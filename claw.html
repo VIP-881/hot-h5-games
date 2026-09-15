@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎪 抓娃娃机 - 热门H5游戏</title>
+<meta name="description" content="抓娃娃机H5模拟游戏，控制爪子下降抓取随机奖励，复原街机抓娃娃体验免费在线玩">
+<meta property="og:title" content="🎪 抓娃娃机 - 热门H5游戏"><meta property="og:description" content="控制机械爪抓取玩偶奖品"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"抓娃娃机","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#e17055,#d63031);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none}h1{font-size:1.8em;margin:4px 0;text-shadow:0 2px 6px rgba(0,0,0,0.3)}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(0,0,0,0.2);padding:5px 14px;border-radius:20px;font-size:0.95em;font-weight:600}canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(0,0,0,0.3)}</style>
+</head>
+<body>
+<h1>🎪 抓娃娃机</h1>
+<div class="stats"><span>🎮 <b id="coins">10</b></span><span>🎁 <b id="collected">0</b></span><span>⭐ <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="420"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=420;
+let claw={x:W/2,y:80,targetX:W/2,state:'idle',open:true,dropY:0},prizes=[],coins=10,collected=0,best=0;
+try{best=parseInt(localStorage.getItem('claw_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+const PRIZES=['🧸','🐻','🐱','🐶','🐰','🦊','🐼','🎁','💎','🌟','🐙','🦄'];
+function spawnPrizes(){
+  prizes=[];
+  const positions=[];
+  for(let i=0;i<8;i++){let x,y;do{x=60+Math.random()*(W-120);y=300+Math.random()*50}while(positions.some(p=>Math.abs(p.x-x)<40&&Math.abs(p.y-y)<40));positions.push({x,y});prizes.push({x,y,emoji:PRIZES[Math.floor(Math.random()*PRIZES.length)],size:20+Math.random()*12,caught:false,held:false})}
+}
+function drop(){
+  if(coins<=0||claw.state!=='idle')return;coins--;document.getElementById('coins').textContent=coins;
+  claw.state='dropping';claw.open=true;claw.dropY=claw.y;
+}
+function update(){
+  if(claw.state==='idle')claw.x+=(claw.targetX-claw.x)*0.1;
+  else if(claw.state==='dropping'){claw.y+=4;if(claw.y>320){claw.state='closing';setTimeout(()=>{claw.open=false;
+    for(const p of prizes){if(!p.caught&&Math.abs(p.x-claw.x)<25&&Math.abs(p.y-claw.y)<25){p.held=true;p.caught=true}}
+    claw.state='rising'},300)}}
+  else if(claw.state==='rising'){claw.y-=3;if(claw.y<80){claw.state='open';setTimeout(()=>{claw.open=true;
+    let got=false;
+    for(const p of prizes)if(p.held){p.held=false;got=true;collected++;document.getElementById('collected').textContent=collected;if(collected>best){best=collected;document.getElementById('best').textContent=best;try{localStorage.setItem('claw_best',best)}catch(e){}}}
+    claw.state='idle';if(coins<=0&&prizes.filter(p=>!p.caught).length===0)endGame()},400)}}
+}
+function endGame(){ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 24px sans-serif';ctx.textAlign='center';ctx.fillText('🎉 游戏结束',W/2,H/2-10);ctx.font='16px sans-serif';ctx.fillText(`${collected}个奖品  点击重来`,W/2,H/2+20)}
+function draw(){
+  ctx.fillStyle='#e17055';ctx.fillRect(0,0,W,H);
+  // Machine boundary
+  ctx.fillStyle='#2d3436';ctx.fillRect(10,10,W-20,H-20);ctx.strokeStyle='#ffd700';ctx.lineWidth=3;ctx.strokeRect(10,10,W-20,H-20);
+  // Prize area
+  ctx.fillStyle='#111';ctx.fillRect(30,280,W-60,110);
+  // Prize chute
+  ctx.fillStyle='#222';ctx.fillRect(W-50,80,30,H-100);
+  ctx.fillStyle='#333';ctx.fillRect(W-50,80,30,4);
+  ctx.fillStyle='#ffd700';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText('🎁',W-35,75);
+  prizes.forEach(p=>{if(!p.caught||p.held){ctx.font=`${p.size}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.emoji,p.x,p.held?claw.x:p.x,p.held?claw.y:p.y)}});
+  // Claw arm
+  ctx.strokeStyle='#999';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(claw.x,30);ctx.lineTo(claw.x,claw.y-30);ctx.stroke();
+  // Claw
+  const cx=claw.x,cy=claw.y;
+  ctx.strokeStyle='#ddd';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(cx-2,cy-30);ctx.lineTo(cx-2,cy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx+2,cy-30);ctx.lineTo(cx+2,cy);ctx.stroke();
+  if(claw.open){
+    ctx.beginPath();ctx.moveTo(cx-2,cy);ctx.lineTo(cx-18,cy+16);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx-2,cy);ctx.lineTo(cx-18,cy+16);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx+2,cy);ctx.lineTo(cx+18,cy+16);ctx.stroke();
+  }else{
+    ctx.beginPath();ctx.moveTo(cx-2,cy);ctx.lineTo(cx-6,cy+14);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx+2,cy);ctx.lineTo(cx+6,cy+14);ctx.stroke();
+  }
+}
+c.addEventListener('mousemove',e=>{claw.targetX=e.clientX-c.getBoundingClientRect().left});
+c.addEventListener('touchmove',e=>{e.preventDefault();claw.targetX=e.touches[0].clientX-c.getBoundingClientRect().left},{passive:false});
+c.addEventListener('click',()=>{if(claw.state==='idle')drop();if(claw.state==='idle'&&coins<=0)restart()});
+function restart(){coins=10;collected=0;claw={x:W/2,y:80,targetX:W/2,state:'idle',open:true};document.getElementById('coins').textContent='10';document.getElementById('collected').textContent='0';spawnPrizes()}
+function loop(){update();draw();requestAnimationFrame(loop)}spawnPrizes();loop();
+</script>
+</body>
+</html>
