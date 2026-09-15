@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🫧 泡泡龙</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#1a0533,#0d1b3e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
+h1{font-size:1.8em;margin-bottom:4px;text-shadow:0 0 20px rgba(255,100,200,0.5)}
+.stats{display:flex;gap:16px;margin:6px 0}
+.stats span{background:rgba(255,255,255,0.12);padding:5px 14px;border-radius:20px;font-size:0.95em}
+canvas{border-radius:10px;display:block;max-width:96vw;box-shadow:0 4px 24px rgba(200,100,255,0.15)}
+</style>
+</head>
+<body>
+<h1>🫧 泡泡龙</h1>
+<div class="stats"><span>⭐ <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="520"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=360,H=520,R=14,COLS=10,OFFSET=8;
+const PAL=['#ff4757','#ffa502','#2ed573','#1e90ff','#a55eea','#ff6b81'];
+let bubbles=[],bullet=null,score=0,best=0,aimAngle=-Math.PI/2,targetX=W/2;
+try{best=parseInt(localStorage.getItem('bubble_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function getXY(row,col){
+  const x=col*(R*2+2)+R+4+(row%2?R+1:0);
+  const y=row*(R*2+1)+R+30;
+  return{x,y};
+}
+function initBubbles(){
+  bubbles=[];
+  for(let r=0;r<7;r++)for(let c=(r%2?0:0);c<(r%2?COLS-1:COLS);c++){
+    const{ x, y }=getXY(r,c);
+    bubbles.push({x,y,r:R,color:PAL[Math.floor(Math.random()*PAL.length)],row:r,col:c});
+  }
+  spawnBullet();
+}
+function spawnBullet(){
+  bullet={x:W/2,y:H-60,r:R,color:PAL[Math.floor(Math.random()*PAL.length)],active:true};
+}
+function findCluster(bubble,targetColor,visited=new Set()){
+  const key=`${bubble.row},${bubble.col}`;
+  if(visited.has(key)||bubble.color!==targetColor)return[];
+  visited.add(key);
+  const cluster=[bubble];
+  const neighbors=getNeighbors(bubble);
+  for(const n of neighbors){
+    const cluster2=findCluster(n,targetColor,visited);
+    cluster.push(...cluster2);
+  }
+  return cluster;
+}
+function getNeighbors(b){
+  const dirs=b.row%2?[[-1,-1],[-1,0],[0,-1],[0,1],[1,-1],[1,0]]:[[-1,0],[-1,1],[0,-1],[0,1],[1,0],[1,1]];
+  const ns=[];
+  for(const[dr,dc] of dirs){
+    const nr=b.row+dr,nc=b.col+dc;
+    const nb=bubbles.find(b2=>b2.row===nr&&b2.col===nc);
+    if(nb)ns.push(nb);
+  }
+  return ns;
+}
+function removeFloating(){
+  const connected=new Set();
+  function markConnected(b){
+    const k=`${b.row},${b.col}`;
+    if(connected.has(k))return;
+    connected.add(k);
+    getNeighbors(b).forEach(markConnected);
+  }
+  const top=bubbles.filter(b=>b.row===0);
+  top.forEach(markConnected);
+  const floating=bubbles.filter(b=>!connected.has(`${b.row},${b.col}`));
+  score+=floating.length*15;
+  document.getElementById('score').textContent=score;
+  if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('bubble_best',best)}catch(e){}}
+  return floating.length>0;
+}
+function shoot(angle){
+  if(!bullet||!bullet.active)return;
+  bullet.vx=Math.cos(angle)*8;bullet.vy=Math.sin(angle)*8;
+  bullet.flying=true;
+}
+function update(){
+  if(!bullet||!bullet.active||!bullet.flying)return;
+  bullet.x+=bullet.vx;bullet.y+=bullet.vy;
+  if(bullet.x-bullet.r<0||bullet.x+bullet.r>W)bullet.vx*=-1;
+  if(bullet.y-bullet.r<0){
+    placeBullet();return;
+  }
+  for(let i=bubbles.length-1;i>=0;i--){
+    const b=bubbles[i];
+    const dx=bullet.x-b.x,dy=bullet.y-b.y,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<bullet.r+b.r){
+      placeBullet(b);return;
+    }
+  }
+  if(bullet.y+bullet.r>H-30){placeBullet();return}
+}
+function placeBullet(near){
+  if(!bullet)return;
+  let tr,tc;
+  if(near){
+    const a=Math.atan2(bullet.y-near.y,bullet.x-near.x);
+    tr=near.row;tc=near.col;
+    if(Math.abs(a)<Math.PI/4)tc++;
+    else if(Math.abs(a)>Math.PI*3/4)tc--;
+    else if(a>0)tr++;
+    else tr--;
+  }else{
+    tc=Math.round((bullet.x-R-4)/ (R*2+2));
+    tr=Math.floor((bullet.y-R-30)/(R*2+1));
+  }
+  tr=Math.max(0,tr);tc=Math.max(0,tc);
+  if(tr%2&&tc>=COLS-1)tc=COLS-2;
+  if(!tr%2&&tc>=COLS)tc=COLS-1;
+  if(bubbles.find(b=>b.row===tr&&b.col===tc))tc++;
+  const{ x, y }=getXY(tr,tc);
+  const nb={x,y,r:R,color:bullet.color,row:tr,col:tc};
+  bubbles.push(nb);
+  const cluster=findCluster(nb,bullet.color);
+  if(cluster.length>=3){
+    score+=cluster.length*10;
+    document.getElementById('score').textContent=score;
+    cluster.forEach(b=>{const i=bubbles.indexOf(b);if(i>-1)bubbles.splice(i,1)});
+    removeFloating();
+  }
+  bullet=null;spawnBullet();
+  if(bubbles.some(b=>b.y>H-100))endGame();
+}
+function endGame(){
+  ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';
+  ctx.fillText('GAME OVER',W/2,H/2-15);
+  ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  点击重新开始`,W/2,H/2+20);
+}
+function draw(){
+  ctx.fillStyle='#0d1b3e';ctx.fillRect(0,0,W,H);
+  bubbles.forEach(b=>{
+    const g=ctx.createRadialGradient(b.x-3,b.y-3,2,b.x,b.y,b.r);
+    g.addColorStop(0,'rgba(255,255,255,0.5)');g.addColorStop(0.4,b.color);g.addColorStop(1,'rgba(0,0,0,0.3)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();
+  });
+  if(bullet){
+    ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.setLineDash([4,6]);ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(W/2,H-60);ctx.lineTo(targetX,H-60+Math.sin(aimAngle)*20);ctx.stroke();ctx.setLineDash([]);
+    const g=ctx.createRadialGradient(bullet.x-2,bullet.y-2,2,bullet.x,bullet.y,bullet.r);
+    g.addColorStop(0,'rgba(255,255,255,0.5)');g.addColorStop(0.4,bullet.color);g.addColorStop(1,'rgba(0,0,0,0.3)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(bullet.x,bullet.y,bullet.r,0,Math.PI*2);ctx.fill();
+  }
+}
+c.addEventListener('mousemove',e=>{
+  const x=e.clientX-c.getBoundingClientRect().left;
+  targetX=x;aimAngle=Math.atan2(x-W/2,-100);
+});
+c.addEventListener('touchmove',e=>{e.preventDefault();
+  const x=e.touches[0].clientX-c.getBoundingClientRect().left;
+  targetX=x;aimAngle=Math.atan2(x-W/2,-100);
+},{passive:false});
+c.addEventListener('click',()=>{
+  if(!bullet||bullet.flying)return;
+  shoot(aimAngle);
+});
+function loop(){update();draw();requestAnimationFrame(loop)}
+initBubbles();loop();
+</script>
+</body>
+</html>
