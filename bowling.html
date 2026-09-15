@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎳 迷你保龄球</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
+h1{font-size:1.6em;margin:4px 0}
+.stats{display:flex;gap:16px;margin:4px 0 8px}
+.stats span{background:rgba(255,255,255,0.12);padding:5px 14px;border-radius:20px;font-size:0.95em}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(100,100,200,0.15)}
+</style>
+</head>
+<body>
+<h1>🎳 迷你保龄球</h1>
+<div class="stats"><span>🎯 <b id="score">0</b></span><span>🎳 <b id="frame">1</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="480"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=360,H=480;
+let pins=[],ball={x:W/2,y:H-60,r:12,vx:0,vy:0},state='aim',score=0,best=0,frame=1,frameScore=[],roll=1,knockedThisRoll=0,aimAngle=0;
+try{best=parseInt(localStorage.getItem('bowl_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+const PIN_POS=[
+  [0,0],[-18,32],[18,32],[-36,64],[0,64],[36,64],[-54,96],[-18,96],[18,96],[54,96]
+];
+function resetPins(){
+  pins=PIN_POS.map(([x,y])=>({x:W/2+x,y:110+y,r:8,standing:true,vx:0,vy:0}));
+}
+function resetBall(){ball={x:W/2,y:H-60,r:12,vx:0,vy:0};state='aim';knockedThisRoll=0}
+function handlePinCollision(p){
+  const dx=ball.x-p.x,dy=ball.y-p.y,dist=Math.sqrt(dx*dx+dy*dy);
+  if(dist<ball.r+p.r&&p.standing){
+    const nx=dx/dist,ny=dy/dist;
+    p.standing=false;p.vx=nx*ball.vx*0.8;p.vy=ny*ball.vy*0.8;
+    ball.vx*=0.6;ball.vy*=0.6;knockedThisRoll++;
+  }
+}
+function handlePinPin(){
+  for(let i=0;i<pins.length;i++){
+    for(let j=i+1;j<pins.length;j++){
+      const a=pins[i],b=pins[j];
+      if(!a.standing&&!b.standing)continue;
+      const dx=a.x-b.x,dy=a.y-b.y,dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<a.r+b.r){
+        const nx=dx/(dist||1),ny=dy/(dist||1);
+        const overlap=a.r+b.r-dist;
+        if(a.standing&&b.standing){a.x+=nx*overlap/2;a.y+=ny*overlap/2;b.x-=nx*overlap/2;b.y-=ny*overlap/2}
+        else if(a.standing||b.standing){
+          const s=a.standing?a:b,ns=a.standing?b:a;
+          const rel=2*(s.vx*nx+s.vy*ny);
+          s.vx-=rel*nx*0.5;s.vy-=rel*ny*0.5;
+          ns.vx+=rel*nx*0.5;ns.vy+=rel*ny*0.5;
+        }
+      }
+    }
+  }
+}
+function update(){
+  if(state==='rolling'){
+    ball.x+=ball.vx*0.16;ball.y+=ball.vy*0.16;ball.vx*=0.995;ball.vy*=0.995;
+    pins.filter(p=>p.standing).forEach(p=>handlePinCollision(p));
+    handlePinPin();
+    pins.forEach(p=>{p.x+=p.vx*0.16;p.y+=p.vy*0.16;p.vx*=0.96;p.vy*=0.96});
+    if(ball.y<-50||(Math.abs(ball.vx)<0.1&&Math.abs(ball.vy)<0.1))endRoll();
+  }
+}
+function endRoll(){
+  const s=pins.filter(p=>p.standing).length;
+  const k=pins.filter(p=>!p.standing).length;
+  if(roll===1){
+    if(k===10){score+=20;document.getElementById('score').textContent=score;frameScore.push('X');nextFrame();return}
+    roll=2;resetBall();
+  }else{
+    if(k===10){score+=15;frameScore.push('/')}else{score+=k}
+    document.getElementById('score').textContent=score;
+    frameScore.push(String(k));
+    nextFrame();
+  }
+}
+function nextFrame(){
+  frame++;document.getElementById('frame').textContent=Math.min(frame,10);
+  if(frame>10){endGame();return}
+  roll=1;resetPins();resetBall();
+}
+function endGame(){
+  state='end';
+  if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('bowl_best',best)}catch(e){}}
+  ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#ffd700';ctx.font='bold 28px sans-serif';ctx.textAlign='center';
+  ctx.fillText('🎳 比赛结束!',W/2,H/2-15);
+  ctx.font='16px sans-serif';ctx.fillText(`总分: ${score}  点击重新开始`,W/2,H/2+20);
+}
+function draw(){
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#8B7355';ctx.fillRect(0,80,W,250);
+  for(let i=0;i<8;i++){ctx.strokeStyle='rgba(0,0,0,0.15)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,90+i*30);ctx.lineTo(W,90+i*30);ctx.stroke()}
+  ctx.fillStyle='#555';ctx.fillRect(0,H-40,W,40);
+  ctx.fillStyle='#444';ctx.beginPath();ctx.moveTo(0,H-40);ctx.lineTo(40,H-10);ctx.lineTo(W-40,H-10);ctx.lineTo(W,H-40);ctx.fill();
+  pins.forEach(p=>{
+    if(p.standing||p.vy>0.1){
+      ctx.fillStyle=p.standing?'#fff':'rgba(255,255,255,0.5)';ctx.strokeStyle='#ccc';ctx.lineWidth=1;
+      ctx.beginPath();ctx.ellipse(p.x,p.y,p.r,p.r*1.2,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+      ctx.strokeStyle='#c0392b';ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(p.x,p.y-p.r*1.2);ctx.lineTo(p.x,p.y-p.r*1.5);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(p.x-3,p.y-p.r*1.2);ctx.lineTo(p.x-1,p.y-p.r*1.5);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(p.x+3,p.y-p.r*1.2);ctx.lineTo(p.x+1,p.y-p.r*1.5);ctx.stroke();
+    }
+  });
+  ctx.fillStyle='#2c3e50';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();ctx.arc(ball.x-3,ball.y-3,ball.r*0.3,0,Math.PI*2);ctx.fill();
+}
+c.addEventListener('mousemove',e=>{
+  if(state!=='aim')return;
+  const x=e.clientX-c.getBoundingClientRect().left;
+  ball.x=Math.max(30,Math.min(W-30,x));
+});
+c.addEventListener('touchmove',e=>{e.preventDefault();
+  if(state!=='aim')return;
+  ball.x=Math.max(30,Math.min(W-30,e.touches[0].clientX-c.getBoundingClientRect().left));
+},{passive:false});
+c.addEventListener('click',()=>{
+  if(state==='end'){restart();return}
+  if(state==='aim'){state='rolling';ball.vy=-12;ball.vx=(ball.x-W/2)*0.15}
+});
+function restart(){score=0;frame=1;roll=1;frameScore=[];state='aim';resetPins();resetBall();document.getElementById('score').textContent='0';document.getElementById('frame').textContent='1'}
+function loop(){update();if(state!=='end')draw();requestAnimationFrame(loop)}
+resetPins();loop();
+</script>
+</body>
+</html>
