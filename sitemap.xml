@@ -2,12 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://hot-h5-games.netlify.app/</loc><lastmod>2026-09-15</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/2048.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://hot-h5-games.netlify.app/angling.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/archery.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/balloon.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/blackjack.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/bowling.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/breakout.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/bubble.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://hot-h5-games.netlify.app/catch.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/darts.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/dice.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/draw.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
@@ -19,11 +21,13 @@
   <url><loc>https://hot-h5-games.netlify.app/jump.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/link.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/match3.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://hot-h5-games.netlify.app/maze.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/memory.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/mines.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/mole.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/penalty.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/piano.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://hot-h5-games.netlify.app/pinball.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/pong.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/puzzle.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/racer.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
@@ -31,6 +35,7 @@
   <url><loc>https://hot-h5-games.netlify.app/rhythm.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/ringtoss.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/shmup.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://hot-h5-games.netlify.app/ski.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/slot.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/snake.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hot-h5-games.netlify.app/spot.html</loc><lastmod>2026-09-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
