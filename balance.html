@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>⚖️ 平衡大师 - 热门H5游戏</title>
+<meta name="description" content="平衡大师H5物理游戏，在天平两端放置砝码精准平衡重量，考验物理直觉和估算能力，免费在线逻辑游戏">
+<meta property="og:title" content="⚖️ 平衡大师 - 热门H5游戏">
+<meta property="og:description" content="放置砝码精准平衡天平">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"平衡大师","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none}
+h1{font-size:1.8em;margin:4px 0}
+.stats{display:flex;gap:12px;margin:6px 0 10px}
+.stats span{background:rgba(255,255,255,0.12);padding:5px 14px;border-radius:20px;font-size:0.95em}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 20px rgba(100,100,200,0.15)}
+.weights{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.weight-btn{padding:12px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-weight:bold;cursor:pointer;transition:all 0.15s;font-size:0.9em}
+.weight-btn:hover{background:rgba(100,150,255,0.25)}
+.weight-btn.used{opacity:0.3;pointer-events:none}
+.result{min-height:24px;margin-top:6px;font-size:1em;text-align:center}
+</style>
+</head>
+<body>
+<h1>⚖️ 平衡大师</h1>
+<div class="stats"><span>✅ <b id="score">0</b></span><span>🔥 <b id="streak">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="250"></canvas>
+<div class="result" id="result">选择砝码放入左盘使天平平衡</div>
+<div class="weights" id="weights"></div>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=360,H=250,CX=W/2,CY=100;
+
+let targetWeight=0,leftWeight=0,rightWeight=0,usedWeights=[],score=0,streak=0,best=0,active=true;
+const ALL_WEIGHTS=[1,2,3,5,8,13,21];
+try{best=parseInt(localStorage.getItem('balance_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function newPuzzle(){
+  targetWeight=5+Math.floor(Math.random()*50);
+  const available=ALL_WEIGHTS.filter(w=>w<=targetWeight+10);
+  rightWeight=targetWeight;leftWeight=0;usedWeights=[];active=true;
+  document.getElementById('result').textContent=`右盘: ${targetWeight}g · 选择砝码放入左盘`;
+  renderWeights(available);
+  draw();
+}
+function renderWeights(available){
+  document.getElementById('weights').innerHTML=available.map(w=>`<button class="weight-btn${usedWeights.includes(w)?' used':''}" onclick="placeWeight(${w})">${w}g</button>`).join('');
+}
+function placeWeight(w){
+  if(!active||usedWeights.includes(w))return;
+  usedWeights.push(w);leftWeight+=w;
+  renderWeights(ALL_WEIGHTS.filter(w2=>w2<=targetWeight+10));
+  draw();
+  if(leftWeight===rightWeight){
+    active=false;score+=10+streak*5;streak++;
+    document.getElementById('score').textContent=score;
+    document.getElementById('streak').textContent=streak;
+    document.getElementById('result').textContent='🎉 完美平衡!';
+    if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('balance_best',best)}catch(e){}}
+    setTimeout(newPuzzle,1000);
+  }else if(leftWeight>rightWeight){
+    active=false;streak=0;
+    document.getElementById('streak').textContent='0';
+    document.getElementById('result').textContent=`❌ 超重了! 左:${leftWeight} > 右:${rightWeight}`;
+    setTimeout(newPuzzle,1000);
+  }
+}
+function draw(){
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#ddd';ctx.lineWidth=1;
+  // Stand
+  ctx.fillStyle='#8B4513';ctx.fillRect(CX-4,CY+40,8,80);
+  ctx.fillStyle='#A0522D';ctx.fillRect(CX-10,CY+110,20,8);
+  // Beam - tilt based on weight diff
+  const tilt=Math.atan2((leftWeight-rightWeight)*0.6,H);
+  ctx.save();ctx.translate(CX,CY+40);ctx.rotate(tilt);
+  ctx.strokeStyle='#ddd';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-140,0);ctx.lineTo(140,0);ctx.stroke();
+  // Left pan
+  ctx.strokeStyle='#999';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(-140,0);ctx.lineTo(-140,30);ctx.stroke();
+  ctx.beginPath();ctx.ellipse(-140,32,40,8,0,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='rgba(100,100,255,0.2)';ctx.fillRect(-170,34,60,8);
+  // Right pan
+  ctx.beginPath();ctx.moveTo(140,0);ctx.lineTo(140,30);ctx.stroke();
+  ctx.beginPath();ctx.ellipse(140,32,40,8,0,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='rgba(255,100,100,0.2)';ctx.fillRect(110,34,60,8);
+  ctx.restore();
+  // Weights display
+  ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.textAlign='center';
+  ctx.fillText(`左: ${leftWeight}g`,CX-80,CY+80);
+  ctx.fillText(`右: ${rightWeight}g`,CX+80,CY+80);
+  if(active)ctx.fillText(`目标: ${targetWeight-targetWeight+targetWeight}g →`,CX,CY+80);
+  // Visual weights on pans
+  const lx=CX-140,ly=CY+40+32;
+  const rx=CX+140,ry=CY+40+32;
+  usedWeights.forEach((w,i)=>{
+    const px=lx-20+i*15,py=ly-5-i*3;
+    ctx.fillStyle=`hsl(${w*20},60%,50%)`;ctx.fillRect(px-6,py-8,12,12);
+    ctx.fillStyle='#fff';ctx.font='7px sans-serif';ctx.fillText(w,px,py);
+  });
+  ctx.fillStyle=`hsl(${targetWeight*5%360},60%,50%)`;ctx.fillRect(rx+10,ry-8,12,12);
+  ctx.fillStyle='#fff';ctx.font='7px sans-serif';ctx.fillText(targetWeight,rx+16,ry);
+}
+newPuzzle();
+</script>
+</body>
+</html>
