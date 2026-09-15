@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎈 射击气球</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#87CEEB,#4a90d9);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
+h1{font-size:1.6em;margin:4px 0;text-shadow:0 2px 4px rgba(0,0,0,0.2)}
+.stats{display:flex;gap:16px;margin:4px 0 8px}
+.stats span{background:rgba(255,255,255,0.2);padding:5px 14px;border-radius:20px;font-size:0.95em;font-weight:600}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(0,0,0,0.15);cursor:crosshair}
+</style>
+</head>
+<body>
+<h1>🎈 射击气球</h1>
+<div class="stats"><span>🎯 <b id="score">0</b></span><span>💥 <b id="misses">0</b>/10</span><span>⏱ <b id="timer">60</b>s</span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="380" height="500"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=380,H=500;
+let balloons=[],score=0,misses=0,best=0,timeLeft=60,timerInterval,started=false,gameover=false,particles=[];
+try{best=parseInt(localStorage.getItem('balloon_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+const COLORS=['#FF6B6B','#4ECDC4','#FFE66D','#A8E6CF','#FF8B94','#B8A9C9','#6C5B7B','#F7DC6F','#AED6F1','#F1948A'];
+function spawnBalloon(){const c=COLORS[Math.floor(Math.random()*COLORS.length)];balloons.push({x:30+Math.random()*(W-60),y:H+30,r:20+Math.random()*25,color:c,speed:0.8+Math.random()*2,opacity:1,t:0,sway:0,swaySpeed:0.01+Math.random()*0.02})}
+function update(){
+  if(!started||gameover)return;
+  for(let i=balloons.length-1;i>=0;i--){
+    balloons[i].y-=balloons[i].speed;balloons[i].t++;balloons[i].sway=Math.sin(balloons[i].t*balloons[i].swaySpeed)*15;
+    balloons[i].x+=Math.sin(balloons[i].t*balloons[i].swaySpeed)*0.5;
+    if(balloons[i].y<-60){balloons.splice(i,1);misses++;document.getElementById('misses').textContent=misses;if(misses>=10)endGame()}
+  }
+  if(balloons.length<6&&Math.random()<0.02)spawnBalloon();
+  for(let i=particles.length-1;i>=0;i--){particles[i].life--;particles[i].x+=particles[i].vx;particles[i].y+=particles[i].vy;particles[i].vy+=0.15;if(particles[i].life<=0)particles.splice(i,1)}
+}
+function draw(){
+  ctx.fillStyle='#87CEEB';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<12;i++){ctx.fillStyle='rgba(255,255,255,0.2)';ctx.beginPath();ctx.arc(30+i*35,(i*19)%40,10+Math.random()*15,0,Math.PI*2);ctx.fill()}
+  ctx.fillStyle='#228B22';ctx.fillRect(0,H-40,W,40);
+  ctx.fillStyle='#2ecc71';ctx.fillRect(0,H-42,W,5);
+  balloons.forEach(b=>{
+    const x=b.x+b.sway;
+    ctx.fillStyle=b.color;ctx.beginPath();ctx.ellipse(x,b.y,b.r,b.r*1.3,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();ctx.ellipse(x-b.r*0.25,b.y-b.r*0.4,b.r*0.15,b.r*0.2,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.moveTo(x,b.y+b.r*1.3);ctx.lineTo(x-2,b.y+b.r*1.3+8);ctx.lineTo(x+2,b.y+b.r*1.3+8);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,b.y+b.r*1.3+8);ctx.quadraticCurveTo(x-5,b.y+b.r*1.3+20,x+10,b.y+b.r*1.3+40);ctx.stroke();
+  });
+  particles.forEach(p=>{ctx.fillStyle=`rgba(${[255,255,100,200,100,255][Math.floor(Math.random()*6)]},${p.life/20})`;ctx.beginPath();ctx.arc(p.x,p.y,2+Math.random()*3,0,Math.PI*2);ctx.fill()});
+  if(!started){ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 22px sans-serif';ctx.textAlign='center';ctx.fillText('🎈 点击开始游戏',W/2,H/2)}
+}
+function endGame(){
+  gameover=true;clearInterval(timerInterval);
+  if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('balloon_best',best)}catch(e){}}
+  ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.fillText('时间到!',W/2,H/2-15);
+  ctx.font='16px sans-serif';ctx.fillText(`击中 ${score} 个  点击重新开始`,W/2,H/2+20);
+}
+function start(){
+  started=true;timeLeft=60;score=0;misses=0;gameover=false;balloons=[];particles=[];
+  document.getElementById('score').textContent='0';document.getElementById('misses').textContent='0';document.getElementById('timer').textContent='60';
+  clearInterval(timerInterval);
+  for(let i=0;i<5;i++)spawnBalloon();
+  timerInterval=setInterval(()=>{timeLeft--;document.getElementById('timer').textContent=timeLeft;if(timeLeft<=0)endGame()},1000);
+}
+c.addEventListener('click',e=>{
+  if(gameover){start();return}
+  if(!started){start();return}
+  const rect=c.getBoundingClientRect();
+  const x=e.clientX-rect.left,y=e.clientY-rect.top;
+  for(let i=balloons.length-1;i>=0;i--){
+    const b=balloons[i],bx=b.x+b.sway,dx=x-bx,dy=y-b.y;
+    if(Math.sqrt(dx*dx+(dy/(b.r*1.3/b.r))*(dy/(b.r*1.3/b.r)))<b.r+5){
+      for(let p=0;p<10;p++)particles.push({x:bx,y:b.y,vx:(Math.random()-0.5)*6,vy:-3-Math.random()*5,life:20});
+      balloons.splice(i,1);score++;document.getElementById('score').textContent=score;return;
+    }
+  }
+});
+function loop(){update();draw();requestAnimationFrame(loop)}
+loop();
+</script>
+</body>
+</html>
