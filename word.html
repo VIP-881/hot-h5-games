@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🧩 拼字达人 - 热门H5游戏</title>
+<meta name="description" content="拼字达人H5单词游戏，打乱字母重新排列成正确单词，锻炼词汇量和拼写能力，免费在线英语学习游戏">
+<meta property="og:title" content="🧩 拼字达人 - 热门H5游戏">
+<meta property="og:description" content="打乱字母重新排列，找出正确单词">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"拼字达人","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none}
+h1{font-size:1.8em;margin:4px 0}
+.stats{display:flex;gap:12px;margin:6px 0 10px}
+.stats span{background:rgba(255,255,255,0.12);padding:5px 14px;border-radius:20px;font-size:0.95em}
+.letters{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0;min-height:60px}
+.letter{width:52px;height:52px;background:linear-gradient(135deg,#e17055,#d63031);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4em;font-weight:bold;cursor:pointer;transition:all 0.2s;box-shadow:0 3px 10px rgba(0,0,0,0.3)}
+.letter:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(214,48,49,0.3)}
+.letter.used{opacity:0.3;pointer-events:none;transform:translateY(4px)}
+.answer-area{display:flex;gap:6px;min-height:60px;margin:10px 0;flex-wrap:wrap;justify-content:center}
+.answer-slot{width:52px;height:52px;border:2px dashed rgba(255,255,255,0.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4em;font-weight:bold;cursor:pointer;transition:all 0.15s}
+.answer-slot.filled{background:rgba(46,213,115,0.2);border-color:#2ed573;cursor:pointer}
+.hint-area{color:#ffa502;font-size:0.9em;margin:8px 0;min-height:22px}
+.btn{background:rgba(100,150,255,0.2);color:#8cf;border:1px solid #8cf;padding:10px 24px;border-radius:24px;font-size:1em;cursor:pointer;margin:4px;transition:all 0.2s}
+.btn:hover{background:rgba(100,150,255,0.35)}
+</style>
+</head>
+<body>
+<h1>🧩 拼字达人</h1>
+<div class="stats"><span>✅ <b id="score">0</b></span><span>🔥 <b id="streak">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<div class="hint-area" id="hint"></div>
+<div class="answer-area" id="answerArea"></div>
+<div class="letters" id="letters"></div>
+<div><button class="btn" onclick="skip()">⏭ 跳过</button><button class="btn" onclick="clearAnswer()">↩ 清除</button></div>
+<script>
+const WORDS=['REACT','GAME','STACK','CLOUD','BRAIN','TRACK','FLAME','CRISP','BLAST','SHARK','PLANT','STORM','WORLD','SPACE','DREAM','BRICK','CHESS','FLASH','GRAPE','HEART','JUMP','KNIFE','LIGHT','MUSIC','OCEAN','PIANO','QUEEN','RIVER','SNAKE','TIGER'];
+let word='',scrambled=[],answer=[],used=[],score=0,streak=0,best=0;
+try{best=parseInt(localStorage.getItem('word_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+function newWord(){
+  word=WORDS[Math.floor(Math.random()*WORDS.length)];
+  scrambled=shuffle(word.split(''));
+  while(scrambled.join('')===word)scrambled=shuffle(word.split(''));
+  answer=[];used=Array(word.length).fill(false);
+  document.getElementById('hint').textContent=`${word.length} 个字母的英文单词`;
+  render();
+}
+function addLetter(i){
+  if(answer.length>=word.length||used[i])return;
+  answer.push(scrambled[i]);used[i]=true;render();
+}
+function removeLetter(i){
+  if(answer.length===0)return;
+  const letter=answer[i];
+  const si=scrambled.findIndex((l,j)=>l===letter&&used[j]&&answer.indexOf(l)===i||(answer.filter((a,k)=>a===letter&&k<=i).length===scrambled.filter((s,k)=>s===letter&&used[k]&&k<=scrambled.indexOf(letter)).length));
+  answer.splice(i,1);
+  for(let j=used.length-1;j>=0;j--){if(scrambled[j]===letter&&used[j]){used[j]=false;break}}
+  render();
+  if(answer.join('')===word){score+=word.length*10;streak++;document.getElementById('score').textContent=score;document.getElementById('streak').textContent=streak;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('word_best',best)}catch(e){}}
+  document.getElementById('hint').textContent='🎉 正确!';setTimeout(newWord,800)}
+}
+function render(){
+  document.getElementById('letters').innerHTML=scrambled.map((l,i)=>`<div class="letter${used[i]?' used':''}" onclick="addLetter(${i})">${l}</div>`).join('');
+  document.getElementById('answerArea').innerHTML=Array.from({length:word.length},(_,i)=>`<div class="answer-slot${i<answer.length?' filled':''}" onclick="removeLetter(${i})">${answer[i]||''}</div>`).join('');
+}
+function skip(){streak=0;document.getElementById('streak').textContent='0';newWord()}
+function clearAnswer(){while(answer.length){removeLetter(0)}}
+newWord();
+</script>
+</body>
+</html>
