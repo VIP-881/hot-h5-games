@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🚁 直升机救援 - 热门H5游戏</title>
+<meta name="description" content="直升机救援H5飞行游戏，控制直升机躲避障碍救人，考验飞行操控技巧，免费在线">
+<meta property="og:title" content="🚁 直升机救援 - 热门H5游戏"><meta property="og:description" content="控制直升机飞行，躲避障碍救援"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"直升机救援","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#74b9ff,#0984e3);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:20px;font-size:0.9em;font-weight:600}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🚁 直升机救援</h1>
+<div class="stats"><span>⭐ <b id="score">0</b></span><span>🛟 <b id="rescued">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="520"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=520;
+let chopper={x:W/2,y:H/2,vy:0,w:40,h:20},obstacles=[],rescues=[],score=0,rescued=0,best=0,frame=0,thrusting=false,cameraX=0,speed=2,gameover=false;
+try{best=parseInt(localStorage.getItem('chopper_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function spawn(){const gap=170;const topH=60+Math.random()*(H-gap-120);
+  obstacles.push({x:cameraX+W+50,topH,gapH:gap,passed:false,scored:false});
+  rescues.push({x:cameraX+W+100+Math.random()*150,y:topH+gap/2+40,r:14,alive:true});
+}
+function update(){if(gameover)return;frame++;cameraX+=speed;speed=2+score/100;if(thrusting)chopper.vy-=0.4;chopper.vy+=0.2;chopper.y+=chopper.vy*0.5;
+  if(chopper.y<10||chopper.y>H-10)endGame();
+  if(frame%60===0)spawn();
+  for(let i=obstacles.length-1;i>=0;i--){const o=obstacles[i];o.x-=speed;
+    if(!o.scored&&o.x+20<chopper.x){o.scored=true;score+=10;document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('chopper_best',best)}catch(e){}}
+    }if(o.x<-60)obstacles.splice(i,1)}
+  for(let i=rescues.length-1;i>=0;i--){const r=rescues[i];r.x-=speed;
+    const dx=chopper.x-r.x,dy=chopper.y-r.y;if(!r.alive)continue;
+    if(Math.sqrt(dx*dx+dy*dy)<chopper.w/2+r.r){r.alive=false;rescued++;document.getElementById('rescued').textContent=rescued}
+    if(r.x<-40)rescues.splice(i,1)}
+  for(const o of obstacles){if(chopper.x+chopper.w/2>o.x&&chopper.x-chopper.w/2<o.x+20&&(chopper.y-chopper.h/2<o.topH||chopper.y+chopper.h/2>o.topH+o.gapH)){endGame();return}}
+}
+function endGame(){gameover=true;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('💥 坠毁了!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  点击重来`,W/2,H/2+20)}
+function draw(){
+  ctx.fillStyle='#74b9ff';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<12;i++){const x=((i*40)-cameraX*0.3)%W,y=30+Math.sin(i)*100;ctx.fillStyle='rgba(255,255,255,0.4)';ctx.beginPath();ctx.arc(x,y,8+Math.random()*15,0,Math.PI*2);ctx.fill()}
+  obstacles.forEach(o=>{ctx.fillStyle='#2d3436';ctx.fillRect(o.x,0,20,o.topH);ctx.fillRect(o.x,o.topH+o.gapH,20,H-o.topH-o.gapH);ctx.fillStyle='#636e72';ctx.fillRect(o.x-2,o.topH-15,24,15);ctx.fillRect(o.x-2,o.topH+o.gapH,24,15)});
+  rescues.forEach(r=>{if(r.alive){ctx.fillStyle='#ff0';ctx.beginPath();ctx.arc(r.x,r.y,r.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font=`${r.r}px sans-serif`;ctx.textAlign='center';ctx.fillText('🧑',r.x,r.y+4)}});
+  ctx.fillStyle='#e17055';ctx.beginPath();ctx.ellipse(chopper.x,chopper.y-chopper.h/2,chopper.w/3,8,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#2d3436';ctx.fillRect(chopper.x-chopper.w/2,chopper.y-chopper.h/2+4,chopper.w,8);
+  ctx.fillStyle='#3498db';ctx.fillRect(chopper.x-chopper.w/2-2,chopper.y-chopper.h/2-8,chopper.w+4,8);
+  if(thrusting){ctx.fillStyle='#ff0';ctx.beginPath();ctx.arc(chopper.x,chopper.y+chopper.h/2,6,0,Math.PI*2);ctx.fill()}
+  ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(0,0,W,30);ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText(`🚁 按住飞行 ⏱ ${Math.floor(cameraX/100)}m`,W/2,20)}
+document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();thrusting=true}});
+document.addEventListener('keyup',e=>{thrusting=false});
+c.addEventListener('touchstart',e=>{e.preventDefault();if(gameover){restart();return}thrusting=true});
+c.addEventListener('touchend',()=>thrusting=false);
+c.addEventListener('mousedown',()=>{if(gameover){restart();return}thrusting=true});
+c.addEventListener('mouseup',()=>thrusting=false);
+function restart(){chopper={x:W/2,y:H/2,vy:0,w:40,h:20};obstacles=[];rescues=[];score=0;rescued=0;frame=0;speed=2;cameraX=0;gameover=false;document.getElementById('score').textContent='0';document.getElementById('rescued').textContent='0'}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
