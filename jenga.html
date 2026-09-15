@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🏗️ 叠叠高 - 热门H5游戏</title>
+<meta name="description" content="叠叠高Jenga风格益智游戏，从塔中抽出一块积木放在顶部，保持平衡别让塔倒塌免费在线">
+<meta property="og:title" content="🏗️ 叠叠高 - 热门H5游戏"><meta property="og:description" content="抽积木叠塔，Jenga风格"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"叠叠高","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🏗️ 叠叠高</h1>
+<div class="stats"><span>🧱 <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="320" height="420"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=320,H=420,BW=60,BH=18;
+let blocks=[],score=0,best=0,selected=null,dragX=0,gameover=false;
+try{best=parseInt(localStorage.getItem('jenga_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function init(){
+  blocks=[];
+  for(let layer=0;layer<12;layer++){
+    const y=H-40-layer*(BH+3);
+    const horizontal=layer%2===0;
+    for(let i=0;i<3;i++){
+      const x=horizontal?W/2-BW*1.5+i*BW+2:W/2-BW/2;
+      const y2=horizontal?y:y+(i-1)*(BH+3);
+      blocks.push({x,y:y2,w:horizontal?BW-4:BH,h:horizontal?BH:BW-4,layer,pos:i,horizontal});
+    }
+  }
+  selected=null;score=0;gameover=false;document.getElementById('score').textContent='0';
+}
+function draw(){
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  // Shadow
+  ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(W/2-BW*1.5-8,H-45,BW*3+16,10);
+  blocks.forEach(b=>{
+    const hue=b.layer*8+30;
+    ctx.fillStyle=`hsl(${hue},60%,${40+b.layer*2}%)`;
+    ctx.fillRect(b.x,b.y,b.w,b.h);
+    ctx.fillStyle=`hsla(${hue},80%,70%,0.3)`;ctx.fillRect(b.x+2,b.y+2,b.w-4,3);
+    if(selected===b){ctx.strokeStyle='#ffd700';ctx.lineWidth=2;ctx.strokeRect(b.x-2,b.y-2,b.w+4,b.h+4)}
+  });
+}
+
+function findBlock(x,y){
+  for(let i=blocks.length-1;i>=0;i--){
+    const b=blocks[i];
+    if(x>b.x&&x<b.x+b.w&&y>b.y&&y<b.y+b.h){
+      // Can only pick from top 3 layers
+      if(b.layer>=blocks.reduce((max,b2)=>Math.max(max,b2.layer),0)-2)return b;
+    }
+  }
+  return null;
+}
+function placeBlock(b){
+  if(!selected)return;
+  const topLayer=blocks.reduce((max,b2)=>Math.max(max,b2.layer),0);
+  const topBlocks=blocks.filter(b2=>b2.layer===topLayer);
+  const offset=blockCount(topLayer);
+  const horizontal=topLayer%2===0;
+  if(offset>=3)return; // Layer full
+  const newLayer=topLayer===selected.layer?topLayer:topLayer+1;
+  const x=horizontal?W/2-BW*1.5+offset*(BW+2)+2:W/2-BW/2+(offset-1)*(BH+2);
+  const y=H-40-newLayer*(BH+3)+2;
+  selected.x=x;selected.y=y;selected.layer=newLayer;selected.pos=offset;
+  score++;document.getElementById('score').textContent=score;
+  if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('jenga_best',best)}catch(e){}}
+  // Check stability - remove floating blocks
+  checkStability();
+  selected=null;
+  if(blocks.some(b=>b.y<20)){gameover=true;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#ff4757';ctx.font='bold 24px sans-serif';ctx.textAlign='center';ctx.fillText('💥 塔倒了!',W/2,H/2-10);ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.fillText(`${score}块  点击重来`,W/2,H/2+20)}
+}
+function blockCount(layer){return blocks.filter(b=>b.layer===layer).length}
+function checkStability(){
+  // Simple: all blocks must have support
+  blocks.sort((a,b)=>a.layer-b.layer);
+  for(const b of blocks){
+    if(b.layer===0)continue;
+    const below=blocks.filter(b2=>b2.layer===b.layer-1);
+    let supported=false;
+    for(const b2 of below){
+      if(b2.horizontal){
+        if(b.x+b.w>b2.x&&b.x<b2.x+b2.w)supported=true;
+      }
+    }
+    if(!supported){b.y+=5;if(b.y>H)blocks.splice(blocks.indexOf(b),1)}
+  }
+}
+c.addEventListener('mousedown',e=>{if(gameover){init();return}const r=c.getBoundingClientRect();const b=findBlock(e.clientX-r.left,e.clientY-r.top);if(b&&!selected){selected=b;dragX=b.x-e.clientX+r.left}});
+c.addEventListener('mousemove',e=>{if(!selected)return;const r=c.getBoundingClientRect();selected.x=e.clientX-r.left+dragX});
+c.addEventListener('mouseup',()=>{if(selected)placeBlock(selected)});
+c.addEventListener('touchstart',e=>{e.preventDefault();if(gameover){init();return}const r=c.getBoundingClientRect();const b=findBlock(e.touches[0].clientX-r.left,e.touches[0].clientY-r.top);if(b&&!selected){selected=b;dragX=b.x-e.touches[0].clientX+r.left}});
+c.addEventListener('touchmove',e=>{e.preventDefault();if(!selected)return;const r=c.getBoundingClientRect();selected.x=e.touches[0].clientX-r.left+dragX});
+c.addEventListener('touchend',()=>{if(selected)placeBlock(selected)});
+function loop(){draw();requestAnimationFrame(loop)}init();loop();
+</script>
+</body>
+</html>
