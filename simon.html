@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎵 音乐记忆 - 热门H5游戏</title>
+<meta name="description" content="音乐记忆西蒙Simon风格游戏，记住并重复颜色闪烁序列，序列越来越长考验记忆力免费在线">
+<meta property="og:title" content="🎵 音乐记忆 - 热门H5游戏"><meta property="og:description" content="记住颜色序列并重复，Simon风格"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"音乐记忆","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.1);padding:4px 12px;border-radius:20px;font-size:0.9em}.board{display:grid;grid-template-columns:120px 120px;grid-template-rows:120px 120px;gap:8px}.btn-c{width:120px;height:120px;border-radius:12px;cursor:pointer;transition:all 0.15s;border:none;opacity:0.6}.btn-c:active,.btn-c.active{opacity:1;transform:scale(0.95)}.btn-c.red{background:#e74c3c}.btn-c.blue{background:#3498db}.btn-c.green{background:#2ecc71}.btn-c.yellow{background:#f1c40f}.info{font-size:1.2em;margin:10px 0;min-height:28px;text-align:center}.btn{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:8px 20px;border-radius:20px;font-size:0.9em;cursor:pointer;margin:6px}</style>
+</head>
+<body>
+<h1>🎵 音乐记忆</h1>
+<div class="stats"><span>🧠 <b id="level">1</b></span><span>🏆 <b id="best">1</b></span></div>
+<div class="board">
+  <button class="btn-c red" id="btn0" onclick="press(0)"></button>
+  <button class="btn-c blue" id="btn1" onclick="press(1)"></button>
+  <button class="btn-c green" id="btn2" onclick="press(2)"></button>
+  <button class="btn-c yellow" id="btn3" onclick="press(3)"></button>
+</div>
+<div class="info" id="info">点击开始</div>
+<button class="btn" onclick="startGame()">▶ 开始</button>
+<script>
+let sequence=[],playerIdx=0,level=1,playing=false,best=1;
+const tones=[261,329,392,523]; // C4 E4 G4 C5
+const btns=['btn0','btn1','btn2','btn3'];
+try{best=parseInt(localStorage.getItem('simon_best'))||1;document.getElementById('best').textContent=best}catch(e){}
+function startGame(){sequence=[];playerIdx=0;level=1;playing=false;document.getElementById('level').textContent='1';nextRound()}
+function nextRound(){
+  sequence.push(Math.floor(Math.random()*4));playerIdx=0;playing=false;
+  document.getElementById('info').textContent='👀 记住序列...';
+  let i=0;
+  const show=setInterval(()=>{
+    if(i>=sequence.length){clearInterval(show);playing=true;document.getElementById('info').textContent='👆 重复序列';return}
+    const btn=document.getElementById(btns[sequence[i]]);btn.classList.add('active');
+    playTone(sequence[i]);setTimeout(()=>btn.classList.remove('active'),300);i++;
+  },600);
+}
+function press(i){
+  if(!playing)return;
+  const btn=document.getElementById(btns[i]);btn.classList.add('active');playTone(i);setTimeout(()=>btn.classList.remove('active'),150);
+  if(sequence[playerIdx]===i){playerIdx++;
+    if(playerIdx>=sequence.length){level++;document.getElementById('level').textContent=level;if(level>best){best=level;document.getElementById('best').textContent=best;try{localStorage.setItem('simon_best',best)}catch(e)}document.getElementById('info').textContent='✅ 正确!';setTimeout(nextRound,800)}
+  }else{document.getElementById('info').textContent='❌ 错了! 重新开始';playing=false;setTimeout(startGame,1000)}
+}
+function playTone(i){const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=tones[i];g.gain.value=0.3;o.connect(g);g.connect(a.destination);o.start();g.gain.exponentialRampToValueAtTime(0.01,a.currentTime+0.3);o.stop(a.currentTime+0.3)}
+</script>
+</body>
+</html>
