@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎯 弹球消砖 - 热门H5游戏</title>
+<meta name="description" content="弹球消砖物理射击游戏，瞄准发射弹球击中并消除数字砖块，反弹连击得分免费在线">
+<meta property="og:title" content="🎯 弹球消砖 - 热门H5游戏"><meta property="og:description" content="瞄准发射弹球，反弹消除砖块"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"弹球消砖","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#1a1a2e,#0f3460);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🎯 弹球消砖</h1>
+<div class="stats"><span>🎱 <b id="balls">5</b></span><span>⭐ <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="540"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=540;
+let blocks=[],balls=[],aimBalls=5,aimAngle=-Math.PI/2,score=0,best=0,frame=0;
+try{best=parseInt(localStorage.getItem('bball_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function spawnBlocks(){
+  blocks=[];
+  for(let r=0;r<5;r++)for(let c=0;c<6;c++){
+    blocks.push({x:24+c*54,y:30+r*28,w:50,h:24,hp:1+r,color:`hsl(${r*40+200},70%,${60-r*5}%)`,pts:(r+1)*10});
+  }
+}
+function aim(x){aimAngle=Math.atan2(-(H-100),x-W/2)}
+function fire(){
+  if(aimBalls<=0||balls.length>0)return;
+  aimBalls--;document.getElementById('balls').textContent=aimBalls;
+  balls.push({x:W/2,y:H-20,vx:Math.cos(aimAngle)*8,vy:Math.sin(aimAngle)*8,r:6,bounces:0});
+}
+function update(){frame++;
+  for(let i=balls.length-1;i>=0;i--){
+    const b=balls[i];b.x+=b.vx;b.y+=b.vy;b.vy+=0.05;
+    if(b.x-b.r<0||b.x+b.r>W)b.vx*=-1;
+    if(b.y-b.r<0)b.vy*=-1;
+    if(b.y>H+30){balls.splice(i,1);if(aimBalls<=0&&blocks.every(bl=>bl.hp<=0))endGame(true)}
+    for(const bl of blocks){
+      if(bl.hp<=0)continue;
+      if(b.x+b.r>bl.x&&b.x-b.r<bl.x+bl.w&&b.y+b.r>bl.y&&b.y-b.r<bl.y+bl.h){
+        bl.hp--;score+=bl.pts;document.getElementById('score').textContent=score;
+        if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('bball_best',best)}catch(e){}}
+        const dy=b.y-bl.y,ddy=Math.abs(b.y-(bl.y+bl.h));
+        if(Math.min(Math.abs(b.y-bl.y),Math.abs(b.y-bl.y-bl.h))<Math.min(Math.abs(b.x-bl.x),Math.abs(b.x-bl.x-bl.w)))b.vy*=-1.05;else b.vx*=-1.05;
+        b.vy-=1;break;
+      }
+    }
+  }
+  if(aimBalls<=0&&balls.length===0&&blocks.some(bl=>bl.hp>0)){aimBalls=5;document.getElementById('balls').textContent='5';spawnBlocks()}
+}
+function endGame(win){
+  ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle=win?'#2ed573':'#ff4757';ctx.font='bold 24px sans-serif';ctx.textAlign='center';ctx.fillText(win?'🏆 全部消除!':'游戏结束',W/2,H/2-10);ctx.font='14px sans-serif';ctx.fillText(`得分: ${score}  点击重来`,W/2,H/2+20);aimBalls=-1;
+}
+function draw(){
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  blocks.forEach(bl=>{if(bl.hp<=0)return;ctx.fillStyle=bl.color;ctx.fillRect(bl.x,bl.y,bl.w,bl.h);ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(bl.x+2,bl.y+2,bl.w-4,4);ctx.fillStyle='#fff';ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.fillText(bl.hp,bl.x+bl.w/2,bl.y+bl.h/2+5)});
+  balls.forEach(b=>{ctx.fillStyle='#ff0';ctx.shadowColor='#ff0';ctx.shadowBlur=6;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0});
+  ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=2;ctx.setLineDash([3,5]);ctx.beginPath();ctx.moveTo(W/2,H-15);ctx.lineTo(W/2+Math.cos(aimAngle)*40,H-15+Math.sin(aimAngle)*40);ctx.stroke();ctx.setLineDash([]);
+}
+c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();aim(e.clientX-r.left)});
+c.addEventListener('touchmove',e=>{e.preventDefault();const r=c.getBoundingClientRect();aim(e.touches[0].clientX-r.left)},{passive:false});
+c.addEventListener('click',()=>{if(aimBalls<0){restart()}fire()});
+function restart(){score=0;aimBalls=5;balls=[];document.getElementById('score').textContent='0';document.getElementById('balls').textContent='5';spawnBlocks()}
+function loop(){update();draw();requestAnimationFrame(loop)}spawnBlocks();loop();
+</script>
+</body>
+</html>
