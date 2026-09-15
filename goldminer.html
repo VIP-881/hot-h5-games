@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>⛏️ 黄金矿工 - 热门H5游戏</title>
+<meta name="description" content="黄金矿工经典Flash游戏复刻，放出钩子抓取金块钻石，看准时机点击收钩免费在线">
+<meta property="og:title" content="⛏️ 黄金矿工 - 热门H5游戏"><meta property="og:description" content="放出钩子抓取金块，经典淘金游戏"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"黄金矿工","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#87CEEB,#4682B4);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:20px;font-size:0.9em;font-weight:600}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>⛏️ 黄金矿工</h1>
+<div class="stats"><span>💰 <b id="money">0</b></span><span>🎯 <b id="target">300</b></span><span>⛏️ <b id="level">1</b></span></div>
+<canvas id="c" width="360" height="440"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=440,HOOK_X=W/2,HOOK_Y=50;
+let hook={angle:0.8,len:40,maxLen:350,speed:3,retracting:false,item:null},items=[],money=0,target=300,level=1,state='aiming';
+function spawnItems(){
+  items=[];
+  const types=[{emoji:'🪨',size:16,value:20,speed:2},{emoji:'🪨',size:24,value:30,speed:3},{emoji:'💰',size:20,value:100,speed:1},{emoji:'💎',size:14,value:200,speed:0.5},{emoji:'🌟',size:12,value:150,speed:0.7}];
+  for(let i=0;i<6;i++){const t=types[Math.floor(Math.random()*types.length)];items.push({x:40+Math.random()*(W-80),y:100+Math.random()*(H-150),...t})}
+}
+function update(){
+  if(state==='aiming'){hook.angle+=0.03;if(hook.angle>Math.PI)hook.angle=0.5}
+  else if(state==='extending'){
+    hook.len+=hook.speed*2;
+    const hx=HOOK_X+Math.cos(-hook.angle)*hook.len,hy=HOOK_Y+Math.sin(-hook.angle)*hook.len;
+    if(hook.len>=hook.maxLen||hx<0||hx>W||hy>H){state='retracting';hook.retracting=true}
+    for(const it of items){if(!it.caught&&Math.abs(hx-it.x)<it.size+4&&Math.abs(hy-it.y)<it.size+4){hook.item=it;it.caught=true;state='retracting';hook.retracting=true;hook.speed=it.speed;break}}
+  }else if(state==='retracting'){
+    hook.len-=hook.speed*2;
+    if(hook.item)hook.item={...hook.item,x:HOOK_X+Math.cos(-hook.angle)*hook.len,y:HOOK_Y+Math.sin(-hook.angle)*hook.len};
+    if(hook.len<=40){money+=hook.item?hook.item.value:0;hook.item=null;hook.retracting=false;hook.speed=3;state='aiming';document.getElementById('money').textContent=money;if(money>=target){level++;target=300+level*100;document.getElementById('target').textContent=target;document.getElementById('level').textContent=level;spawnItems()}}}
+  }
+}
+function draw(){
+  ctx.fillStyle='#87CEEB';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#DEB887';ctx.fillRect(0,H-60,W,60);
+  ctx.fillStyle='#8B4513';ctx.fillRect(0,H-62,W,4);
+  items.forEach(it=>{if(!it.caught||it===hook.item){ctx.font=`${it.size*1.5}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(it.emoji,it.x,it.y);ctx.font='10px sans-serif';ctx.fillStyle='#fff';ctx.fillText(it.value,it.x,it.y+it.size*0.8)}});
+  // Hook rope
+  const hx=HOOK_X+Math.cos(-hook.angle)*hook.len,hy=HOOK_Y+Math.sin(-hook.angle)*hook.len;
+  ctx.strokeStyle='#654321';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(HOOK_X,HOOK_Y);ctx.lineTo(hx,hy);ctx.stroke();
+  // Hook
+  ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.beginPath();ctx.arc(hx,hy+4,6,0,Math.PI);ctx.stroke();
+  // Aim line
+  if(state==='aiming'){ctx.strokeStyle='rgba(255,0,0,0.3)';ctx.setLineDash([4,6]);ctx.beginPath();ctx.moveTo(HOOK_X,HOOK_Y);ctx.lineTo(HOOK_X+Math.cos(-hook.angle)*60,HOOK_Y+Math.sin(-hook.angle)*60);ctx.stroke();ctx.setLineDash([])}
+  ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(0,0,W,30);ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText(`⛏️ 黄金矿工 Lv${level}`,W/2,20);
+}
+c.addEventListener('click',()=>{if(state==='aiming')state='extending'});
+c.addEventListener('touchstart',e=>{e.preventDefault();if(state==='aiming')state='extending'});
+function loop(){update();draw();requestAnimationFrame(loop)}spawnItems();loop();
+</script>
+</body>
+</html>
