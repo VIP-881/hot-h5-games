@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🦘 跳跳蛙 - 热门H5游戏</title>
+<meta name="description" content="跳跳蛙休闲游戏，点击屏幕让青蛙跳上荷叶不断前进，控制跳跃距离别掉进水里免费在线">
+<meta property="og:title" content="🦘 跳跳蛙 - 热门H5游戏"><meta property="og:description" content="点击跳荷叶，十字路口过河"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"跳跳蛙","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#74b9ff,#0984e3);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:20px;font-size:0.9em;font-weight:600}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🦘 跳跳蛙</h1>
+<div class="stats"><span>🐸 <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="520"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=520;
+let frog={x:W/2,y:H-60,r:16,onPad:false},pads=[],score=0,best=0,gameover=false,charging=false,power=0;
+try{best=parseInt(localStorage.getItem('frog_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function spawnPads(){
+  pads=[];
+  // Generate a path of pads upward
+  let px=W/2,py=H-120;
+  for(let i=0;i<8;i++){
+    const offset=(Math.random()-0.5)*(120-i*10);
+    ps.push({x:Math.max(30,Math.min(W-70,px+offset)),y:py,w:45+Math.random()*15,h:18});
+    py-=55+Math.random()*15;
+  }
+  pads=[ps[0],ps[1],ps[2],ps[3],ps[4],ps[5],ps[6],ps[7]];
+  var ps=[];
+  let px2=W/2,py2=H-120;
+  for(let i=0;i<8;i++){const o=(Math.random()-0.5)*(120-i*10);ps.push({x:Math.max(30,Math.min(W-70,px2+o)),y:py2,w:45+Math.random()*15,h:18});py2-=55+Math.random()*15}
+  pads=ps;frog.onPad=true;
+}
+function jump(){
+  if(charging||gameover)return;power=Math.min(80,(Date.now()-chargeStart)*0.3+30);
+  frog.vy=-power*0.7;frog.vx=0;frog.onPad=false;charging=false;power=0;
+}
+function update(){
+  if(gameover)return;
+  if(!frog.onPad){frog.vy+=0.3;frog.y+=frog.vy;frog.x+=frog.vx||0;if(frog.y>H+30)endGame();
+    for(const p of pads){if(frog.vy>0&&frog.x+frog.r>p.x&&frog.x-frog.r<p.x+p.w&&frog.y+frog.r>p.y&&frog.y+frog.r<p.y+p.h+5){frog.y=p.y-frog.r;frog.onPad=true;frog.vy=0;score++;document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('frog_best',best)}catch(e)}const dy=pads[pads.length-1].y-frog.y;if(dy>H*0.6)for(const p2 of pads)p2.y-=dy-H*0.5;spawnMorePads();break}}}
+  }
+}
+let chargeStart=0;
+function spawnMorePads(){const last=pads[pads.length-1];for(let i=0;i<3;i++){pads.push({x:Math.max(30,Math.min(W-70,last.x+(Math.random()-0.5)*120)),y:last.y-55-Math.random()*15,w:45+Math.random()*15,h:18})}}
+function endGame(){gameover=true;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('💧 掉水里了!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`${score}跳  点击重来`,W/2,H/2+20)}
+function draw(){
+  ctx.fillStyle='#74b9ff';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#0984e3';for(let y=(frame||0)%40;y<H;y+=80){ctx.fillRect(0,y,W,40)}
+  pads.forEach(p=>{ctx.fillStyle='#2ecc71';ctx.beginPath();ctx.ellipse(p.x+p.w/2,p.y+p.h/2,p.w/2,p.h/2,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#27ae60';ctx.beginPath();ctx.arc(p.x+p.w*0.3,p.y,3,0,Math.PI*2);ctx.fill()});
+  ctx.fillStyle='#2ecc71';ctx.beginPath();ctx.arc(frog.x,frog.y-frog.r*0.3,frog.r,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(frog.x-5,frog.y-frog.r*0.3-4,5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(frog.x+5,frog.y-frog.r*0.3-4,5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#000';ctx.beginPath();ctx.arc(frog.x-5,frog.y-frog.r*0.3-4,2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(frog.x+5,frog.y-frog.r*0.3-4,2,0,Math.PI*2);ctx.fill();
+  if(charging){ctx.fillStyle=`rgba(255,255,255,${Math.min(1,(Date.now()-chargeStart)*0.003)})`;ctx.beginPath();ctx.arc(frog.x,frog.y-40,8+Math.min(20,(Date.now()-chargeStart)*0.06),0,Math.PI*2);ctx.fill()}
+}
+c.addEventListener('mousedown',()=>{if(!gameover&&frog.onPad){charging=true;chargeStart=Date.now()}});
+c.addEventListener('mouseup',()=>{if(charging)jump()});
+c.addEventListener('touchstart',e=>{e.preventDefault();if(gameover){restart();return}if(frog.onPad){charging=true;chargeStart=Date.now()}});
+c.addEventListener('touchend',()=>{if(charging)jump()});
+function restart(){score=0;gameover=false;frog={x:W/2,y:H-60,r:16,onPad:false};charging=false;power=0;document.getElementById('score').textContent='0';spawnPads();frog.onPad=true}
+let frame=0;function loop(){frame++;update();draw();requestAnimationFrame(loop)}spawnPads();frog.onPad=true;loop();
+</script>
+</body>
+</html>
