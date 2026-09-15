@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🏎️ 公路飙车</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
+h1{font-size:1.6em;margin-bottom:4px}
+.stats{display:flex;gap:16px;margin:6px 0 10px}
+.stats span{background:rgba(255,255,255,0.12);padding:5px 14px;border-radius:20px;font-size:0.95em}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(255,100,50,0.1)}
+</style>
+</head>
+<body>
+<h1>🏎️ 公路飙车</h1>
+<div class="stats"><span>⭐ <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="560"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=360,H=560,CW=40,LANES=[60,155,250,320];
+let car={x:LANES[1]-CW/2,y:H-120,w:CW,h:70},obstacles=[],score=0,best=0,speed=4,frame=0,running=true;
+try{best=parseInt(localStorage.getItem('racer_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function reset(){
+  car.x=LANES[1]-CW/2;obstacles=[];score=0;speed=4;frame=0;running=true;
+  document.getElementById('score').textContent='0';
+}
+function spawn(){
+  const lane=LANES[Math.floor(Math.random()*4)];
+  obstacles.push({x:lane-CW/2,y:-80,w:CW,h:70});
+}
+function update(){
+  if(!running)return;
+  frame++;
+  if(frame%Math.max(20,60-score*2)===0)spawn();
+  score++;document.getElementById('score').textContent=score;
+  if(score%100===0&&speed<12)speed+=0.3;
+  for(let i=obstacles.length-1;i>=0;i--){
+    obstacles[i].y+=speed;
+    if(obstacles[i].y>H)obstacles.splice(i,1);
+  }
+  for(const o of obstacles){
+    if(car.x<o.x+o.w&&car.x+car.w>o.x&&car.y<o.y+o.h&&car.y+car.h>o.y)endGame();
+  }
+}
+function endGame(){
+  running=false;
+  if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('racer_best',best)}catch(e){}}
+  ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.font='bold 28px sans-serif';ctx.textAlign='center';
+  ctx.fillText('CRASH!',W/2,H/2-15);
+  ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  点击重新开始`,W/2,H/2+20);
+}
+function draw(){
+  ctx.fillStyle='#1a1a1a';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#333';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.setLineDash([30,20]);
+  ctx.beginPath();ctx.moveTo(180,0);ctx.lineTo(180,H);ctx.stroke();ctx.setLineDash([]);
+  ctx.strokeStyle='#888';ctx.lineWidth=2;ctx.strokeRect(5,0,W-10,H);
+  for(let y=(frame*speed*0.5)%40;y<H;y+=40){ctx.fillStyle='#fff';ctx.fillRect(178,y,4,20)}
+  obstacles.forEach(o=>{
+    ctx.fillStyle='#ff4757';ctx.fillRect(o.x,o.y,o.w,o.h);
+    ctx.fillStyle='#ff6b81';ctx.fillRect(o.x+2,o.y+2,o.w-4,o.h*0.4);
+    ctx.fillStyle='#333';ctx.fillRect(o.x+8,o.y+o.h*0.4,o.w-16,o.h*0.3);
+  });
+  ctx.fillStyle='#1e90ff';ctx.beginPath();ctx.roundRect(car.x,car.y,car.w,car.h,8);ctx.fill();
+  ctx.fillStyle='#4aa3ff';ctx.fillRect(car.x+6,car.y+5,car.w*0.35,car.h*0.45);
+  ctx.fillRect(car.x+car.w-6-car.w*0.35,car.y+5,car.w*0.35,car.h*0.45);
+  ctx.fillStyle='#fff';ctx.fillRect(car.x+2,car.y+car.h*0.8,car.w-4,car.h*0.15);
+  ctx.fillStyle='#ff0';ctx.fillRect(car.x+2,car.y+car.h*0.8,car.w-4,car.h*0.15);
+  ctx.fillStyle='#ffeaa7';ctx.fillRect(car.x+6,car.y+8,car.w*0.2,car.h*0.3);
+  ctx.fillRect(car.x+car.w-6-car.w*0.2,car.y+8,car.w*0.2,car.h*0.3);
+}
+c.addEventListener('mousemove',e=>{
+  const x=e.clientX-c.getBoundingClientRect().left;
+  car.x=Math.max(5+CW/2,Math.min(W-5-CW-CW/2,x-CW/2));
+});
+c.addEventListener('touchmove',e=>{e.preventDefault();
+  const x=e.touches[0].clientX-c.getBoundingClientRect().left;
+  car.x=Math.max(5+CW/2,Math.min(W-5-CW-CW/2,x-CW/2));
+},{passive:false});
+c.addEventListener('click',()=>{if(!running)reset()});
+c.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft')car.x=Math.max(5,car.x-30);
+  if(e.key==='ArrowRight')car.x=Math.min(W-5-CW,car.x+30);
+});
+function loop(){update();draw();requestAnimationFrame(loop)}
+reset();loop();
+</script>
+</body>
+</html>
