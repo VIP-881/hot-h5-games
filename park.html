@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🚗 停车大师 - 热门H5游戏</title>
+<meta name="description" content="停车大师驾驶游戏，拖动手指控制车辆精准停入车位别碰到障碍物，考验微操能力免费在线">
+<meta property="og:title" content="🚗 停车大师 - 热门H5游戏"><meta property="og:description" content="精准控制车辆倒入车位"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"停车大师","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#2c3e50,#1a252f);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🚗 停车大师</h1>
+<div class="stats"><span>🎯 <b id="level">1</b>/4</span><span>💥 <b id="crashes">0</b></span></div>
+<canvas id="c" width="340" height="400"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=340,H=400;
+let car={x:W/2,y:H-80,w:30,h:48,angle:0,v:0},parking=[],walls=[],level=1,crashes=0,gameover=false,parked=false;
+const LEVELS=[
+  {car:[W/2,H-80,0],park:[W/2,120,40,60],walls:[[10,10,W-20,8],[10,H-10,W-20,8],[10,10,8,H-20],[W-18,10,8,H-20]]},
+  {car:[60,H-80,0],park:[W-80,100,40,60],walls:[[10,10,W-20,8],[10,H-10,W-20,8],[10,10,8,H-20],[W-18,10,8,H-20],[W/2,60,8,100],[W/2,180,8,100]]},
+  {car:[W/2,H-80,Math.PI/2],park:[W/2+10,120,60,40],walls:[[10,10,W-20,8],[10,H-10,W-20,8],[10,10,8,H-20],[W-18,10,8,H-20],[80,100,8,80],[W-88,140,8,80]]},
+  {car:[80,80,0],park:[W-80,H-80,40,60],walls:[[10,10,W-20,8],[10,H-10,W-20,8],[10,10,8,H-20],[W-18,10,8,H-20],[W/2,60,8,150],[120,H/2,150,8]]},
+];
+function loadLevel(l){
+  const lv=LEVELS[l-1];car={x:lv.car[0],y:lv.car[1],angle:lv.car[2],w:30,h:48,v:0};
+  parking={x:lv.park[0],y:lv.park[1],w:lv.park[2],h:lv.park[3]};
+  walls=lv.walls.map(w=>({x:w[0],y:w[1],w:w[2],h:w[3]}));parked=false;gameover=false;
+  document.getElementById('level').textContent=`${l}/4`;
+}
+function update(){if(gameover||parked)return;car.x+=Math.cos(car.angle)*car.v;car.y+=Math.sin(car.angle)*car.v;car.v*=0.95;
+  for(const w of walls){
+    const cx=car.x,cy=car.y;const cos=Math.cos(-car.angle),sin=Math.sin(-car.angle);
+    const carCorners=[[cx-car.w/2,cy-car.h/2],[cx+car.w/2,cy-car.h/2],[cx-car.w/2,cy+car.h/2],[cx+car.w/2,cy+car.h/2]];
+    for(const[wx,wy]of carCorners){if(wx>w.x&&wx<w.x+w.w&&wy>w.y&&wy<w.y+w.h){crashes++;document.getElementById('crashes').textContent=crashes;car.v*=-0.5;break}}
+  }
+  if(Math.abs(car.x-parking.x-parking.w/2)<parking.w/2-6&&Math.abs(car.y-parking.y-parking.h/2)<parking.h/2-6&&Math.abs(car.v)<0.3&&Math.abs(car.angle%(Math.PI))<0.15){
+    parked=true;setTimeout(()=>{if(level<4){level++;loadLevel(level)}else{gameover=true;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#2ed573';ctx.font='bold 24px sans-serif';ctx.textAlign='center';ctx.fillText('🏆 全部完成!',W/2,H/2-10);ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.fillText('点击重来',W/2,H/2+20)}},800)}
+}
+function draw(){
+  ctx.fillStyle='#2c3e50';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.strokeRect(4,4,W-8,H-8);
+  // Parking spot
+  ctx.strokeStyle='#ffd700';ctx.setLineDash([6,3]);ctx.lineWidth=2;ctx.strokeRect(parking.x-parking.w/2,parking.y-parking.h/2,parking.w,parking.h);ctx.setLineDash([]);
+  walls.forEach(w=>{ctx.fillStyle='#555';ctx.fillRect(w.x,w.y,w.w,w.h)});
+  // Car
+  ctx.save();ctx.translate(car.x,car.y);ctx.rotate(car.angle);
+  ctx.fillStyle='#e74c3c';ctx.fillRect(-car.w/2,-car.h/2,car.w,car.h);
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(-car.w/2+3,-car.h/3,car.w-6,car.h/3);
+  ctx.fillStyle='#fff';ctx.fillRect(-2,-2,4,4);ctx.restore();
+  if(parked)ctx.fillStyle='#2ecc71',ctx.font='18px sans-serif',ctx.textAlign='center',ctx.fillText('✅ 完美!',car.x,car.y-40);
+}
+document.addEventListener('keydown',e=>{const m={ArrowUp:0.8,ArrowDown:-0.5,ArrowLeft:-0.05,ArrowRight:0.05};if(m[e.key]!==undefined){e.preventDefault();if(e.key==='ArrowLeft'||e.key==='ArrowRight')car.angle+=m[e.key];else car.v+=m[e.key]}});
+let touchDir=0,touchPower=0;
+c.addEventListener('touchstart',e=>{e.preventDefault();if(gameover)restart();const r=c.getBoundingClientRect();const x=e.touches[0].clientX-r.left;touchDir=x<W/2?-0.04:0.04});
+c.addEventListener('touchmove',e=>{e.preventDefault();const r=c.getBoundingClientRect();const x=e.touches[0].clientX-r.left;touchDir=x<W/2?-0.04:0.04});
+c.addEventListener('touchend',()=>{car.v+=0.5});
+setInterval(()=>{if(touchDir!==0)car.angle+=touchDir;touchDir*=0.8},16);
+function restart(){level=1;crashes=0;document.getElementById('crashes').textContent='0';loadLevel(1)}
+function loop(){update();draw();requestAnimationFrame(loop)}loadLevel(1);loop();
+</script>
+</body>
+</html>
