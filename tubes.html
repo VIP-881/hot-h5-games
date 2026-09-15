@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🧪 试管排序 - 热门H5游戏</title>
+<meta name="description" content="试管排序H5益智游戏，将不同颜色液体倒入试管中分层排序，考验逻辑规划能力免费在线">
+<meta property="og:title" content="🧪 试管排序 - 热门H5游戏"><meta property="og:description" content="分层倒液排序，水排序谜题"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"试管排序","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}.tubes{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;max-width:380px;margin:10px}.tube{width:52px;height:140px;border:2px solid rgba(255,255,255,0.3);border-radius:0 0 12px 12px;position:relative;cursor:pointer;overflow:hidden;transition:all 0.2s;display:flex;flex-direction:column-reverse}.tube:hover{border-color:rgba(255,255,255,0.6)}.tube.selected{border-color:#ffd700;box-shadow:0 0 12px rgba(255,215,0,0.3)}.layer{height:25%;transition:all 0.3s}.btn{background:rgba(100,150,255,0.2);color:#8cf;border:1px solid #8cf;padding:8px 20px;border-radius:20px;font-size:0.9em;cursor:pointer;margin:6px}</style>
+</head>
+<body>
+<h1>🧪 试管排序</h1>
+<div class="stats"><span>🧪 <b id="moves">0</b></span><span>🏆 <b id="best">--</b></span></div>
+<div class="tubes" id="tubes"></div>
+<button class="btn" onclick="restart()">🔄 重新开始</button>
+<script>
+const N=6,SLOTS=4,COLORS=['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6'];
+let tubes=[],selected=null,moves=0,best;
+try{best=parseInt(localStorage.getItem('tube_best'))||0;document.getElementById('best').textContent=best?`${best}步`:'--'}catch(e){}
+function init(){
+  const colorPool=[];
+  for(let c=0;c<COLORS.length;c++)for(let i=0;i<SLOTS;i++)colorPool.push(c);
+  for(let i=colorPool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[colorPool[i],colorPool[j]]=[colorPool[j],colorPool[i]]}
+  tubes=Array(N+1).fill().map(()=>[]);
+  tubes[N]=[]; // empty tube
+  for(let t=0;t<N;t++)for(let s=0;s<SLOTS;s++)tubes[t].push(colorPool[t*SLOTS+s]);
+  shuffle(tubes.slice(0,N)); // ensure tubes are shuffled
+  selected=null;moves=0;document.getElementById('moves').textContent='0';
+  if(isComplete())init(); // re-randomize if accidentally sorted
+  render();
+}
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}}
+function tap(idx){
+  if(selected===null){if(tubes[idx].length>0)selected=idx}
+  else if(selected===idx)selected=null;
+  else{
+    const src=tubes[selected],dst=tubes[idx];
+    if(dst.length>=SLOTS)return;
+    const topColor=src[src.length-1];
+    if(dst.length===0||dst[dst.length-1]===topColor){
+      let count=1;while(count<src.length&&src[src.length-1-count]===topColor)count++;
+      const canMove=Math.min(count,SLOTS-dst.length);
+      for(let i=0;i<canMove;i++)dst.push(src.pop());
+      moves++;document.getElementById('moves').textContent=moves;
+      if(isComplete()){if(!best||moves<best){best=moves;document.getElementById('best').textContent=`${best}步`;try{localStorage.setItem('tube_best',best)}catch(e)}setTimeout(()=>alert(`🎉 完成! ${moves}步`),100)}
+    }
+    selected=null;
+  }
+  render();
+}
+function isComplete(){return tubes.every(t=>{if(t.length===0)return true;return t.length===SLOTS&&t.every(c=>c===t[0])})}
+function render(){
+  document.getElementById('tubes').innerHTML=tubes.map((t,i)=>`<div class="tube${selected===i?' selected':''}" onclick="tap(${i})">${t.map(c=>`<div class="layer" style="background:${COLORS[c]}"></div>`).join('')}</div>`).join('');
+}
+function restart(){init()}init();
+</script>
+</body>
+</html>
