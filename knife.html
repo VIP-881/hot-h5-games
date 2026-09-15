@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎯 飞刀挑战 - 热门H5游戏</title>
+<meta name="description" content="飞刀挑战Knife Hit旋转靶子投飞刀不碰到已有刀，考验精准度和节奏感免费在线">
+<meta property="og:title" content="🎯 飞刀挑战 - 热门H5游戏"><meta property="og:description" content="旋转靶子投飞刀不碰已有刀"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"飞刀挑战"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#2c3e50,#1a252f);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🎯 飞刀挑战</h1>
+<div class="stats"><span>🔪 <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="340" height="400"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=340,H=400,CX=W/2,CY=H/2-20,RR=100;
+let knives=[],rotation=0,score=0,best=0,gameover=false,speed=0.02;
+try{best=parseInt(localStorage.getItem('knife_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function throwKnife(){
+  if(gameover)return;const a=rotation;
+  for(const k of knives){const da=Math.abs(a-k.angle);if(da<0.3||da>Math.PI*2-0.3){gameover=true;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('💥 撞刀了!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`${score}把  点击重来`,W/2,H/2+20);return}}
+  knives.push({angle:a});score++;document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('knife_best',best)}catch(e)}speed+=0.001;
+}
+function update(){if(!gameover)rotation+=speed}
+function draw(){
+  ctx.fillStyle='#2c3e50';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#8B4513';ctx.beginPath();ctx.arc(CX,CY,RR+10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#A0522D';ctx.beginPath();ctx.arc(CX,CY,RR,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#DEB887';for(let i=0;i<8;i++){const a=i*Math.PI/4+rotation;ctx.save();ctx.translate(CX,CY);ctx.rotate(a);ctx.fillRect(-3,-RR+10,6,20);ctx.restore()}
+  knives.forEach(k=>{ctx.fillStyle='#ccc';ctx.save();ctx.translate(CX,CY);ctx.rotate(k.angle);ctx.fillRect(-2,-RR+15,4,RR-15);ctx.fillStyle='#888';ctx.fillRect(-3,-RR+5,6,10);ctx.restore()});
+  ctx.fillStyle='#555';ctx.beginPath();ctx.arc(CX,CY,20,0,Math.PI*2);ctx.fill();ctx.fillStyle='#333';ctx.beginPath();ctx.arc(CX,CY,12,0,Math.PI*2);ctx.fill();
+}
+c.addEventListener('click',throwKnife);
+c.addEventListener('touchstart',e=>{e.preventDefault();if(gameover)restart();else throwKnife()});
+function restart(){knives=[];rotation=0;score=0;speed=0.02;gameover=false;document.getElementById('score').textContent='0'}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
