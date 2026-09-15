@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎪 飞碟射击 - 热门H5游戏</title>
+<meta name="description" content="飞碟射击H5小游戏，快速瞄准击碎抛出的飞碟靶子，考验反应速度和瞄准精度，免费在线射击游戏">
+<meta property="og:title" content="🎪 飞碟射击 - 热门H5游戏">
+<meta property="og:description" content="瞄准击碎飞碟，考验眼手协调">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"飞碟射击","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#87CEEB,#5dade2);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none;cursor:crosshair}
+h1{font-size:1.8em;margin:4px 0;text-shadow:0 2px 6px rgba(0,0,0,0.3)}
+.stats{display:flex;gap:12px;margin:6px 0 8px}
+.stats span{background:rgba(255,255,255,0.2);padding:5px 14px;border-radius:20px;font-size:0.95em;font-weight:600}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(0,0,0,0.2)}
+</style>
+</head>
+<body>
+<h1>🎪 飞碟射击</h1>
+<div class="stats"><span>🎯 <b id="hits">0</b></span><span>📊 <b id="accuracy">--</b>%</span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="380" height="480"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=380,H=480;
+let skeets=[],hits=0,shots=0,best=0,crossX=W/2,crossY=H/2,gameover=false,particles=[],state='waiting',timer=0,roundTime=60,timerInterval;
+try{best=parseInt(localStorage.getItem('skeet_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function spawnSkeet(){
+  const fromLeft=Math.random()>.5;
+  const y=H*0.3+Math.random()*H*0.4;
+  skeets.push({x:fromLeft?-30:W+30,y,vx:(fromLeft?1:-1)*(3+Math.random()*5),vy:-3-Math.random()*4,radius:18,active:true,life:120,rot:0});
+}
+function update(){
+  if(!gameover)return; // use interval-based spawning
+  for(let i=skeets.length-1;i>=0;i--){
+    const s=skeets[i];
+    s.x+=s.vx;s.y+=s.vy;s.vy+=0.08;s.rot+=0.1;s.life--;
+    if(s.life<=0||s.x<-50||s.x>W+50||s.y>H+50)skeets.splice(i,1);
+  }
+  for(let i=particles.length-1;i>=0;i--){particles[i].life--;particles[i].x+=particles[i].vx;particles[i].y+=particles[i].vy;if(particles[i].life<=0)particles.splice(i,1)}
+}
+function draw(){
+  ctx.fillStyle='#87CEEB';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#228B22';ctx.fillRect(0,H-60,W,60);
+  ctx.fillStyle='#2ecc71';ctx.fillRect(0,H-62,W,4);
+  ctx.fillStyle='#8B4513';ctx.fillRect(0,H-6,W,6);
+  for(let i=0;i<8;i++){ctx.fillStyle=`rgba(255,255,255,${0.1+Math.random()*0.15})`;ctx.beginPath();ctx.arc(Math.random()*W,Math.random()*(H-80),3+Math.random()*8,0,Math.PI*2);ctx.fill()}
+  skeets.forEach(s=>{
+    ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.rot);
+    ctx.fillStyle='#e67e22';ctx.beginPath();ctx.ellipse(0,0,s.radius,s.radius*0.6,0,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#d35400';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,0.2)';ctx.beginPath();ctx.ellipse(-3,-2,s.radius*0.3,s.radius*0.15,0,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  });
+  particles.forEach(p=>{ctx.fillStyle=`rgba(255,165,0,${p.life/20})`;ctx.beginPath();ctx.arc(p.x,p.y,2+Math.random()*3,0,Math.PI*2);ctx.fill()});
+  ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.setLineDash([8,6]);
+  ctx.beginPath();ctx.moveTo(crossX-16,crossY);ctx.lineTo(crossX+16,crossY);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(crossX,crossY-16);ctx.lineTo(crossX,crossY+16);ctx.stroke();ctx.setLineDash([]);
+  ctx.beginPath();ctx.arc(crossX,crossY,6,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fillRect(0,0,W,36);
+  ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText(`🎪 飞碟射击 ⏱ ${timer}s`,W/2,24);
+}
+function shoot(x,y){
+  if(gameover)return;shots++;
+  for(let i=skeets.length-1;i>=0;i--){
+    const s=skeets[i],dx=x-s.x,dy=y-s.y;
+    if(Math.sqrt(dx*dx+dy*dy)<s.radius+12){
+      for(let p=0;p<12;p++)particles.push({x:s.x,y:s.y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6,life:20});
+      hits++;skeets.splice(i,1);
+      document.getElementById('hits').textContent=hits;
+      document.getElementById('accuracy').textContent=Math.round(hits/shots*100)+'%';
+      if(hits>best){best=hits;document.getElementById('best').textContent=best;try{localStorage.setItem('skeet_best',best)}catch(e){}}
+      return;
+    }
+  }
+  document.getElementById('accuracy').textContent=Math.round(hits/shots*100)+'%';
+}
+function startRound(){timer=roundTime;skeets=[];gameover=false;clearInterval(timerInterval);
+  const spawnInterval=setInterval(spawnSkeet,800);
+  timerInterval=setInterval(()=>{timer--;if(timer<=0){clearInterval(spawnInterval);clearInterval(timerInterval);endGame()}},1000);
+  setTimeout(()=>clearInterval(spawnInterval),roundTime*1000-100);
+}
+function endGame(){gameover=true;skeets=[];ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('射击结束!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`命中 ${hits} · ${Math.round(hits/shots*100)}%  点击重来`,W/2,H/2+20)}
+c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();crossX=e.clientX-r.left;crossY=e.clientY-r.top});
+c.addEventListener('click',e=>{const r=c.getBoundingClientRect();if(gameover&&timer<=0){restart();return}shoot(e.clientX-r.left,e.clientY-r.top)});
+c.addEventListener('touchmove',e=>{e.preventDefault();const r=c.getBoundingClientRect();crossX=e.touches[0].clientX-r.left;crossY=e.touches[0].clientY-r.top});
+c.addEventListener('touchstart',e=>{e.preventDefault();const r=c.getBoundingClientRect();if(gameover&&timer<=0){restart();return}const t=e.touches[0];crossX=t.clientX-r.left;crossY=t.clientY-r.top;shoot(crossX,crossY)});
+function restart(){hits=0;shots=0;skeets=[];particles=[];document.getElementById('hits').textContent='0';document.getElementById('accuracy').textContent='--%';startRound()}
+function loop(){update();draw();requestAnimationFrame(loop)}
+startRound();loop();
+</script>
+</body>
+</html>
