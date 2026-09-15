@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🍉 合成大西瓜</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#ffeaa7,#fdcb6e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#2d3436;user-select:none;-webkit-user-select:none;touch-action:none}
+h1{font-size:1.6em;margin:2px 0}
+.stats{display:flex;gap:16px;margin:4px 0 8px}
+.stats span{background:rgba(0,0,0,0.08);padding:5px 14px;border-radius:20px;font-size:0.95em;font-weight:600}
+canvas{display:block;border-radius:12px;max-width:96vw;box-shadow:0 6px 30px rgba(0,0,0,0.15)}
+</style>
+</head>
+<body>
+<h1>🍉 合成大西瓜</h1>
+<div class="stats"><span>⭐ <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="340" height="500"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=340,H=500,G=0.5,DAMP=0.7;
+const FRUITS=[
+  {emoji:'🫐',r:14,name:'蓝莓',score:1,color:'#5f27cd'},
+  {emoji:'🍒',r:18,name:'樱桃',score:3,color:'#c0392b'},
+  {emoji:'🍊',r:23,name:'橘子',score:6,color:'#e17055'},
+  {emoji:'🍋',r:28,name:'柠檬',score:10,color:'#fdcb6e'},
+  {emoji:'🥝',r:34,name:'猕猴桃',score:15,color:'#55efc4'},
+  {emoji:'🍇',r:40,name:'葡萄',score:21,color:'#a55eea'},
+  {emoji:'🍑',r:47,name:'桃子',score:28,color:'#fd79a8'},
+  {emoji:'🍍',r:55,name:'菠萝',score:36,color:'#ffeaa7'},
+  {emoji:'🍈',r:64,name:'蜜瓜',score:45,color:'#81ecec'},
+  {emoji:'🍉',r:75,name:'西瓜',score:55,color:'#00b894'},
+];
+let balls=[],nextBall=null,score=0,best=0,dropX=W/2,gameover=false,merging=false;
+try{best=parseInt(localStorage.getItem('suika_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function randFruitIdx(){return Math.floor(Math.random()*5)}
+function spawnNext(){nextBall={x:W/2,y:40,r:FRUITS[randFruitIdx()].r,idx:randFruitIdx(),vy:0,vx:0,active:true}}
+function update(){
+  if(gameover)return;
+  if(!nextBall){spawnNext();return}
+  nextBall.vy+=G;nextBall.y+=nextBall.vy;nextBall.x+=nextBall.vx;
+  if(nextBall.x-nextBall.r<10){nextBall.x=10+nextBall.r;nextBall.vx*=-0.3}
+  if(nextBall.x+nextBall.r>W-10){nextBall.x=W-10-nextBall.r;nextBall.vx*=-0.3}
+  if(nextBall.y+nextBall.r>=H-8){nextBall.y=H-8-nextBall.r;placeBall();return}
+  for(const b of balls){
+    const dx=nextBall.x-b.x,dy=nextBall.y-b.y,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<nextBall.r+b.r&&nextBall.idx===b.idx&&nextBall.idx<FRUITS.length-1&&!merging){
+      placeBall();return;
+    }
+  }
+}
+function placeBall(){
+  if(!nextBall)return;
+  if(nextBall.y<60){gameover=true;endGame();return}
+  balls.push({...nextBall,active:true});
+  checkMerge();
+  spawnNext();
+}
+function checkMerge(){
+  merging=true;
+  for(let i=0;i<balls.length;i++){
+    for(let j=i+1;j<balls.length;j++){
+      if(balls[i].idx===balls[j].idx&&balls[i].idx<FRUITS.length-1){
+        const dx=balls[i].x-balls[j].x,dy=balls[i].y-balls[j].y,dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<balls[i].r+balls[j].r-10){
+          const newIdx=balls[i].idx+1;
+          const nx=(balls[i].x+balls[j].x)/2,ny=(balls[i].y+balls[j].y)/2;
+          balls.splice(j,1);balls.splice(i,1);
+          balls.push({x:nx,y:ny,r:FRUITS[newIdx].r,idx:newIdx,vy:-3,vx:(Math.random()-0.5)*4,active:true});
+          score+=FRUITS[newIdx].score;
+          document.getElementById('score').textContent=score;
+          if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('suika_best',best)}catch(e){}}
+          checkMerge();merging=false;return;
+        }
+      }
+    }
+  }
+  merging=false;
+}
+function resolveCollisions(){
+  for(let i=0;i<balls.length;i++){
+    balls[i].vy+=G;balls[i].y+=balls[i].vy;balls[i].x+=balls[i].vx;
+    if(balls[i].x-balls[i].r<8){balls[i].x=8+balls[i].r;balls[i].vx*=-0.3}
+    if(balls[i].x+balls[i].r>W-8){balls[i].x=W-8-balls[i].r;balls[i].vx*=-0.3}
+    if(balls[i].y+balls[i].r>=H-8){balls[i].y=H-8-balls[i].r;balls[i].vy*=-0.3;balls[i].vx*=0.9}
+    for(let j=i+1;j<balls.length;j++){
+      const dx=balls[j].x-balls[i].x,dy=balls[j].y-balls[i].y,dist=Math.sqrt(dx*dx+dy*dy);
+      const minDist=balls[i].r+balls[j].r;
+      if(dist<minDist){
+        const nx=dx/dist,ny=dy/dist;
+        const overlap=minDist-dist;
+        balls[i].x-=nx*overlap/2;balls[i].y-=ny*overlap/2;
+        balls[j].x+=nx*overlap/2;balls[j].y+=ny*overlap/2;
+        const relVx=balls[i].vx-balls[j].vx,relVy=balls[i].vy-balls[j].vy;
+        const relVel=relVx*nx+relVy*ny;
+        if(relVel>0){balls[i].vx-=relVel*nx*DAMP;balls[i].vy-=relVel*ny*DAMP;balls[j].vx+=relVel*nx*DAMP;balls[j].vy+=relVel*ny*DAMP}
+      }
+    }
+  }
+  if(balls.some(b=>b.y<40)){gameover=true;endGame()}
+}
+function endGame(){
+  ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.font='bold 28px sans-serif';ctx.textAlign='center';
+  ctx.fillText('GAME OVER',W/2,H/2-15);
+  ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  点击重新开始`,W/2,H/2+20);
+}
+function draw(){
+  ctx.fillStyle='#ffeaa7';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#fdcb6e';ctx.lineWidth=3;ctx.strokeRect(5,5,W-10,H-10);
+  ctx.strokeStyle='rgba(0,0,0,0.1)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(5,H-13);ctx.lineTo(W-5,H-13);ctx.stroke();
+  balls.forEach(b=>{
+    const g=ctx.createRadialGradient(b.x-3,b.y-3,2,b.x,b.y,b.r);
+    g.addColorStop(0,'rgba(255,255,255,0.5)');g.addColorStop(0.6,FRUITS[b.idx].color);g.addColorStop(1,'rgba(0,0,0,0.2)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();
+    ctx.font=`${b.r*0.7}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(FRUITS[b.idx].emoji,b.x,b.y);
+  });
+  if(nextBall){
+    ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.arc(nextBall.x,H-10,nextBall.r,0,Math.PI);ctx.fill();
+    ctx.fillStyle=FRUITS[nextBall.idx].color;ctx.beginPath();ctx.arc(nextBall.x,nextBall.y,nextBall.r,0,Math.PI*2);ctx.fill();
+    ctx.font=`${nextBall.r*0.7}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(FRUITS[nextBall.idx].emoji,nextBall.x,nextBall.y);
+  }
+}
+c.addEventListener('mousemove',e=>{
+  if(gameover||!nextBall||nextBall.y>50)return;
+  nextBall.x=Math.max(nextBall.r+10,Math.min(W-nextBall.r-10,e.clientX-c.getBoundingClientRect().left));
+});
+c.addEventListener('touchmove',e=>{e.preventDefault();
+  if(gameover||!nextBall||nextBall.y>50)return;
+  nextBall.x=Math.max(nextBall.r+10,Math.min(W-nextBall.r-10,e.touches[0].clientX-c.getBoundingClientRect().left));
+},{passive:false});
+c.addEventListener('click',e=>{if(gameover)restart()});
+c.addEventListener('touchend',e=>{if(nextBall&&nextBall.y<60){nextBall.vy=2;nextBall.vx=(Math.random()-0.5)*2}});
+c.addEventListener('mouseup',e=>{if(nextBall&&nextBall.y<60){nextBall.vy=2;nextBall.vx=(Math.random()-0.5)*2}});
+function restart(){balls=[];nextBall=null;score=0;gameover=false;document.getElementById('score').textContent='0';spawnNext()}
+function loop(){update();resolveCollisions();draw();requestAnimationFrame(loop)}
+restart();loop();
+</script>
+</body>
+</html>
