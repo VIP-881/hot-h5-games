@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🏓 弹球大战 - 热门H5游戏</title>
+<meta name="description" content="弹球大战PvP竞技游戏，左右各控挡板反弹弹球得分，双人对战经典街机模式免费在线">
+<meta property="og:title" content="🏓 弹球大战 - 热门H5游戏"><meta property="og:description" content="双人弹球对战，左右挡板各控一方"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"弹球大战","playMode":"MultiPlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:20px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.1);padding:4px 14px;border-radius:20px;font-size:1em}canvas{display:block;border-radius:8px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🏓 弹球大战</h1>
+<div class="stats"><span>🔵 <b id="ps">0</b></span><span>🔴 <b id="as">0</b></span></div>
+<canvas id="c" width="360" height="460"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=460,PW=8,PH=60,BR=8;
+let ball={x:W/2,y:H/2,vx:5,vy:3},pl={y:H/2-PH/2},pr={y:H/2-PH/2},ps=0,as=0,serving=true;
+function reset(){ball={x:W/2,y:H/2,vx:(Math.random()>.5?1:-1)*5,vy:(Math.random()*6-3)};serving=true}
+function update(){
+  if(serving)return;ball.x+=ball.vx;ball.y+=ball.vy;
+  if(ball.y-BR<0||ball.y+BR>H)ball.vy*=-1;
+  if(ball.x-BR<PW+20&&ball.y>pl.y&&ball.y<pl.y+PH){ball.x=PW+20+BR;ball.vx*=-1.05;ball.vy+=(ball.y-pl.y-PH/2)*0.2}
+  if(ball.x+BR>W-PW-20&&ball.y>pr.y&&ball.y<pr.y+PH){ball.x=W-PW-20-BR;ball.vx*=-1.05;ball.vy+=(ball.y-pr.y-PH/2)*0.2}
+  if(ball.x<0){as++;document.getElementById('as').textContent=as;reset()}
+  if(ball.x>W){ps++;document.getElementById('ps').textContent=ps;reset()}
+}
+function draw(){
+  ctx.fillStyle='#0a0a1a';ctx.fillRect(0,0,W,H);
+  ctx.setLineDash([5,10]);ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#3498db';ctx.fillRect(15,pl.y,PW,PH);ctx.fillStyle='#e74c3c';ctx.fillRect(W-15-PW,pr.y,PW,PH);
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ball.x,ball.y,BR,0,Math.PI*2);ctx.fill();ctx.shadowColor='#fff';ctx.shadowBlur=8;ctx.fill();ctx.shadowBlur=0;
+  if(serving)ctx.fillStyle='#fff',ctx.font='14px sans-serif',ctx.textAlign='center',ctx.fillText('点击开始',W/2,H/2+20);
+  ctx.fillStyle='#fff';ctx.font='26px sans-serif';ctx.textAlign='center';ctx.fillText(`${ps}:${as}`,W/2,40);
+}
+// Left paddle: keyboard W/S, Right: AI or keyboard ArrowUp/Down
+document.addEventListener('keydown',e=>{const m={w:-8,s:8,ArrowUp:-8,ArrowDown:8};if(m[e.key]){if(e.key==='w'||e.key==='s')pl.y=Math.max(0,Math.min(H-PH,pl.y+m[e.key]));else pr.y=Math.max(0,Math.min(H-PH,pr.y+m[e.key]))}});
+// AI for right paddle
+let aiInterval=setInterval(()=>{if(!serving)pr.y+=(ball.y-pr.y-PH/2)*0.08;pr.y=Math.max(0,Math.min(H-PH,pr.y))},16);
+// Touch: left half controls left paddle, right half controls right
+c.addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.touches){const x=t.clientX-c.getBoundingClientRect().left;if(x<W/2)pl.y=Math.max(0,Math.min(H-PH,t.clientY-c.getBoundingClientRect().top-PH/2));else pr.y=Math.max(0,Math.min(H-PH,t.clientY-c.getBoundingClientRect().top-PH/2))}},{passive:false});
+c.addEventListener('mousemove',e=>{pl.y=Math.max(0,Math.min(H-PH,e.clientY-c.getBoundingClientRect().top-PH/2))});
+c.addEventListener('click',()=>{if(serving)serving=false});
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
