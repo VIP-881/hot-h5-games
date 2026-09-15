@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎯 飞斧投掷 - 热门H5游戏</title>
+<meta name="description" content="飞斧投掷休闲游戏，点击时机让飞斧精准命中靶心，考验节奏感和手眼协调免费在线">
+<meta property="og:title" content="🎯 飞斧投掷 - 热门H5游戏"><meta property="og:description" content="看准时机投掷飞斧命中靶心"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"飞斧投掷","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#2c3e50,#1a252f);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🎯 飞斧投掷</h1>
+<div class="stats"><span>🪓 <b id="axes">10</b></span><span>🎯 <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="340" height="440"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=340,H=440,CX=W/2,CY=H-180,TR=120;
+let axes=[],score=0,aCount=10,best=0,rotation=0,state='aim',gameover=false;
+try{best=parseInt(localStorage.getItem('axe_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function throwAxe(){
+  if(state!=='aim'||aCount<=0)return;
+  const dist=Math.abs(rotation%(Math.PI*2)-Math.PI);
+  const pts=dist<0.2?50:dist<0.5?30:dist<1?10:dist<1.5?5:1;
+  axes.push({rot:rotation%(Math.PI*2),pts,hit:true});score+=pts;
+  document.getElementById('score').textContent=score;aCount--;document.getElementById('axes').textContent=aCount;
+  if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('axe_best',best)}catch(e)}}
+  if(aCount<=0)setTimeout(endGame,500);
+}
+function endGame(){gameover=true;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('飞斧用完了!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  点击重来`,W/2,H/2+20)}
+function update(){if(!gameover)rotation+=0.04}
+function draw(){
+  ctx.fillStyle='#2c3e50';ctx.fillRect(0,0,W,H);
+  // Target
+  const ringColors=['#fff','#000','#e74c3c','#f39c12','#e67e22'];
+  for(let i=4;i>=0;i--){ctx.fillStyle=ringColors[i];ctx.beginPath();ctx.arc(CX,CY,TR-i*(TR/5),0,Math.PI*2);ctx.fill()}
+  ctx.fillStyle='#ffd700';ctx.beginPath();ctx.arc(CX,CY,TR/8,0,Math.PI*2);ctx.fill();
+  // Axes stuck in target
+  axes.forEach(a=>{
+    ctx.save();ctx.translate(CX,CY);ctx.rotate(a.rot);
+    ctx.fillStyle='#888';ctx.fillRect(-3,-10,6,20);
+    ctx.fillStyle='#DEB887';ctx.fillRect(-2,-8,4,16);ctx.restore();
+  });
+  // Rotating aim indicator
+  const ax=CX+Math.cos(rotation)*TR*0.7,ay=CY+Math.sin(rotation)*TR*0.7;
+  ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=2;ctx.setLineDash([3,3]);ctx.beginPath();ctx.arc(CX,CY,TR*0.7,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#ff0';ctx.beginPath();ctx.arc(ax,ay,6,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='16px sans-serif';ctx.textAlign='center';ctx.fillText(`🪓 ${aCount}`,W/2,H-20);
+}
+c.addEventListener('click',()=>{if(gameover)restart();else throwAxe()});
+c.addEventListener('touchstart',e=>{e.preventDefault();if(gameover)restart();else throwAxe()});
+function restart(){score=0;aCount=10;axes=[];rotation=0;gameover=false;document.getElementById('score').textContent='0';document.getElementById('axes').textContent='10'}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
