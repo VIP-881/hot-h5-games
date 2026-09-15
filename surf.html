@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🌊 冲浪达人 - 热门H5游戏</title>
+<meta name="description" content="冲浪达人H5竞技游戏，左右滑动保持冲浪板平衡躲避海浪和礁石，滑得越远得分越高免费在线">
+<meta property="og:title" content="🌊 冲浪达人 - 热门H5游戏"><meta property="og:description" content="左右滑动冲浪，躲避礁石海浪"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"冲浪达人","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#00b4d8,#0077b6);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0;text-shadow:0 2px 6px rgba(0,0,0,0.3)}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:20px;font-size:0.9em;font-weight:600}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🌊 冲浪达人</h1>
+<div class="stats"><span>🏄 <b id="score">0</b>m</span><span>🏆 <b id="best">0</b>m</span></div>
+<canvas id="c" width="360" height="520"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=520;
+let surfer={x:W/2,y:H/2,w:30,h:20},rocks=[],waves=[],score=0,best=0,speed=3,frame=0,gameover=false;
+try{best=parseInt(localStorage.getItem('surf_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function spawnRock(){rocks.push({x:10+Math.random()*(W-40),y:-40,w:18+Math.random()*20,h:14+Math.random()*16,speed:speed+Math.random()})}
+function update(){if(gameover)return;frame++;speed=3+score/200;
+  if(frame%Math.max(15,40-score*0.3)===0)spawnRock();
+  score++;document.getElementById('score').textContent=score;
+  for(let i=rocks.length-1;i>=0;i--){rocks[i].y+=rocks[i].speed;if(rocks[i].y>H+50)rocks.splice(i,1)}
+  for(const r of rocks){if(surfer.x<r.x+r.w&&surfer.x+surfer.w>r.x&&surfer.y<r.y+r.h&&surfer.y+surfer.h>r.y)endGame()}
+  // Wave animation
+  waves=Array.from({length:5},(_,i)=>({x:i*W/5,y:(H-30)+Math.sin(frame*0.05+i)*10,amp:5+Math.random()*8}));
+}
+function endGame(){gameover=true;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('surf_best',best)}catch(e)}ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('💥 撞礁石了!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`滑了 ${score}m  点击重来`,W/2,H/2+20)}
+function draw(){
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#00b4d8');g.addColorStop(0.7,'#0077b6');g.addColorStop(1,'#023e8a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // Waves
+  ctx.fillStyle='rgba(255,255,255,0.15)';
+  waves.forEach(w=>{ctx.beginPath();ctx.moveTo(w.x,w.y);for(let x=0;x<=W/5;x++){const wx=w.x+x,wy=w.y+Math.sin((frame*0.05)+x*0.3)*w.amp;ctx.lineTo(wx,wy)}ctx.lineTo(w.x+W/5,H);ctx.lineTo(w.x,H);ctx.closePath();ctx.fill()});
+  rocks.forEach(r=>{ctx.fillStyle='#555';ctx.beginPath();ctx.roundRect(r.x,r.y-5,r.w,r.h,4);ctx.fill();ctx.fillStyle='#333';ctx.beginPath();ctx.arc(r.x+r.w/2,r.y,2,0,Math.PI*2);ctx.fill()});
+  // Surfer
+  ctx.fillStyle='#DEB887';ctx.beginPath();ctx.arc(surfer.x+surfer.w/2,surfer.y+3,8,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#f5cba7';ctx.beginPath();ctx.arc(surfer.x+surfer.w/2-3,surfer.y,3,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff';ctx.fillRect(surfer.x+8,surfer.y-10,surfer.w-16,15);
+  ctx.fillStyle='#e74c3c';ctx.fillRect(surfer.x+10,surfer.y-8,surfer.w-20,4);
+  // Board
+  ctx.fillStyle='#f39c12';ctx.beginPath();ctx.roundRect(surfer.x-5,surfer.y+10,surfer.w+10,8,4);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='18px sans-serif';ctx.textAlign='center';ctx.fillText(`${score}m`,W/2,30);
+}
+c.addEventListener('mousemove',e=>{surfer.x=Math.max(5,Math.min(W-surfer.w-5,e.clientX-c.getBoundingClientRect().left-surfer.w/2))});
+c.addEventListener('touchmove',e=>{e.preventDefault();surfer.x=Math.max(5,Math.min(W-surfer.w-5,e.touches[0].clientX-c.getBoundingClientRect().left-surfer.w/2))},{passive:false});
+c.addEventListener('click',()=>{if(gameover)restart()});
+function restart(){surfer.x=W/2;rocks=[];score=0;speed=3;frame=0;gameover=false;document.getElementById('score').textContent='0'}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
