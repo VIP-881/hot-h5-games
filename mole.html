@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🔨 打地鼠</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#2d4a22,#1a3a12);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none}
+h1{font-size:1.6em;margin-bottom:4px}
+.stats{display:flex;gap:16px;margin:6px 0 10px}
+.stats span{background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:20px;font-size:0.95em}
+canvas{display:block;border-radius:12px;max-width:96vw;touch-action:none}
+</style>
+</head>
+<body>
+<h1>🔨 打地鼠</h1>
+<div class="stats"><span>⭐ <b id="score">0</b></span><span>⏱ <b id="timer">30</b>s</span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="400"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=360,H=400,COLS=3,ROWS=3,SIZE=100,GAP=15,OFFX=15,OFFY=40;
+let moles=[],score=0,best=0,remaining=30,started=false,gameover=false,timerInterval;
+try{best=parseInt(localStorage.getItem('mole_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+let holes=[];
+for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)holes.push({r,c,x:OFFX+c*(SIZE+GAP),y:OFFY+r*(SIZE+GAP)});
+
+function spawnMole(){
+  const empty=holes.filter(h=>!moles.find(m=>m.r===h.r&&m.c===h.c));
+  if(!empty.length)return;
+  const h=empty[Math.floor(Math.random()*empty.length)];
+  const lifetime=Math.max(600,1200-score*5);
+  const isGold=Math.random()<0.1;
+  moles.push({r:h.r,c:h.c,life:lifetime,maxLife:lifetime,isGold,anim:0});
+}
+
+function drawMole(m){
+  const h=holes.find(h2=>h2.r===m.r&&h2.c===m.c),x=h.x+SIZE/2,y=h.y+SIZE/2;
+  const emerge=m.life/m.maxLife;
+  const size=SIZE*0.35*Math.min(1,emerge*2);
+  ctx.fillStyle=m.isGold?'#ffd700':'#8B4513';
+  ctx.beginPath();ctx.ellipse(x,y-5,size,size*0.8,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(x,y-5-size*0.3,size*0.7,size*0.5,0,0,Math.PI*2);
+  ctx.fillStyle=m.isGold?'#ffe44d':'#a0522d';ctx.fill();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x-size*0.25,y-5-size*0.4,size*0.15,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(x+size*0.25,y-5-size*0.4,size*0.15,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#000';ctx.beginPath();ctx.arc(x-size*0.25,y-5-size*0.4,size*0.07,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(x+size*0.25,y-5-size*0.4,size*0.07,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#ff6b81';ctx.beginPath();ctx.arc(x,y-5+size*0.1,size*0.1,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#000';ctx.lineWidth=0.5;
+  ctx.beginPath();ctx.arc(x-size*0.2,y-5+size*0.05,size*0.05,0,Math.PI);ctx.stroke();
+  ctx.beginPath();ctx.arc(x+size*0.2,y-5+size*0.05,size*0.05,0,Math.PI);ctx.stroke();
+}
+function draw(){
+  ctx.fillStyle='#3a6b2a';ctx.fillRect(0,0,W,H);
+  holes.forEach(h=>{ctx.fillStyle='#2a4a1a';ctx.beginPath();ctx.ellipse(h.x+SIZE/2,h.y+SIZE/2,SIZE*0.42,SIZE*0.38,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#1a3010';ctx.beginPath();ctx.ellipse(h.x+SIZE/2,h.y+SIZE/2,SIZE*0.32,SIZE*0.28,0,0,Math.PI*2);ctx.fill()});
+  moles.forEach(m=>drawMole(m));
+  ctx.fillStyle='#fff';ctx.font='bold 16px sans-serif';ctx.textAlign='center';
+  if(!started)ctx.fillText('点击开始游戏',W/2,H/2);
+}
+function update(){
+  if(!started||gameover)return;
+  for(let i=moles.length-1;i>=0;i--){
+    moles[i].life--;
+    if(moles[i].life<=0)moles.splice(i,1);
+  }
+  if(Math.random()<0.03)moles.length<3&&spawnMole();
+}
+c.addEventListener('click',e=>{
+  if(gameover){restart();return}
+  if(!started){startGame();return}
+  const rect=c.getBoundingClientRect();
+  const x=e.clientX-rect.left,y=e.clientY-rect.top;
+  for(let i=moles.length-1;i>=0;i--){
+    const m=moles[i],h=holes.find(h2=>h2.r===m.r&&h2.c===m.c);
+    const dx=x-(h.x+SIZE/2),dy=y-(h.y+SIZE/2);
+    if(Math.sqrt(dx*dx+dy*dy)<SIZE*0.4){
+      score+=m.isGold?5:1;
+      document.getElementById('score').textContent=score;
+      moles.splice(i,1);return;
+    }
+  }
+});
+c.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  if(gameover){restart();return}
+  if(!started){startGame();return}
+  for(const t of e.touches){
+    const rect=c.getBoundingClientRect();
+    const x=t.clientX-rect.left,y=t.clientY-rect.top;
+    for(let i=moles.length-1;i>=0;i--){
+      const m=moles[i],h=holes.find(h2=>h2.r===m.r&&h2.c===m.c);
+      const dx=x-(h.x+SIZE/2),dy=y-(h.y+SIZE/2);
+      if(Math.sqrt(dx*dx+dy*dy)<SIZE*0.4){
+        score+=m.isGold?5:1;
+        document.getElementById('score').textContent=score;
+        moles.splice(i,1);return;
+      }
+    }
+  }
+});
+function startGame(){
+  started=true;remaining=30;
+  timerInterval=setInterval(()=>{
+    remaining--;document.getElementById('timer').textContent=remaining;
+    if(remaining<=0)endGame();
+  },1000);
+}
+function endGame(){
+  gameover=true;started=false;clearInterval(timerInterval);
+  if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('mole_best',best)}catch(e){}}
+  ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.font='bold 28px sans-serif';ctx.textAlign='center';
+  ctx.fillText('时间到!',W/2,H/2-15);
+  ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  点击重来`,W/2,H/2+20);
+}
+function restart(){score=0;moles=[];remaining=30;gameover=false;clearInterval(timerInterval);document.getElementById('score').textContent='0';document.getElementById('timer').textContent='30';startGame()}
+function loop(){update();draw();requestAnimationFrame(loop)}
+loop();
+</script>
+</body>
+</html>
