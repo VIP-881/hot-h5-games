@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🐠 捕鱼达人 - 热门H5游戏</title>
+<meta name="description" content="经典捕鱼游戏，手指点击发射炮弹捕鱼，多种鱼类不同分值，免费在线玩">
+<meta property="og:title" content="🐠 捕鱼达人 - 热门H5游戏">
+<meta property="og:description" content="经典捕鱼达人，点击屏幕发射炮弹捕捉各种鱼类">
+<meta property="og:type" content="website">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"捕鱼达人","description":"在线捕鱼街机游戏","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#0077b6,#023e8a);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none;overflow:hidden}
+h1{font-size:1.6em;margin:4px 0;text-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.stats{display:flex;gap:12px;margin:4px 0 6px}
+.stats span{background:rgba(255,255,255,0.18);padding:4px 12px;border-radius:20px;font-size:0.9em;font-weight:600}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(0,0,0,0.3)}
+</style>
+</head>
+<body>
+<h1>🐠 捕鱼达人</h1>
+<div class="stats"><span>⭐ <b id="score">0</b></span><span>🔫 <b id="bullets">50</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="380" height="520"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=380,H=520;
+let fishes=[],bullets=[],score=0,ammo=50,best=0,frame=0,gameover=false,bubbles=[];
+try{best=parseInt(localStorage.getItem('fish_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+const FISH_TYPES=[
+  {emoji:'🐟',size:16,speed:0.8,points:10,color:'#ff6b6b'},
+  {emoji:'🐠',size:20,speed:1.0,points:20,color:'#ffa502'},
+  {emoji:'🐡',size:24,speed:0.5,points:30,color:'#a55eea'},
+  {emoji:'🦈',size:44,speed:1.5,points:80,color:'#576574'},
+  {emoji:'🐢',size:28,speed:0.4,points:40,color:'#2ed573'},
+  {emoji:'🐙',size:32,speed:0.6,points:50,color:'#e17055'},
+  {emoji:'🦀',size:18,speed:0.3,points:15,color:'#ff4757'},
+  {emoji:'🐳',size:60,speed:0.6,points:150,color:'#1e90ff',rare:true},
+];
+function spawnFish(){
+  if(fishes.length>12)return;
+  const typeIdx=Math.random()<0.05?7:Math.floor(Math.random()*7);
+  const t=FISH_TYPES[typeIdx];
+  const fromLeft=Math.random()>0.5;
+  const x=fromLeft?-t.size:W+t.size,vx=(fromLeft?1:-1)*t.speed*0.8;
+  const y=50+Math.random()*(H-150);
+  fishes.push({x,y,vx,vy:(Math.random()-0.5)*0.3,size:t.size,type:t,life:1,wiggle:0});
+}
+function shoot(tx,ty){
+  if(ammo<=0||gameover)return;
+  ammo--;document.getElementById('bullets').textContent=ammo;
+  const dx=tx-50,dy=ty,dist=Math.sqrt(dx*dx+dy*dy);
+  bullets.push({x:55,y:Math.min(ty,H-40),vx:dx/dist*10,vy:dy/dist*10,life:40});
+}
+function update(){
+  if(gameover)return;
+  frame++;
+  if(frame%40===0)spawnFish();
+  frame%10===0&&bubbles.push({x:Math.random()*W,y:H+10,size:2+Math.random()*6,speed:0.5+Math.random()});
+  for(let i=bubbles.length-1;i>=0;i--){bubbles[i].y-=bubbles[i].speed;if(bubbles[i].y<-10)bubbles.splice(i,1)}
+  for(let i=bullets.length-1;i>=0;i--){
+    bullets[i].x+=bullets[i].vx;bullets[i].y+=bullets[i].vy;bullets[i].life--;
+    if(bullets[i].life<=0||bullets[i].x<0||bullets[i].x>W||bullets[i].y<0||bullets[i].y>H){bullets.splice(i,1);continue}
+    for(let j=fishes.length-1;j>=0;j--){
+      const f=fishes[j],dx=bullets[i].x-f.x,dy=bullets[i].y-f.y;
+      if(Math.sqrt(dx*dx+dy*dy)<f.size+6){
+        f.life-=0.34;bullets.splice(i,1);
+        if(f.life<=0){score+=f.type.points;document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('fish_best',best)}catch(e){}}fishes.splice(j,1)}
+        break;
+      }
+    }
+  }
+  fishes.forEach(f=>{
+    f.x+=f.vx;f.y+=f.vy+Math.sin(f.wiggle)*1.2;f.wiggle+=0.05;
+    if(f.x<-f.size*2||f.x>W+f.size*2)fishes.splice(fishes.indexOf(f),1);
+    f.y=Math.max(30,Math.min(H-40,f.y));
+  });
+  if(ammo<=0&&bullets.length===0)endGame();
+}
+function endGame(){
+  gameover=true;
+  ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.font='bold 28px sans-serif';ctx.textAlign='center';
+  ctx.fillText('弹药耗尽!',W/2,H/2-15);
+  ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  点击重新开始`,W/2,H/2+20);
+}
+function draw(){
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'#0077b6');grad.addColorStop(0.3,'#023e8a');grad.addColorStop(1,'#001845');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=1;
+  for(let y=(frame%40)*4;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+  bubbles.forEach(b=>{ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(b.x,b.y,b.size,0,Math.PI*2);ctx.stroke()});
+  fishes.forEach(f=>{
+    const dir=f.vx>0?1:-1;
+    ctx.save();ctx.translate(f.x,f.y);ctx.scale(dir,1);
+    ctx.font=`${f.size*1.4}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(f.type.emoji,0,0);
+    ctx.font='9px sans-serif';ctx.fillStyle='#fff';ctx.fillText(f.type.points,0,f.size*0.3);
+    ctx.restore();
+    if(f.type.rare){ctx.strokeStyle='#ffd700';ctx.lineWidth=2;ctx.setLineDash([3,3]);ctx.beginPath();ctx.roundRect(f.x-f.size,f.y-f.size*0.8,f.size*2,f.size*1.6,8);ctx.stroke();ctx.setLineDash([])}
+  });
+  bullets.forEach(b=>{ctx.fillStyle='#ffdd59';ctx.shadowColor='#ffdd59';ctx.shadowBlur=6;ctx.beginPath();ctx.arc(b.x,b.y,4,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(b.x-1,b.y-1,2,0,Math.PI*2);ctx.fill()});
+  ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(0,0,W,50);
+  ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText(`🐠 捕鱼达人`,W/2,22);
+}
+c.addEventListener('click',e=>{
+  if(gameover){restart();return}
+  const rect=c.getBoundingClientRect();
+  shoot(e.clientX-rect.left,e.clientY-rect.top);
+});
+c.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  if(gameover){restart();return}
+  const rect=c.getBoundingClientRect();
+  for(const t of e.touches)shoot(t.clientX-rect.left,t.clientY-rect.top);
+});
+function restart(){fishes=[];bullets=[];score=0;ammo=50;frame=0;gameover=false;document.getElementById('score').textContent='0';document.getElementById('bullets').textContent='50'}
+function loop(){update();if(!gameover)draw();requestAnimationFrame(loop)}
+loop();
+</script>
+</body>
+</html>
