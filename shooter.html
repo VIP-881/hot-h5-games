@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎯 一秒神枪手 - 热门H5游戏</title>
+<meta name="description" content="一秒神枪手H5小游戏，快速反应点击出现在屏幕上的目标靶子，测试并提升你的反应速度和精准度，免费在线竞技游戏">
+<meta property="og:title" content="🎯 一秒神枪手 - 热门H5游戏">
+<meta property="og:description" content="快速反应射击，点击出现的靶子">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"一秒神枪手","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none;cursor:crosshair}
+h1{font-size:1.8em;margin:4px 0;color:#ff4757}
+.stats{display:flex;gap:12px;margin:6px 0 8px}
+.stats span{background:rgba(255,255,255,0.1);padding:5px 14px;border-radius:20px;font-size:0.95em}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(255,71,87,0.15)}
+</style>
+</head>
+<body>
+<h1>🎯 一秒神枪手</h1>
+<div class="stats"><span>🎯 <b id="hits">0</b></span><span>⚡ <b id="avgTime">--</b>ms</span><span>🏆 <b id="best">--</b>ms</span></div>
+<canvas id="c" width="380" height="480"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=380,H=480;
+let target=null,startTime=0,hits=0,reactionTimes=[],bestRT,state='idle',timeoutId,showing=0,misses=0,maxMisses=10;
+try{bestRT=parseInt(localStorage.getItem('shooter_best'))||0;document.getElementById('best').textContent=bestRT?`${bestRT}ms`:'--ms'}catch(e){}
+
+function showTarget(){
+  const r=15+Math.random()*25;
+  target={x:40+Math.random()*(W-80),y:60+Math.random()*(H-120),r,life:Math.max(30,80-hits*3),maxLife:Math.max(30,80-hits*3)};
+  startTime=Date.now();showing=Date.now();
+}
+function startRound(){
+  if(state==='over')return;
+  state='waiting';
+  const delay=400+Math.random()*1200;
+  timeoutId=setTimeout(()=>{showTarget();state='active'},delay);
+}
+function update(){
+  if(state==='active'&&target){
+    target.life--;
+    if(target.life<=0){misses++;document.getElementById('missesDisplay').textContent=misses;clearTimeout(timeoutId);state='idle';target=null;if(misses>=maxMisses)endGame();else startRound()}
+  }
+}
+function endGame(){
+  state='over';
+  ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';
+  ctx.fillText('GAME OVER',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`命中 ${hits} · 点击重新开始`,W/2,H/2+20);
+}
+function draw(){
+  ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=1;ctx.strokeRect(4,4,W-8,H-8);
+  if(target){
+    const alpha=target.life/target.maxLife;
+    ctx.fillStyle=`rgba(255,0,0,${0.3+alpha*0.3})`;
+    ctx.shadowColor=`rgba(255,0,0,${alpha})`;ctx.shadowBlur=15+alpha*10;
+    ctx.beginPath();ctx.arc(target.x,target.y,target.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+    for(let i=0;i<3;i++){ctx.strokeStyle=`rgba(255,255,255,${alpha*0.5})`;ctx.lineWidth=1;ctx.beginPath();ctx.arc(target.x,target.y,target.r+i*8,0,Math.PI*2);ctx.setLineDash([2,4]);ctx.stroke();ctx.setLineDash([])}
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(target.x,target.y,target.r*0.2,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=`rgba(255,0,0,${alpha})`;ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(target.x,target.y-target.r);ctx.lineTo(target.x,target.y-target.r-10);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(target.x,target.y+target.r);ctx.lineTo(target.x,target.y+target.r+10);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(target.x-target.r,target.y);ctx.lineTo(target.x-target.r-10,target.y);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(target.x+target.r,target.y);ctx.lineTo(target.x+target.r+10,target.y);ctx.stroke();
+  }
+  if(state==='idle'){ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='16px sans-serif';ctx.textAlign='center';ctx.fillText('等待目标出现...',W/2,H/2)}
+}
+c.addEventListener('click',e=>{
+  if(state==='over'){restart();return}
+  if(state==='active'&&target){
+    const r=c.getBoundingClientRect();
+    const x=e.clientX-r.left,y=e.clientY-r.top;
+    const dx=x-target.x,dy=y-target.y,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<target.r+10){
+      const rt=Date.now()-startTime;hits++;
+      reactionTimes.push(rt);
+      document.getElementById('hits').textContent=hits;
+      const avg=Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length);
+      document.getElementById('avgTime').textContent=`${avg}ms`;
+      if(!bestRT||rt<bestRT){bestRT=rt;document.getElementById('best').textContent=`${rt}ms`;try{localStorage.setItem('shooter_best',bestRT)}catch(e){}}
+      clearTimeout(timeoutId);state='idle';target=null;startRound();
+      return;
+    }
+  }
+  if(state==='waiting'){misses++;if(misses>=maxMisses)endGame()}
+});
+function restart(){hits=0;reactionTimes=[];misses=0;state='idle';target=null;document.getElementById('hits').textContent='0';document.getElementById('avgTime').textContent='--ms';startRound()}
+function loop(){update();draw();requestAnimationFrame(loop)}
+restart();loop();
+</script>
+</body>
+</html>
