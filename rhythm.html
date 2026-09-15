@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎵 节奏大师 - 热门H5游戏</title>
+<meta name="description" content="音乐节奏点击游戏，跟随节拍点击落下的音符方块，挑战你的反应力">
+<meta property="og:title" content="🎵 节奏大师 - 热门H5游戏">
+<meta property="og:description" content="音乐节奏游戏，跟随节拍点击音符方块">
+<meta property="og:type" content="website">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"节奏大师","description":"音乐节奏点击游戏","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none;overflow:hidden}
+h1{font-size:1.6em;margin:4px 0;background:linear-gradient(135deg,#f093fb,#f5576c,#fda085);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 30px rgba(255,100,150,0.2)}
+.stats{display:flex;gap:16px;margin:6px 0;z-index:10}
+.stats span{background:rgba(255,255,255,0.1);padding:5px 14px;border-radius:20px;font-size:0.95em}
+</style>
+</head>
+<body>
+<h1>🎵 节奏大师</h1>
+<div class="stats"><span>⭐ <b id="score">0</b></span><span>🔥 <b id="combo">0</b></span><span>🎯 <b id="accuracy">--</b>%</span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="520"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=360,H=520,COLS=4,COL_W=W/COLS,HIT_Y=H-100;
+let notes=[],score=0,combo=0,maxCombo=0,accuracy=0,totalHits=0,goodHits=0,best=0,speed=3,state='idle',beat=0,effects=[],bpm=120,misses=0;
+try{best=parseInt(localStorage.getItem('rhythm_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function spawnNote(){
+  const col=Math.floor(Math.random()*COLS);
+  notes.push({col,x:col*COL_W+COL_W/2,y:-30,w:COL_W-12,hit:false,missed:false,speed});
+}
+function update(){
+  if(state!=='playing')return;
+  beat+=0.016;
+  if(beat>60/bpm/1.3){beat=0;spawnNote()}
+  if(Math.random()<0.03)spawnNote();
+  for(let i=notes.length-1;i>=0;i--){
+    notes[i].y+=notes[i].speed;
+    if(notes[i].y>HIT_Y+50&&!notes[i].hit&&!notes[i].missed){notes[i].missed=true;misses++;combo=0;document.getElementById('combo').textContent='0';totalHits++;updateAccuracy()}
+    if(notes[i].y>H+50){notes.splice(i,1);if(!notes[i]?.hit&&!notes[i]?.missed){combo=0;document.getElementById('combo').textContent='0'}}
+    speed=3+score/50;
+  }
+  for(let i=effects.length-1;i>=0;i--){effects[i].life--;effects[i].y-=2;if(effects[i].life<=0)effects.splice(i,1)}
+  if(misses>=10)endGame();
+}
+function endGame(){
+  state='over';
+  if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('rhythm_best',best)}catch(e){}}
+  ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';
+  ctx.fillText('演奏结束!',W/2,H/2-20);
+  ctx.font='16px sans-serif';
+  ctx.fillText(`得分: ${score}  最大连击: ${maxCombo}`,W/2,H/2+10);
+  ctx.fillText(`精准度: ${Math.round(goodHits/totalHits*100)||0}%  点击重来`,W/2,H/2+35);
+}
+function updateAccuracy(){
+  if(totalHits>0){accuracy=Math.round(goodHits/totalHits*100);document.getElementById('accuracy').textContent=accuracy}
+}
+function draw(){
+  ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);
+  for(let x=0;x<COLS;x++){ctx.fillStyle='rgba(255,255,255,0.03)';ctx.fillRect(x*COL_W+6,0,COL_W-12,H)}
+  ctx.strokeStyle='#fff';ctx.lineWidth=4;ctx.shadowColor='#fff';ctx.shadowBlur=15;
+  ctx.beginPath();ctx.moveTo(0,HIT_Y);ctx.lineTo(W,HIT_Y);ctx.stroke();ctx.shadowBlur=0;
+  ctx.fillStyle='rgba(255,255,255,0.05)';ctx.fillRect(0,HIT_Y-25,W,50);
+  notes.forEach(n=>{
+    if(n.hit||n.missed)return;
+    const dist=Math.abs(n.y-HIT_Y)/40;
+    const alpha=1-Math.min(1,dist);
+    const hue=(n.col*90+score*3)%360;
+    ctx.fillStyle=`hsla(${hue},70%,60%,${0.6+alpha*0.4})`;
+    ctx.shadowColor=`hsla(${hue},70%,60%,${alpha})`;ctx.shadowBlur=10+alpha*10;
+    ctx.beginPath();ctx.roundRect(n.x-n.w/2,n.y-18,n.w,36,8);ctx.fill();
+    ctx.shadowBlur=0;
+  });
+  effects.forEach(e=>{
+    ctx.fillStyle=`rgba(255,255,255,${e.life/20})`;ctx.font='bold 16px sans-serif';ctx.textAlign='center';
+    ctx.fillText(e.text,e.x,e.y);
+  });
+  if(state==='idle'){
+    ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#fff';ctx.font='bold 22px sans-serif';ctx.textAlign='center';
+    ctx.fillText('🎵 节奏大师',W/2,H/2-10);
+    ctx.font='14px sans-serif';ctx.fillText('点击屏幕开始',W/2,H/2+20);
+  }
+}
+function tap(x){
+  const col=Math.floor(x/COL_W);
+  let hit=false;
+  for(const n of notes){
+    if(n.hit||n.missed||n.col!==col)continue;
+    const dist=Math.abs(n.y-HIT_Y);
+    if(dist<40){n.hit=true;hit=true;
+      const pts=dist<15?30:dist<25?20:10;
+      score+=pts*(1+Math.floor(combo/10));combo++;maxCombo=Math.max(maxCombo,combo);
+      document.getElementById('score').textContent=score;
+      document.getElementById('combo').textContent=combo;
+      goodHits++;totalHits++;updateAccuracy();
+      effects.push({x:n.x,y:HIT_Y-40,life:20,text:dist<15?'PERFECT':dist<25?'GREAT':'GOOD'});
+      break;
+    }
+  }
+  if(!hit){combo=0;document.getElementById('combo').textContent='0'}
+}
+c.addEventListener('click',e=>{
+  if(state==='over'){restart();return}
+  if(state==='idle'){state='playing';beat=0;return}
+  const rect=c.getBoundingClientRect();tap(e.clientX-rect.left);
+});
+c.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  if(state==='over'){restart();return}
+  if(state==='idle'){state='playing';beat=0;return}
+  const rect=c.getBoundingClientRect();
+  for(const t of e.touches)tap(t.clientX-rect.left);
+});
+function restart(){
+  notes=[];effects=[];score=0;combo=0;maxCombo=0;totalHits=0;goodHits=0;misses=0;accuracy=0;speed=3;state='playing';beat=0;
+  document.getElementById('score').textContent='0';document.getElementById('combo').textContent='0';document.getElementById('accuracy').textContent='--';
+}
+function loop(){update();draw();requestAnimationFrame(loop)}
+loop();
+</script>
+</body>
+</html>
