@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🧮 数独 - 热门H5游戏</title>
+<meta name="description" content="经典数独游戏，多种难度，免费在线挑战">
+<meta property="og:title" content="🧮 数独 - 热门H5游戏">
+<meta property="og:description" content="经典9×9数独，简单/中等/困难三种难度">
+<meta property="og:type" content="website">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"数独","description":"经典数独谜题游戏","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+h1{font-size:1.8em;margin:4px 0 8px}
+.stats{display:flex;gap:12px;margin:6px 0}
+.stats span,.diff-btn{padding:6px 14px;border-radius:20px;font-size:0.9em;cursor:pointer;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);transition:all 0.2s}
+.diff-btn.active{background:rgba(100,150,255,0.3);border-color:#6af}
+.diff-btn:hover{background:rgba(255,255,255,0.15)}
+.grid{display:grid;grid-template-columns:repeat(9,38px);grid-template-rows:repeat(9,38px);gap:1px;background:rgba(255,255,255,0.15);padding:2px;border-radius:8px;margin:10px 0}
+.cell{width:38px;height:38px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;font-size:1.1em;font-weight:600;cursor:pointer;transition:background 0.15s}
+.cell:nth-child(3n){border-right:2px solid rgba(255,255,255,0.3)}
+.cell:nth-child(9n+1){border-left:2px solid rgba(255,255,255,0.3)}
+.cell:nth-child(-n+27),.cell:nth-child(n+55):nth-child(-n+81){border-bottom:2px solid rgba(255,255,255,0.3)}
+.cell:nth-child(n+28):nth-child(-n+54){border-bottom:2px solid rgba(255,255,255,0.3)}
+.cell.given{color:#aaa}
+.cell.selected{background:rgba(100,150,255,0.3)}
+.cell.error{color:#ff4757}
+.cell.same-num{background:rgba(100,150,255,0.15)}
+.numpad{display:flex;gap:6px;margin-top:8px}
+.numpad button{width:38px;height:38px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:1.1em;cursor:pointer;transition:all 0.15s}
+.numpad button:hover{background:rgba(100,150,255,0.3)}
+.numpad button.erase{background:rgba(255,71,87,0.2);border-color:#ff4757}
+</style>
+</head>
+<body>
+<h1>🧮 数独</h1>
+<div style="display:flex;gap:8px;margin-bottom:4px">
+  <button class="diff-btn active" onclick="setDiff('easy')">简单</button>
+  <button class="diff-btn" onclick="setDiff('medium')">中等</button>
+  <button class="diff-btn" onclick="setDiff('hard')">困难</button>
+</div>
+<div class="stats">
+  <span>⏱ <b id="timer">00:00</b></span>
+  <span>🏆 <b id="best">--</b></span>
+  <button style="padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);color:#fff;cursor:pointer" onclick="newGame()">🔄 新游戏</button>
+</div>
+<div class="grid" id="grid"></div>
+<div class="numpad">
+  <button onclick="inputNum(1)">1</button><button onclick="inputNum(2)">2</button><button onclick="inputNum(3)">3</button>
+  <button onclick="inputNum(4)">4</button><button onclick="inputNum(5)">5</button><button onclick="inputNum(6)">6</button>
+  <button onclick="inputNum(7)">7</button><button onclick="inputNum(8)">8</button><button onclick="inputNum(9)">9</button>
+  <button class="erase" onclick="inputNum(0)">✕</button>
+</div>
+<script>
+let puzzle=[],solution=[],given=[],selected=null,timerInterval,seconds=0,isComplete=false,diff='easy';
+const DIFFS={easy:40,medium:30,hard:22};
+
+function generate(){
+  const g=Array(9).fill().map(()=>Array(9).fill(0));
+  fill(g);solution=g.map(r=>[...r]);
+  const cells=[];for(let r=0;r<9;r++)for(let c=0;c<9;c++)cells.push([r,c]);
+  for(let i=cells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cells[i],cells[j]]=[cells[j],cells[i]]}
+  const removeCount=81-DIFFS[diff];
+  puzzle=g.map(r=>[...r]);given=Array(9).fill().map(()=>Array(9).fill(false));
+  for(let i=0;i<removeCount;i++){const[r,c]=cells[i];puzzle[r][c]=0}
+  cells.slice(removeCount).forEach(([r,c])=>given[r][c]=true);
+}
+function fill(board){
+  for(let r=0;r<9;r++)for(let c=0;c<9;c++){if(board[r][c]===0){
+    const nums=[1,2,3,4,5,6,7,8,9];
+    for(let i=nums.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[nums[i],nums[j]]=[nums[j],nums[i]]}
+    for(const n of nums){if(isValid(board,r,c,n)){board[r][c]=n;if(fill(board))return true;board[r][c]=0}}
+    return false;
+  }}return true;
+}
+function isValid(board,r,c,n){
+  for(let i=0;i<9;i++){if(board[r][i]===n||board[i][c]===n)return false}
+  const sr=Math.floor(r/3)*3,sc=Math.floor(c/3)*3;
+  for(let i=0;i<3;i++)for(let j=0;j<3;j++){if(board[sr+i][sc+j]===n)return false}
+  return true;
+}
+function render(){
+  const g=document.getElementById('grid');g.innerHTML='';
+  for(let r=0;r<9;r++)for(let c=0;c<9;c++){
+    const el=document.createElement('div');el.className='cell';
+    if(given[r][c])el.classList.add('given');
+    if(selected&&selected[0]===r&&selected[1]===c)el.classList.add('selected');
+    if(selected&&puzzle[r][c]!==0&&puzzle[r][c]===puzzle[selected[0]][selected[1]]&&(r!==selected[0]||c!==selected[1]))el.classList.add('same-num');
+    if(puzzle[r][c]!==0&&!given[r][c]&&puzzle[r][c]!==solution[r][c])el.classList.add('error');
+    el.textContent=puzzle[r][c]||'';
+    el.addEventListener('click',()=>{selected=[r,c];render()});
+    g.appendChild(el);
+  }
+}
+function inputNum(n){
+  if(!selected||isComplete)return;
+  const[r,c]=selected;
+  if(given[r][c])return;
+  puzzle[r][c]=n;
+  if(!timerInterval){startTimer()}
+  if(checkComplete()){isComplete=true;clearInterval(timerInterval);const t=document.getElementById('timer').textContent;const bestKey=`sudoku_${diff}_best`;const old=parseInt(localStorage.getItem(bestKey)||'0');if(!old||seconds<old){try{localStorage.setItem(bestKey,seconds)}catch(e){};document.getElementById('best').textContent=t}setTimeout(()=>alert('🎉 完成了!'),100)}
+  render();
+}
+function checkComplete(){for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(puzzle[r][c]!==solution[r][c])return false;return true}
+function startTimer(){seconds=0;timerInterval=setInterval(()=>{seconds++;const m=Math.floor(seconds/60).toString().padStart(2,'0');const s=(seconds%60).toString().padStart(2,'0');document.getElementById('timer').textContent=`${m}:${s}`},1000)}
+function setDiff(d){diff=d;document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');newGame()}
+function newGame(){clearInterval(timerInterval);timerInterval=null;seconds=0;isComplete=false;selected=null;document.getElementById('timer').textContent='00:00';const bestKey=`sudoku_${diff}_best`;const b=parseInt(localStorage.getItem(bestKey)||'0');document.getElementById('best').textContent=b?`${Math.floor(b/60).toString().padStart(2,'0')}:${(b%60).toString().padStart(2,'0')}`:'--';generate();render()}
+newGame();
+</script>
+</body>
+</html>
