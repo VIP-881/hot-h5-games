@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🏀 投篮大挑战</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
+h1{font-size:1.6em;margin-bottom:4px}
+.stats{display:flex;gap:16px;margin:6px 0 10px}
+.stats span{background:rgba(255,255,255,0.12);padding:5px 14px;border-radius:20px;font-size:0.95em}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(255,100,50,0.15)}
+.hint{color:#aaa;font-size:0.85em;margin-top:6px}
+</style>
+</head>
+<body>
+<h1>🏀 投篮大挑战</h1>
+<div class="stats"><span>⭐ <b id="score">0</b></span><span>🏀 <b id="balls">5</b></span><span>🔥 <b id="streak">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="500"></canvas>
+<div class="hint">👆 向上滑动投篮，速度决定力度</div>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=360,H=500,G=0.35;
+let hoop={x:W/2,y:180,w:70,h:12},ball={x:W/2-10,y:H-80,w:22,h:22,vx:0,vy:0},score=0,balls=5,best=0,streak=0,flying=false,swipe=false,sy=0,ty=0;
+try{best=parseInt(localStorage.getItem('hoop_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function resetBall(){
+  ball.x=W/2-11;ball.y=H-80;ball.vx=0;ball.vy=0;flying=false;hoop.x=W/2-hoop.w/2+(Math.random()*2-1)*hoop.w;
+}
+function shoot(power){
+  if(flying||balls<=0)return;
+  ball.vx=(power*0.08)*(0.8+Math.random()*0.4);
+  ball.vy=-power*0.9;
+  flying=true;balls--;
+  document.getElementById('balls').textContent=balls;
+}
+function update(){
+  if(!flying)return;
+  ball.x+=ball.vx;ball.y+=ball.vy;ball.vy+=G;
+  if(ball.y+ball.h>=hoop.y&&ball.y<=hoop.y+hoop.h&&ball.x+ball.w>hoop.x&&ball.x<hoop.x+hoop.w&&ball.vy>0){
+    score+=10+streak*5;streak++;
+    document.getElementById('score').textContent=score;
+    document.getElementById('streak').textContent=streak;
+    if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('hoop_best',best)}catch(e){}}
+    resetBall();
+    if(streak>=3)hoop.x=W/2-hoop.w/2+(Math.random()*1.6-0.8)*hoop.w;
+    if(balls<=0)endGame();
+  }
+  if(ball.y>H+30){streak=0;document.getElementById('streak').textContent='0';resetBall();if(balls<=0)endGame()}
+}
+function endGame(){
+  ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.font='bold 28px sans-serif';ctx.textAlign='center';
+  ctx.fillText('GAME OVER',W/2,H/2-20);
+  ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  点击重新开始`,W/2,H/2+15);
+}
+function draw(){
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#333';ctx.fillRect(0,H-40,W,40);
+  ctx.fillStyle='#555';ctx.fillRect(0,H-42,W,4);
+  ctx.beginPath();ctx.arc(0,H-40,100,0,Math.PI*0.5);ctx.fillStyle='#333';ctx.fill();
+  const g=ctx.createLinearGradient(hoop.x,hoop.y,hoop.x+hoop.w,hoop.y);
+  g.addColorStop(0,'#ff6347');g.addColorStop(1,'#ff4500');
+  ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(hoop.x,hoop.y,hoop.w,hoop.h,3);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(hoop.x,hoop.y+hoop.h,hoop.w,2);
+  ctx.strokeStyle='#888';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(hoop.x,hoop.y+hoop.h);ctx.lineTo(hoop.x-8,hoop.y+hoop.h+30);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(hoop.x+hoop.w,hoop.y+hoop.h);ctx.lineTo(hoop.x+hoop.w+8,hoop.y+hoop.h+30);ctx.stroke();
+  ctx.fillStyle='#ff8c00';ctx.beginPath();ctx.arc(ball.x+ball.w/2,ball.y+ball.h/2,ball.w/2,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.beginPath();ctx.arc(ball.x+ball.w/2,ball.y+ball.h/2,ball.w/2,0,Math.PI*2);ctx.stroke();
+  ctx.strokeStyle='#000';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.arc(ball.x+ball.w/2,ball.y+ball.h/2-1,ball.w/3,0,Math.PI);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ball.x+ball.w/2,ball.y+ball.h/2-1);ctx.lineTo(ball.x+ball.w/2,ball.y+ball.h/2+1);ctx.stroke();
+  if(swipe&&!flying){
+    const dy=Math.min(Math.abs(ty-sy),120);
+    ctx.strokeStyle=`rgba(255,255,255,${dy/120})`;ctx.lineWidth=3;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(ball.x+ball.w/2,ball.y);ctx.lineTo(ball.x+ball.w/2,ball.y-dy*1.5);ctx.stroke();
+  }
+}
+c.addEventListener('touchstart',e=>{e.preventDefault();if(!flying&&balls>0){swipe=true;sy=e.touches[0].clientY;ty=sy}});
+c.addEventListener('touchmove',e=>{e.preventDefault();if(swipe){ty=e.touches[0].clientY;const dy=sy-ty;if(dy>20)shoot(Math.min(dy,160))}});
+c.addEventListener('touchend',e=>{if(swipe&&!flying){const dy=sy-ty;if(dy>20)shoot(Math.min(dy,160));swipe=false}});
+c.addEventListener('mousedown',e=>{if(!flying&&balls>0){swipe=true;sy=e.clientY;ty=sy}});
+c.addEventListener('mousemove',e=>{if(swipe){ty=e.clientY;const dy=sy-ty;if(dy>20)shoot(Math.min(dy,160))}});
+c.addEventListener('mouseup',e=>{if(swipe&&!flying){const dy=sy-ty;if(dy>20)shoot(Math.min(dy,160));swipe=false}});
+c.addEventListener('click',e=>{if(balls<=0&&!flying)restart()});
+function restart(){score=0;balls=5;streak=0;flying=false;resetBall();document.getElementById('score').textContent='0';document.getElementById('balls').textContent='5';document.getElementById('streak').textContent='0';hoop.x=W/2-hoop.w/2}
+function loop(){update();draw();requestAnimationFrame(loop)}
+restart();loop();
+</script>
+</body>
+</html>
