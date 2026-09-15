@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎪 接水滴 - 热门H5游戏</title>
+<meta name="description" content="接水滴休闲反应游戏，左右移动水桶接住从天而降的水滴，避开毒液滴保持水桶清洁免费在线">
+<meta property="og:title" content="🎪 接水滴 - 热门H5游戏"><meta property="og:description" content="移动水桶接水滴避毒液"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"接水滴","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#74b9ff,#0984e3);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:20px;font-size:0.9em;font-weight:600}canvas{display:block;border-radius:12px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🎪 接水滴</h1>
+<div class="stats"><span>💧 <b id="score">0</b></span><span>❤️ <b id="lives">5</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="540"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=540;
+let bucket={x:W/2-30,y:H-50,w:60,h:20},drops=[],score=0,lives=5,best=0,frame=0,gameover=false;
+try{best=parseInt(localStorage.getItem('water_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function spawn(){const good=Math.random()>0.15;drops.push({x:20+Math.random()*(W-40),y:-10,r:good?6:10,good,speed:2+Math.random()*3,color:good?'#3498db':'#9b59b6'})}
+function update(){if(gameover)return;frame++;if(frame%Math.max(8,25-score*0.3)===0)spawn();
+  for(let i=drops.length-1;i>=0;i--){drops[i].y+=drops[i].speed;if(drops[i].y>H+20){drops.splice(i,1);if(drops[i]?.good)lives--;document.getElementById('lives').textContent=lives;if(lives<=0)endGame()}}
+  for(let i=drops.length-1;i>=0;i--){const d=drops[i];if(d.y+d.r>bucket.y&&d.y< H&&d.x>bucket.x&&d.x<bucket.x+bucket.w){if(d.good){score+=10;document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('water_best',best)}catch(e){}}}else{lives--;document.getElementById('lives').textContent=lives;if(lives<=0)endGame()}drops.splice(i,1)}}
+}
+function endGame(){gameover=true;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('💧 水桶漏了!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  点击重来`,W/2,H/2+20)}
+function draw(){
+  ctx.fillStyle='#74b9ff';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<15;i++){ctx.fillStyle=`rgba(255,255,255,${0.1+Math.random()*0.15})`;ctx.beginPath();ctx.arc(Math.random()*W,Math.random()*H,3+Math.random()*8,0,Math.PI*2);ctx.fill()}
+  drops.forEach(d=>{ctx.fillStyle=d.color;ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();ctx.arc(d.x-2,d.y-2,d.r*0.3,0,Math.PI*2);ctx.fill()});
+  ctx.fillStyle='#DEB887';ctx.fillRect(bucket.x,bucket.y-5,bucket.w,bucket.h+5);ctx.fillStyle='#654321';ctx.fillRect(bucket.x+2,bucket.y-8,bucket.w-4,6);ctx.fillStyle='rgba(52,152,219,0.3)';ctx.fillRect(bucket.x+5,bucket.y-12,bucket.w-10,12);
+  ctx.fillStyle='#fff';ctx.font='18px sans-serif';ctx.textAlign='center';ctx.fillText(`💧${score}`,W/2,30);
+}
+c.addEventListener('mousemove',e=>{bucket.x=Math.max(5,Math.min(W-bucket.w-5,e.clientX-c.getBoundingClientRect().left-bucket.w/2))});
+c.addEventListener('touchmove',e=>{e.preventDefault();bucket.x=Math.max(5,Math.min(W-bucket.w-5,e.touches[0].clientX-c.getBoundingClientRect().left-bucket.w/2))},{passive:false});
+c.addEventListener('click',()=>{if(gameover)restart()});
+function restart(){score=0;lives=5;drops=[];frame=0;gameover=false;document.getElementById('score').textContent='0';document.getElementById('lives').textContent='5'}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
