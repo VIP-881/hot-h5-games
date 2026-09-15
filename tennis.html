@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎾 网球对战 - 热门H5游戏</title>
+<meta name="description" content="网球对战H5体育游戏，滑动控制球拍击球得分，AI对手会移动防守，免费在线网球竞技">
+<meta property="og:title" content="🎾 网球对战 - 热门H5游戏">
+<meta property="og:description" content="滑动球拍击球，与AI网球对战">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"网球对战","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#2d5016;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:8px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🎾 网球对战</h1>
+<div class="stats"><span>👤 <b id="ps">0</b></span><span>🤖 <b id="as">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="500"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=500;
+let ball={x:W/2,y:H/2,vx:3,vy:-4,r:7},player={x:W/2,y:H-40,w:70},ai={x:W/2,y:40,w:60},ps=0,as=0,best=0,serving=true,winScore=7;
+try{best=parseInt(localStorage.getItem('tennis_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function reset(){ball={x:W/2,y:H/2,vx:(Math.random()>.5?1:-1)*3,vy:(Math.random()>.5?1:-1)*4,r:7};serving=true}
+function update(){
+  if(serving)return;
+  ball.x+=ball.vx;ball.y+=ball.vy;
+  if(ball.x-ball.r<0||ball.x+ball.r>W)ball.vx*=-1;
+  if(ball.y+ball.r>H-20&&ball.x>player.x&&ball.x<player.x+player.w){ball.y=H-20-ball.r;ball.vy*=-1.02;ball.vx+=(ball.x-player.x-player.w/2)*0.15}
+  if(ball.y-ball.r<20&&ball.x>ai.x&&ball.x<ai.x+ai.w){ball.y=20+ball.r;ball.vy*=-1.02;ball.vx+=(ball.x-ai.x-ai.w/2)*0.15}
+  if(ball.y>H){as++;document.getElementById('as').textContent=as;checkSet()}
+  if(ball.y<0){ps++;document.getElementById('ps').textContent=ps;checkSet()}
+  let targetX=ball.x-ai.w/2;
+  if(ball.vy>0)targetX=W/2-ai.w/2;
+  else{ai.x+=(ball.x-ai.x-ai.w/2)*0.06}
+  ai.x=Math.max(0,Math.min(W-ai.w,ai.x))
+}
+function checkSet(){
+  if(ps>=winScore){const s=ps>as?1:0;if(s>best){best=s;document.getElementById('best').textContent=best;try{localStorage.setItem('tennis_best',best)}catch(e)}ps=0;as=0;document.getElementById('ps').textContent='0';document.getElementById('as').textContent='0'}else if(as>=winScore){endGame();return}
+  reset()
+}
+function endGame(){
+  ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';
+  ctx.fillText('YOU LOSE',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText('点击重新开始',W/2,H/2+20);
+}
+function draw(){
+  ctx.fillStyle='#2d5016';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.strokeRect(10,10,W-20,H-20);
+  ctx.setLineDash([3,6]);ctx.beginPath();ctx.moveTo(10,H/2);ctx.lineTo(W-10,H/2);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#fff';ctx.fillRect(player.x,player.y,player.w,8);ctx.fillRect(ai.x,ai.y,ai.w,8);
+  ctx.fillStyle='#e67e22';ctx.fillRect(ai.x+ai.w/2-4,ai.y-8,8,12);
+  ctx.strokeStyle='#666';ctx.lineWidth=1;ctx.strokeRect(ai.x,ai.y+2,ai.w,2);
+  ctx.fillStyle='#ff0';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#fff';ctx.stroke();
+  if(serving){ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText('点击开始发球',W/2,H/2+20)}
+}
+c.addEventListener('mousemove',e=>{player.x=Math.max(0,Math.min(W-player.w,e.clientX-c.getBoundingClientRect().left-player.w/2))});
+c.addEventListener('touchmove',e=>{e.preventDefault();player.x=Math.max(0,Math.min(W-player.w,e.touches[0].clientX-c.getBoundingClientRect().left-player.w/2))},{passive:false});
+c.addEventListener('click',()=>{if(serving)serving=false;if(as>=winScore){ps=0;as=0;document.getElementById('ps').textContent='0';document.getElementById('as').textContent='0';reset()}});
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
