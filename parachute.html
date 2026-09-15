@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎪 高空跳伞 - 热门H5游戏</title>
+<meta name="description" content="高空跳伞冒险游戏，控制跳伞者左右移动穿过云层圈圈收集金币避开障碍物安全着陆免费在线">
+<meta property="og:title" content="🎪 高空跳伞 - 热门H5游戏"><meta property="og:description" content="左右移动穿过圈圈跳伞着陆"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"高空跳伞"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#74b9ff,#a8e6cf);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.25);padding:4px 12px;border-radius:20px;font-size:0.9em;font-weight:600}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🎪 高空跳伞</h1>
+<div class="stats"><span>🪂 <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="540"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=540;
+let diver={x:W/2,y:0},rings=[],score=0,best=0,gameover=false,frame=0;
+try{best=parseInt(localStorage.getItem('parachute_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function spawnRing(){const x=60+Math.random()*(W-120);rings.push({x,y:-30,r:25+Math.random()*15,pts:10,passed:false})}
+function update(){if(gameover)return;frame++;diver.y+=2;
+  if(frame%40===0)spawnRing();
+  for(let i=rings.length-1;i>=0;i--){rings[i].y+=2;if(rings[i].y>H+30)rings.splice(i,1)}
+  for(const r of rings){if(!r.passed&&Math.sqrt((diver.x-r.x)**2+(diver.y-r.y)**2)<r.r){r.passed=true;score+=r.pts;document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('parachute_best',best)}catch(e)}}}
+  if(diver.y>H-30){gameover=true;ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 24px sans-serif';ctx.textAlign='center';ctx.fillText('安全着陆!',W/2,H/2-10);ctx.font='14px sans-serif';ctx.fillText(`得分: ${score}  点击重来`,W/2,H/2+20)}
+}
+function draw(){
+  ctx.fillStyle='#74b9ff';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<15;i++){ctx.fillStyle=`rgba(255,255,255,${0.1+Math.random()*0.2})`;ctx.beginPath();ctx.arc(Math.random()*W,Math.random()*H,10+Math.random()*20,0,Math.PI*2);ctx.fill()}
+  rings.forEach(r=>{ctx.strokeStyle=r.passed?'rgba(255,215,0,0.3)':'rgba(255,255,255,0.6)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(r.x,r.y,r.r,0,Math.PI*2);ctx.stroke();if(!r.passed)ctx.fillStyle='rgba(255,255,255,0.1)',ctx.fill()});
+  ctx.fillStyle='#DEB887';ctx.beginPath();ctx.arc(diver.x,diver.y,12,0,Math.PI*2);ctx.fill();ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.arc(diver.x-4,diver.y-4,3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(diver.x+4,diver.y-4,3,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(diver.x,diver.y+12);ctx.lineTo(diver.x-15,diver.y+30);ctx.lineTo(diver.x+15,diver.y+30);ctx.fill();ctx.fillStyle='#f00';ctx.fillRect(diver.x-14,diver.y+28,28,3);
+  ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='20px sans-serif';ctx.textAlign='center';ctx.fillText(`🪂 ${score}`,W/2,30);
+}
+c.addEventListener('mousemove',e=>{diver.x=e.clientX-c.getBoundingClientRect().left});
+c.addEventListener('touchmove',e=>{e.preventDefault();diver.x=e.touches[0].clientX-c.getBoundingClientRect().left},{passive:false});
+c.addEventListener('click',()=>{if(gameover)restart()});
+function restart(){diver.x=W/2;diver.y=0;rings=[];score=0;frame=0;gameover=false;document.getElementById('score').textContent='0'}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
