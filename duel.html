@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🔫 西部决斗 - 热门H5游戏</title>
+<meta name="description" content="西部决斗反应速度游戏，倒计时后快速点击拔枪射击对手，比谁反应更快免费在线">
+<meta property="og:title" content="🔫 西部决斗 - 热门H5游戏"><meta property="og:description" content="倒计时后快速拔枪，西部牛仔对决"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"西部决斗","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#d4a574,#c19a6b);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#2d3436;user-select:none;-webkit-user-select:none}h1{font-size:1.8em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(0,0,0,0.1);padding:5px 14px;border-radius:20px;font-size:0.95em;font-weight:600}.duel{background:rgba(0,0,0,0.15);border-radius:16px;padding:30px;text-align:center;max-width:380px;width:95vw}.cowboy{font-size:5em;margin:10px 0}.timer{font-size:4em;font-weight:bold;color:#c0392b;min-height:100px;display:flex;align-items:center;justify-content:center}.btn{width:100%;padding:16px;border-radius:12px;font-size:1.2em;font-weight:bold;cursor:pointer;border:none;background:#c0392b;color:#fff;margin-top:8px;transition:all 0.15s}.btn:active{background:#e74c3c;transform:scale(0.97)}.result{font-size:1.2em;margin-top:8px;min-height:28px}</style>
+</head>
+<body>
+<h1>🔫 西部决斗</h1>
+<div class="stats"><span>🤠 <b id="wins">0</b></span><span>💀 <b id="loss">0</b></span><span>⚡ <b id="best">--</b></span></div>
+<div class="duel">
+  <div class="cowboy" id="cowboy">🤠</div>
+  <div class="timer" id="timer">准备</div>
+  <button class="btn" id="btn" onclick="action()">🤠 开始决斗</button>
+  <div class="result" id="result"></div>
+</div>
+<script>
+let state='idle',timerId,reactTime=0,wins=0,loss=0,bestRT;
+try{bestRT=parseInt(localStorage.getItem('duel_best'))||0;document.getElementById('best').textContent=bestRT?`${bestRT}ms`:'--ms'}catch(e){}
+function action(){
+  if(state==='idle'){state='waiting';document.getElementById('btn').textContent='等待...';document.getElementById('timer').textContent='🤠 ⚡ 🤠';document.getElementById('result').textContent='';const delay=1500+Math.random()*3000;
+    timerId=setTimeout(()=>{state='draw';document.getElementById('timer').textContent='🔫 FIRE!';document.getElementById('btn').textContent='快拔枪!';document.getElementById('cowboy').textContent='🔫';reactTime=Date.now()},delay)}
+  else if(state==='waiting'){clearTimeout(timerId);state='idle';loss++;document.getElementById('loss').textContent=loss;document.getElementById('btn').textContent='🤠 重新开始';document.getElementById('result').textContent='太早了! 对手还没拔枪'}}
+  else if(state==='draw'){const rt=Date.now()-reactTime;state='idle';if(rt<1000){wins++;document.getElementById('wins').textContent=wins;document.getElementById('result').textContent=`⚡ ${rt}ms! 你赢了!`;if(!bestRT||rt<bestRT){bestRT=rt;document.getElementById('best').textContent=`${rt}ms`;try{localStorage.setItem('duel_best',bestRT)}catch(e){}}}else{loss++;document.getElementById('loss').textContent=loss;document.getElementById('result').textContent='太慢了! 你输了'};document.getElementById('btn').textContent='🤠 再来一局';document.getElementById('cowboy').textContent='🤠'}}
+</script>
+</body>
+</html>
