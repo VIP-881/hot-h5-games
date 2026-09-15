@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🧪 进化之路 - 热门H5游戏</title>
+<meta name="description" content="进化之路H5游戏，吃掉食物积累经验进化到下一形态，从细胞到人类，免费在线休闲进化游戏">
+<meta property="og:title" content="🧪 进化之路 - 热门H5游戏"><meta property="og:description" content="吃掉食物进化，从细胞到人类"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"进化之路","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#1a0533,#0d1b3e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🧪 进化之路</h1>
+<div class="stats"><span id="levelLabel">🦠 细胞</span><span>🧬 <b id="xp">0</b>/100</span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="500"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=500;
+const EVO=[{emoji:'🦠',name:'细胞',need:100,speed:3},{emoji:'🐛',name:'虫子',need:200,speed:4},{emoji:'🐟',name:'小鱼',need:300,speed:5},{emoji:'🐸',name:'青蛙',need:400,speed:6},{emoji:'🐍',name:'蛇',need:500,speed:7},{emoji:'🦎',name:'蜥蜴',need:600,speed:8},{emoji:'🐒',name:'猴子',need:700,speed:9},{emoji:'🧑',name:'人类',need:800,speed:10}];
+let player={x:W/2,y:H/2,r:20},foods=[],level=0,xp=0,best=0,enemies=[],frame=0;
+try{best=parseInt(localStorage.getItem('evolve_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function spawnFood(){const e=EVO[level];foods.push({x:Math.random()*W,y:Math.random()*H,r:6,emoji:level>2?'🍎':level>0?'🦠':'🟢',pts:10+level*5})}
+function spawnEnemy(){if(Math.random()>0.02)return;const r=player.r*(0.5+Math.random());enemies.push({x:Math.random()*W,y:Math.random()*H,r,emoji:EVO[Math.min(level,EVO.length-1)].emoji,danger:r>player.r,speed:1+Math.random()*3})}
+function update(){frame++;if(frame%20===0&&foods.length<8)spawnFood();spawnEnemy();
+  foods.forEach((f,i)=>{const dx=player.x-f.x,dy=player.y-f.y;if(Math.sqrt(dx*dx+dy*dy)<player.r+f.r){xp+=f.pts;document.getElementById('xp').textContent=`${xp}/${EVO[level].need}`;foods.splice(i,1);if(xp>=EVO[level].need&&level<EVO.length-1){level++;xp-=EVO[level-1].need;player.r=EVO[level].speed*5+10;document.getElementById('levelLabel').textContent=`${EVO[level].emoji} ${EVO[level].name}`;document.getElementById('xp').textContent=`${xp}/${EVO[level].need}`;if(level>best){best=level;document.getElementById('best').textContent=`${EVO[level].emoji}`;try{localStorage.setItem('evolve_best',best)}catch(e)}}}}});
+  enemies.forEach((e,i)=>{e.x+=(player.x-e.x)*0.01*e.speed;e.y+=(player.y-e.y)*0.01*e.speed;const dx=player.x-e.x,dy=player.y-e.y;if(Math.sqrt(dx*dx+dy*dy)<player.r+e.r){if(e.danger){level=0;xp=0;player.r=20;document.getElementById('levelLabel').textContent='🦠 细胞';document.getElementById('xp').textContent='0/100'}else{xp+=20;document.getElementById('xp').textContent=`${xp}/${EVO[level].need}`;enemies.splice(i,1)}}});
+}
+function draw(){ctx.fillStyle='#1a0533';ctx.fillRect(0,0,W,H);foods.forEach(f=>{ctx.font=`${f.r*2}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.emoji,f.x,f.y)});enemies.forEach(e=>{ctx.font=`${e.r*2}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.globalAlpha=e.danger?0.8:0.4;ctx.fillText(e.emoji,e.x,e.y);ctx.globalAlpha=1});ctx.font=`${player.r*1.5}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(EVO[level].emoji,player.x,player.y);ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='12px sans-serif';ctx.fillText(EVO[level].name,player.x,player.y+player.r+10)}
+c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();player.x=e.clientX-r.left;player.y=e.clientY-r.top});
+c.addEventListener('touchmove',e=>{e.preventDefault();const r=c.getBoundingClientRect();player.x=e.touches[0].clientX-r.left;player.y=e.touches[0].clientY-r.top},{passive:false});
+for(let i=0;i<8;i++)spawnFood();
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
