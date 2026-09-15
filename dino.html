@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🦖 恐龙跑酷 - 热门H5游戏</title>
+<meta name="description" content="恐龙跑酷Chrome Dino风格跳跃游戏，点击或按空格跳跃躲避仙人掌，越远分数越高免费在线">
+<meta property="og:title" content="🦖 恐龙跑酷 - 热门H5游戏"><meta property="og:description" content="Chrome小恐龙跳跃躲避仙人掌"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"恐龙跑酷"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f7f7f7;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#555;user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(0,0,0,0.06);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:6px;max-width:96vw;border:1px solid #ddd}</style>
+</head>
+<body>
+<h1>🦖 恐龙跑酷</h1>
+<div class="stats"><span>🦖 <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="700" height="200"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=700,H=200,G=0.6;
+let dino={x:60,y:H-60,w:30,h:40,vy:0,jumping:false},obstacles=[],score=0,best=0,speed=5,frame=0,gameover=false;
+try{best=parseInt(localStorage.getItem('dino_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function spawn(){const w=15+Math.random()*25;obstacles.push({x:W,y:H-52-w,w,h:w})}
+function jump(){if(!dino.jumping&&!gameover){dino.vy=-10;dino.jumping=true}}
+function update(){if(gameover)return;frame++;speed=5+score/200;
+  if(frame%Math.max(30,80-score*0.3)===0)spawn();
+  if(dino.jumping){dino.y+=dino.vy;dino.vy+=G;if(dino.y>=H-60){dino.y=H-60;dino.jumping=false}}
+  score++;document.getElementById('score').textContent=score;
+  for(let i=obstacles.length-1;i>=0;i--){obstacles[i].x-=speed;if(obstacles[i].x<-40)obstacles.splice(i,1)}
+  for(const o of obstacles){if(dino.x+dino.w>o.x&&dino.x<o.x+o.w&&dino.y+dino.h>H-52-o.h){gameover=true;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('dino_best',best)}catch(e)}ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#555';ctx.font='bold 20px sans-serif';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-10);ctx.font='12px sans-serif';ctx.fillText(`得分: ${score}  点击重来`,W/2,H/2+15);return}}
+}
+function draw(){
+  ctx.fillStyle='#f7f7f7';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,H-52);ctx.lineTo(W,H-52);ctx.stroke();
+  obstacles.forEach(o=>{ctx.fillStyle='#27ae60';ctx.fillRect(o.x,H-52-o.h,o.w,o.h);ctx.fillStyle='#2ecc71';ctx.fillRect(o.x+2,H-52-o.h+2,o.w-4,o.h-4)});
+  // Dino
+  const dx=dino.x,dy=dino.y;
+  ctx.fillStyle='#555';ctx.fillRect(dx+4,dy,6,35);ctx.fillRect(dx,dy+10,30,12);
+  ctx.fillRect(dx+18,dy-8,8,6);ctx.fillStyle='#fff';ctx.fillRect(dx+20,dy-6,4,4);ctx.fillStyle='#555';ctx.fillRect(dx+6,dy+22,8,20);ctx.fillRect(dx+18,dy+22,8,20);ctx.fillRect(dx+2,dy+30,4,8);ctx.fillRect(dx+26,dy+30,4,8);
+  ctx.fillStyle='#f00';ctx.fillRect(dx+22,dy-10,3,4);
+}
+document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();if(gameover)restart();else jump()}});
+c.addEventListener('click',()=>{if(gameover)restart();else jump()});
+function restart(){dino.y=H-60;dino.vy=0;dino.jumping=false;obstacles=[];score=0;speed=5;frame=0;gameover=false;document.getElementById('score').textContent='0'}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
