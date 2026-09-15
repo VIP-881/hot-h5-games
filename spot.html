@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🔍 找茬大师 - 热门H5游戏</title>
+<meta name="description" content="找茬大师H5游戏，在两幅相似图片中找出不同的细节，考验你的观察力，免费在线挑战">
+<meta property="og:title" content="🔍 找茬大师 - 热门H5游戏">
+<meta property="og:description" content="找出两幅图中的不同之处，考验观察力">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"找茬大师","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+h1{font-size:1.8em;margin:4px 0}
+.stats{display:flex;gap:12px;margin:6px 0 8px}
+.stats span{background:rgba(255,255,255,0.12);padding:5px 14px;border-radius:20px;font-size:0.95em}
+.canvases{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+canvas{border-radius:8px;max-width:47vw;box-shadow:0 4px 20px rgba(0,0,0,0.3);cursor:crosshair}
+@media (max-width:600px){canvas{max-width:46vw}}
+</style>
+</head>
+<body>
+<h1>🔍 找茬大师</h1>
+<div class="stats"><span>🔍 <b id="found">0</b>/5</span><span>⏱ <b id="timer">0</b>s</span><span>🏆 <b id="best">--</b>s</span></div>
+<div class="canvases">
+  <canvas id="c1" width="300" height="300"></canvas>
+  <canvas id="c2" width="300" height="300"></canvas>
+</div>
+<script>
+const c1=document.getElementById('c1'),ctx1=c1.getContext('2d');
+const c2=document.getElementById('c2'),ctx2=c2.getContext('2d');
+let differences=[],found=[],score=0,startTime,timerInterval,elapsed=0,bestTime,level=1;
+try{bestTime=parseInt(localStorage.getItem('spot_best'))||0;document.getElementById('best').textContent=bestTime?`${bestTime}s`:'--s'}catch(e){}
+
+function genScene(){
+  differences=[];found=[];
+  ctx1.fillStyle='#2c3e50';ctx1.fillRect(0,0,300,300);
+  ctx2.fillStyle='#2c3e50';ctx2.fillRect(0,0,300,300);
+  const drawBoth=(fn)=>{fn(ctx1);fn(ctx2)};
+  drawBoth(ctx=>{ctx.fillStyle='#34495e';ctx.fillRect(10,10,280,280);ctx.strokeStyle='#2c3e50';ctx.lineWidth=2;ctx.strokeRect(10,10,280,280)});
+  
+  const objects=[];
+  for(let i=0;i<12;i++){
+    const x=25+Math.random()*250,y=25+Math.random()*250;
+    const types=['circle','rect','triangle','star'];
+    const type=types[Math.floor(Math.random()*types.length)];
+    const color=`hsl(${Math.floor(Math.random()*360)},60%,${50+Math.random()*30}%)`;
+    const size=10+Math.random()*15;
+    objects.push({x,y,type,color,size});
+  }
+  objects.forEach(o=>{
+    const draw=(ctx,c)=>{ctx.fillStyle=c;ctx.beginPath();
+      if(o.type==='circle')ctx.arc(o.x,o.y,o.size,0,Math.PI*2);
+      else if(o.type==='rect')ctx.fillRect(o.x-o.size/2,o.y-o.size/2,o.size,o.size);
+      else if(o.type==='triangle'){ctx.moveTo(o.x,o.y-o.size);ctx.lineTo(o.x-o.size,o.y+o.size);ctx.lineTo(o.x+o.size,o.y+o.size);ctx.closePath()}
+      else if(o.type==='star'){for(let i=0;i<10;i++){const a=i*Math.PI/5-Math.PI/2,r=i%2?o.size*0.4:o.size;ctx.lineTo(o.x+Math.cos(a)*r,o.y+Math.sin(a)*r)}ctx.closePath()}
+      ctx.fill()
+    };
+    draw(ctx1,o.color);draw(ctx2,o.color);
+  });
+  
+  const diffIndices=new Set();
+  while(diffIndices.size<5)diffIndices.add(Math.floor(Math.random()*objects.length));
+  diffIndices.forEach(i=>{
+    const o=objects[i];
+    const dType=Math.floor(Math.random()*4);
+    let diffColor,dx,dy;
+    if(dType===0){diffColor=`hsl(${(parseInt(o.color.match(/\d+/)?.[0]||0)+180)%360},60%,60%)`}
+    else if(dType===1){dx=o.size*1.5+5}
+    else if(dType===2){dx=o.size*0.6}
+    else{dy=10}
+    if(dType===0){
+      ctx2.fillStyle=diffColor;ctx2.beginPath();
+      if(o.type==='circle')ctx2.arc(o.x,o.y,o.size,0,Math.PI*2);
+      else if(o.type==='rect')ctx2.fillRect(o.x-o.size/2,o.y-o.size/2,o.size,o.size);
+      ctx2.fill();
+    }else{
+      ctx2.fillStyle='#34495e';
+      const erase=(ox,oy)=>{ctx2.fillRect(ox-o.size*2,oy-o.size*2,o.size*4,o.size*4)};
+      erase(o.x+(dx||0),o.y+(dy||0));
+      ctx2.fillStyle=o.color;ctx2.beginPath();
+      if(o.type==='circle')ctx2.arc(o.x+(dx||0),o.y+(dy||0),o.size,0,Math.PI*2);
+      else if(o.type==='rect')ctx2.fillRect(o.x+(dx||0)-o.size/2,o.y+(dy||0)-o.size/2,o.size,o.size);
+      ctx2.fill();
+    }
+    differences.push({...o,x:o.x,y:o.y});
+  });
+  document.getElementById('found').textContent='0';
+  elapsed=0;document.getElementById('timer').textContent='0';
+  clearInterval(timerInterval);startTime=null;
+}
+function checkClick(x,y,canvasNum){
+  if(found.length>=5)return;
+  const scaleX=canvasNum===1?c1.width/c1.clientWidth:c2.width/c2.clientWidth;
+  const scaleY=canvasNum===1?c1.height/c1.clientHeight:c2.height/c2.clientHeight;
+  const cx=x*scaleX,cy=y*scaleY;
+  for(let i=0;i<differences.length;i++){
+    if(found.includes(i))continue;
+    const d=differences[i];
+    const dist=Math.sqrt((cx-d.x)**2+(cy-d.y)**2);
+    if(dist<d.size*2){
+      found.push(i);
+      document.getElementById('found').textContent=found.length;
+      if(!startTime){startTime=Date.now();timerInterval=setInterval(()=>{elapsed=Math.floor((Date.now()-startTime)/1000);document.getElementById('timer').textContent=elapsed},200)}
+      ctx1.strokeStyle='#ff0';ctx1.lineWidth=3;ctx1.setLineDash([4,2]);
+      ctx1.beginPath();ctx1.arc(d.x,d.y,d.size*2,0,Math.PI*2);ctx1.stroke();ctx1.setLineDash([]);
+      ctx2.strokeStyle='#ff0';ctx2.lineWidth=3;ctx2.setLineDash([4,2]);
+      ctx2.beginPath();ctx2.arc(d.x,d.y,d.size*2,0,Math.PI*2);ctx2.stroke();ctx2.setLineDash([]);
+      if(found.length>=5)win();
+      return;
+    }
+  }
+}
+function win(){
+  clearInterval(timerInterval);
+  if(!bestTime||elapsed<bestTime){bestTime=elapsed;document.getElementById('best').textContent=`${bestTime}s`;try{localStorage.setItem('spot_best',bestTime)}catch(e){}}
+  setTimeout(()=>alert(`🎉 全部找到! ${elapsed}s`),100);
+}
+c1.addEventListener('click',e=>{const r=c1.getBoundingClientRect();checkClick(e.clientX-r.left,e.clientY-r.top,1)});
+c2.addEventListener('click',e=>{const r=c2.getBoundingClientRect();checkClick(e.clientX-r.left,e.clientY-r.top,2)});
+c1.addEventListener('touchstart',e=>{e.preventDefault();const r=c1.getBoundingClientRect();checkClick(e.touches[0].clientX-r.left,e.touches[0].clientY-r.top,1)});
+c2.addEventListener('touchstart',e=>{e.preventDefault();const r=c2.getBoundingClientRect();checkClick(e.touches[0].clientX-r.left,e.touches[0].clientY-r.top,2)});
+function restart(){level++;genScene()}
+genScene();
+</script>
+</body>
+</html>
