@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🧠 记忆翻牌</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#0f3460);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+h1{font-size:1.6em;margin:4px 0}
+.stats{display:flex;gap:16px;margin:4px 0 10px}
+.stats span{background:rgba(255,255,255,0.12);padding:5px 14px;border-radius:20px;font-size:0.95em}
+.grid{display:grid;grid-template-columns:repeat(4,72px);grid-template-rows:repeat(4,72px);gap:8px}
+.card{width:72px;height:72px;border-radius:10px;cursor:pointer;transition:transform 0.2s;position:relative;transform-style:preserve-3d}
+.card.flipped{transform:rotateY(180deg)}
+.card.matched{opacity:0.6;pointer-events:none}
+.card-face{position:absolute;inset:0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:2em;backface-visibility:hidden}
+.card-back{background:linear-gradient(135deg,#e17055,#d63031)}
+.card-front{background:rgba(255,255,255,0.1);transform:rotateY(180deg)}
+.btn{background:rgba(100,200,255,0.2);color:#6cf;border:1px solid #6cf;padding:8px 24px;border-radius:20px;font-size:0.9em;cursor:pointer;margin-top:12px;transition:all 0.2s}
+.btn:hover{background:rgba(100,200,255,0.3)}
+</style>
+</head>
+<body>
+<h1>🧠 记忆翻牌</h1>
+<div class="stats"><span>🎯 <b id="pairs">0</b>/8</span><span>👆 <b id="moves">0</b></span><span>⏱ <b id="timer">0</b>s</span><span>🏆 <b id="best">--</b></span></div>
+<div class="grid" id="grid"></div>
+<button class="btn" onclick="restart()">🔄 重新开始</button>
+<script>
+const ICONS=['🍎','🍕','🌈','⭐','🐱','🦊','🎸','🚀'];
+let cards=[],flipped=[],matched=[],moves=0,pairs=0,startTime,timerInterval,elapsed=0,bestMoves,bestTime,locked=false;
+try{bestMoves=parseInt(localStorage.getItem('memory_moves'))||0;bestTime=parseInt(localStorage.getItem('memory_time'))||0;document.getElementById('best').textContent=bestMoves?`${bestMoves}步/${bestTime}s`:'--'}catch(e){}
+
+function init(){
+  const items=[...ICONS,...ICONS];
+  for(let i=items.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[items[i],items[j]]=[items[j],items[i]]}
+  const g=document.getElementById('grid');g.innerHTML='';
+  cards=items.map((icon,i)=>({icon,id:i}));
+  flipped=[];matched=[];moves=0;pairs=0;elapsed=0;locked=false;
+  document.getElementById('pairs').textContent='0';document.getElementById('moves').textContent='0';document.getElementById('timer').textContent='0';
+  clearInterval(timerInterval);startTime=null;
+  cards.forEach((card,i)=>{
+    const el=document.createElement('div');el.className='card';
+    el.innerHTML=`<div class="card-face card-back"></div><div class="card-face card-front">${card.icon}</div>`;
+    el.addEventListener('click',()=>flipCard(i,el));
+    g.appendChild(el);
+  });
+}
+function flipCard(i,el){
+  if(locked||flipped.includes(i)||matched.includes(i)||flipped.length>=2)return;
+  if(!startTime){startTime=Date.now();timerInterval=setInterval(()=>{elapsed=Math.floor((Date.now()-startTime)/1000);document.getElementById('timer').textContent=elapsed},200)}
+  flipped.push(i);el.classList.add('flipped');
+  if(flipped.length===2){
+    moves++;document.getElementById('moves').textContent=moves;
+    if(cards[flipped[0]].icon===cards[flipped[1]].icon){
+      matched.push(flipped[0],flipped[1]);pairs++;
+      document.getElementById('pairs').textContent=pairs;
+      document.querySelectorAll('.card')[flipped[0]].classList.add('matched');
+      document.querySelectorAll('.card')[flipped[1]].classList.add('matched');
+      flipped=[];
+      if(pairs===8)win();
+    }else{
+      locked=true;
+      setTimeout(()=>{
+        document.querySelectorAll('.card')[flipped[0]].classList.remove('flipped');
+        document.querySelectorAll('.card')[flipped[1]].classList.remove('flipped');
+        flipped=[];locked=false;
+      },600);
+    }
+  }
+}
+function win(){
+  clearInterval(timerInterval);
+  if(!bestMoves||moves<bestMoves||(moves===bestMoves&&elapsed<bestTime)){
+    bestMoves=moves;bestTime=elapsed;
+    try{localStorage.setItem('memory_moves',bestMoves);localStorage.setItem('memory_time',bestTime)}catch(e){}
+  }
+  document.getElementById('best').textContent=`${bestMoves}步/${bestTime}s`;
+  setTimeout(()=>{alert(`🎉 完成！${moves} 步 · ${elapsed}s`)},100);
+}
+function restart(){init()}
+init();
+</script>
+</body>
+</html>
