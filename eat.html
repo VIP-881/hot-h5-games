@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🍔 贪吃大胃王 - 热门H5游戏</title>
+<meta name="description" content="贪吃大胃王休闲游戏，控制角色吃掉场上食物变大，别撞比自己大的对手免费在线">
+<meta property="og:title" content="🍔 贪吃大胃王 - 热门H5游戏"><meta property="og:description" content="吃食物变大，别撞大对手"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"贪吃大胃王"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🍔 贪吃大胃王</h1>
+<div class="stats"><span>🍔 <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="380" height="480"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=380,H=480;
+let players=[{x:W/2,y:H/2,r:20,color:'#2ecc71',vx:0,vy:0,ai:false}],foods=[],enemies=[],score=0,best=0,gameover=false;
+try{best=parseInt(localStorage.getItem('eat_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function spawn(){const fs=['🍕','🍔','🍩','🍎','🧁'];foods.push({x:Math.random()*W,y:Math.random()*H,e:fs[Math.floor(Math.random()*5)],r:8,pts:10})}
+function spawnEnemy(){const r=players[0].r*(0.5+Math.random());enemies.push({x:Math.random()*W,y:Math.random()*H,r,color:`hsl(${Math.random()*360},60%,50%)`,sp:1+Math.random()*2})}
+function update(){if(gameover)return;
+  const p=players[0];p.x+=p.vx*0.15;p.y+=p.vy*0.15;p.vx*=0.9;p.vy*=0.9;
+  if(Math.random()<0.02&&foods.length<10)spawn();if(Math.random()<0.005&&enemies.length<6)spawnEnemy();
+  for(let i=foods.length-1;i>=0;i--){const f=foods[i];if(Math.sqrt((p.x-f.x)**2+(p.y-f.y)**2)<p.r+f.r){score+=f.pts;p.r+=1;document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('eat_best',best)}catch(e)}foods.splice(i,1)}}
+  for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];e.x+=(p.x-e.x)*0.01;e.y+=(p.y-e.y)*0.01;if(Math.sqrt((p.x-e.x)**2+(p.y-e.y)**2)<p.r+e.r){if(e.r>p.r){gameover=true;ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('💀 被吃掉了!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  点击重来`,W/2,H/2+20)}else{score+=20;p.r+=e.r*0.3;enemies.splice(i,1);document.getElementById('score').textContent=score}}}
+}
+function draw(){ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);foods.forEach(f=>{ctx.font='20px sans-serif';ctx.textAlign='center';ctx.fillText(f.e,f.x,f.y)});enemies.forEach(e=>{ctx.fillStyle=e.color;ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText('😈',e.x,e.y+4)});const p=players[0];ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font=`${p.r}px sans-serif`;ctx.textAlign='center';ctx.fillText('🦊',p.x,p.y+3)}
+c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();players[0].vx+=(e.clientX-r.left-players[0].x)*0.5;players[0].vy+=(e.clientY-r.top-players[0].y)*0.5});
+c.addEventListener('touchmove',e=>{e.preventDefault();const r=c.getBoundingClientRect();players[0].vx+=(e.touches[0].clientX-r.left-players[0].x)*0.5;players[0].vy+=(e.touches[0].clientY-r.top-players[0].y)*0.5},{passive:false});
+c.addEventListener('click',()=>{if(gameover){players=[{x:W/2,y:H/2,r:20,color:'#2ecc71',vx:0,vy:0,ai:false}];enemies=[];score=0;gameover=false;document.getElementById('score').textContent='0'}});
+for(let i=0;i<8;i++)spawn();for(let i=0;i<3;i++)spawnEnemy();
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
