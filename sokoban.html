@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🏰 推箱子 - 热门H5游戏</title>
+<meta name="description" content="推箱子Sokoban经典益智H5游戏，控制小人将箱子推到目标位置，考验逻辑思维，免费在线迷宫闯关游戏">
+<meta property="og:title" content="🏰 推箱子 - 热门H5游戏">
+<meta property="og:description" content="经典推箱子，将箱子推到目标点">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"推箱子","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none}
+h1{font-size:1.6em;margin:4px 0}
+.stats{display:flex;gap:12px;margin:4px 0 6px;align-items:center}
+.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 20px rgba(100,100,200,0.15)}
+.dpad{display:grid;grid-template:60px 60px 60px/60px 60px 60px;gap:4px;margin-top:8px}
+.dpad button{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:#fff;font-size:1.4em;cursor:pointer}
+.dpad button:active{background:rgba(100,150,255,0.3)}
+.empty{background:transparent!important;border:none!important}
+.btn{background:rgba(100,150,255,0.2);color:#8cf;border:1px solid #8cf;padding:6px 18px;border-radius:20px;font-size:0.85em;cursor:pointer;margin:4px}
+</style>
+</head>
+<body>
+<h1>🏰 推箱子</h1>
+<div class="stats"><span>🎯 <b id="level">1</b></span><span>👣 <b id="moves">0</b></span><span>🏆 <b id="best">--</b>步</span></div>
+<canvas id="c" width="320" height="320"></canvas>
+<div class="dpad">
+  <div class="empty"></div><button onclick="movePlayer(0,-1)">▲</button><div class="empty"></div>
+  <button onclick="movePlayer(-1,0)">◀</button><div class="empty"></div><button onclick="movePlayer(1,0)">▶</button>
+  <div class="empty"></div><button onclick="movePlayer(0,1)">▼</button><div class="empty"></div>
+</div>
+<div><button class="btn" onclick="restart()">🔄 重来</button><button class="btn" onclick="undo()">↩ 悔棋</button></div>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const COLS=8,ROWS=8,S=40,OFFX=4*(S+4),OFFY=4*(S+4);
+let levels=[],currentLevel=0,board=[],player={r:0,c:0},moves=0,history=[],bestMoves;
+try{bestMoves=parseInt(localStorage.getItem('sokoban_best'))||0;document.getElementById('best').textContent=bestMoves?`${bestMoves}步`:'--步'}catch(e){}
+
+// Legend: 0=floor, 1=wall, 2=target, 3=box, 4=player, 5=boxOnTarget
+levels=[
+  [
+    [1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,4,0,1],
+    [1,0,3,0,0,0,0,1],
+    [1,0,0,0,0,0,2,1],
+    [1,0,0,0,3,0,0,1],
+    [1,0,0,2,0,0,0,1],
+    [1,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1],
+  ],
+  [
+    [1,1,1,1,1,1,1,1],
+    [1,0,4,0,0,0,0,1],
+    [1,0,3,3,0,0,0,1],
+    [1,0,0,0,0,2,2,1],
+    [1,0,0,0,0,0,0,1],
+    [1,0,0,0,3,0,0,1],
+    [1,0,0,0,2,0,0,1],
+    [1,1,1,1,1,1,1,1],
+  ],
+  [
+    [1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,4,0,1],
+    [1,0,0,3,0,0,0,1],
+    [1,2,0,0,0,0,0,1],
+    [1,0,3,0,0,2,3,1],
+    [1,0,0,0,0,0,0,1],
+    [1,0,2,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1],
+  ],
+];
+function loadLevel(idx){
+  const lv=levels[idx];
+  board=lv.map((row,r)=>row.map((cell,c)=>{
+    if(cell===4){player={r,c};return 0}
+    return cell;
+  }));
+  moves=0;history=[];
+  document.getElementById('level').textContent=idx+1;
+  document.getElementById('moves').textContent='0';
+}
+function movePlayer(dr,dc){
+  const nr=player.r+dr,nc=player.c+dc;
+  if(nr<0||nr>=ROWS||nc<0||nc>=COLS||board[nr][nc]===1)return;
+  if(board[nr][nc]===3||board[nr][nc]===5){
+    const br=nr+dr,bc=nc+dc;
+    if(br<0||br>=ROWS||bc<0||bc>=COLS||board[br][bc]===1||board[br][bc]===3||board[br][bc]===5)return;
+    history.push({player:{r:player.r,c:player.c},board:board.map(r=>[...r]),moves});
+    board[br][bc]=(levels[currentLevel][br][bc]===2)?5:3;
+    board[nr][nc]=(levels[currentLevel][nr][nc]===2)?2:0;
+    player.r=nr;player.c=nc;moves++;
+  }else{
+    history.push({player:{r:player.r,c:player.c},board:board.map(r=>[...r]),moves});
+    player.r=nr;player.c=nc;moves++;
+  }
+  document.getElementById('moves').textContent=moves;draw();
+  if(checkWin()){
+    if(currentLevel<levels.length-1){currentLevel++;loadLevel(currentLevel);draw();alert(`🎉 通关! 进入第${currentLevel+1}关`)}
+    else{if(!bestMoves||moves<bestMoves){bestMoves=moves;document.getElementById('best').textContent=`${bestMoves}步`;try{localStorage.setItem('sokoban_best',bestMoves)}catch(e){}}alert(`🏆 全部通关! ${moves}步`)}
+  }
+}
+function undo(){
+  if(!history.length)return;
+  const s=history.pop();player=s.player;board=s.board;moves=s.moves;
+  document.getElementById('moves').textContent=moves;draw();
+}
+function checkWin(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(levels[currentLevel][r][c]===2&&board[r][c]!==5)return false;return true}
+function draw(){
+  ctx.clearRect(0,0,320,320);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const x=OFFX+c*S,y=OFFY+r*S;
+    if(board[r][c]===1){ctx.fillStyle='#555';ctx.fillRect(x,y,S,S);ctx.strokeStyle='#777';ctx.strokeRect(x,y,S,S)}
+    else{ctx.fillStyle='#222';ctx.fillRect(x,y,S,S);if(levels[currentLevel][r][c]===2){ctx.fillStyle='rgba(255,0,0,0.3)';ctx.beginPath();ctx.arc(x+S/2,y+S/2,S*0.25,0,Math.PI*2);ctx.fill()}}
+    if(board[r][c]===3||board[r][c]===5){ctx.fillStyle=board[r][c]===5?'#2ecc71':'#e67e22';ctx.fillRect(x+4,y+4,S-8,S-8);ctx.strokeStyle=board[r][c]===5?'#27ae60':'#d35400';ctx.lineWidth=2;ctx.strokeRect(x+4,y+4,S-8,S-8)}
+  }
+  ctx.fillStyle='#3498db';ctx.beginPath();ctx.arc(player.c*S+OFFX+S/2,player.r*S+OFFY+S/2,S*0.35,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(player.c*S+OFFX+S/2-5,player.r*S+OFFY+S/2-4,4,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(player.c*S+OFFX+S/2+5,player.r*S+OFFY+S/2-4,4,0,Math.PI*2);ctx.fill();
+}
+document.addEventListener('keydown',e=>{const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]};if(m[e.key]){e.preventDefault();movePlayer(...m[e.key])}});
+function restart(){loadLevel(0);currentLevel=0;draw()}
+loadLevel(0);draw();
+</script>
+</body>
+</html>
