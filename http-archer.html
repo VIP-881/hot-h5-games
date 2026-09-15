@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🏹 HTTP Archer — API 请求射箭游戏 | Maton H5 Games</title>
+<meta name="description" content="HTTP Archer：角度与力度射箭游戏。瞄准正确的 HTTP 方法（GET/POST/PUT/DELETE）命中 API 端点。3个难度等级，训练你对 REST 方法的直觉。">
+<meta name="keywords" content="射箭游戏,archery game,HTTP方法,REST API,角度力度,物理游戏,HTML5 canvas,瞄准游戏,Maton">
+<meta property="og:title" content="HTTP Archer — API 请求射箭游戏">
+<meta property="og:description" content="角度力度射箭，用正确的HTTP方法命中API端点。训练REST直觉。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vip-881.github.io/hot-h5-games/http-archer.html">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://vip-881.github.io/hot-h5-games/http-archer.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"HTTP Archer","description":"射箭游戏，用正确的HTTP方法命中API端点。训练REST方法直觉。","applicationCategory":"Game","operatingSystem":"Web","author":{"@type":"Organization","name":"Maton AI Games"},"genre":["Sports","Educational","Puzzle"]}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a14;color:#e0e0e0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(10,10,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(251,191,36,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#fbbf24;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(251,191,36,.1);transition:.3s}
+nav a:hover{background:rgba(251,191,36,.2)}
+header{text-align:center;padding:16px;background:linear-gradient(180deg,rgba(251,191,36,.04),transparent)}
+header h1{font-size:1.5em;background:linear-gradient(135deg,#fbbf24,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.container{text-align:center;padding:0 16px}
+.hud{display:flex;justify-content:center;gap:16px;padding:8px;flex-wrap:wrap}
+.hud-item{text-align:center}.hud-item .val{font-size:18px;font-weight:700}.hud-item .lbl{font-size:9px;color:#666}
+canvas{border:1px solid rgba(251,191,36,.1);border-radius:8px;display:block;margin:8px auto}
+.controls{display:flex;gap:10px;justify-content:center;align-items:center;margin:8px;flex-wrap:wrap}
+.controls input[type=range]{width:100px}
+.controls button{padding:8px 20px;border:none;border-radius:10px;font-weight:600;cursor:pointer}
+.btn-shoot{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000}
+.btn-shoot:disabled{opacity:.3}
+.method-select{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:8px}
+.method-btn{padding:6px 14px;border:2px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(20,20,35,.9);color:#ccc;cursor:pointer;font-size:13px;font-weight:600}
+.method-btn:hover{border-color:rgba(139,92,246,.4)}
+.method-btn.selected{border-color:#fbbf24;color:#fbbf24}
+footer{text-align:center;padding:12px;color:#444;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>🏹 HTTP Archer</span></nav>
+<header><h1>🏹 HTTP Archer</h1><p>选择合适的 HTTP 方法 · 命中 API 端点</p></header>
+<div class="container">
+  <div class="hud">
+    <div class="hud-item"><div class="val" id="hScore" style="color:#fbbf24">0</div><div class="lbl">⭐ 分</div></div>
+    <div class="hud-item"><div class="val" id="hHits" style="color:#4ade80">0</div><div class="lbl">🎯 命中</div></div>
+    <div class="hud-item"><div class="val" id="hShots" style="color:#a78bfa">0</div><div class="lbl">🏹 射箭</div></div>
+  </div>
+  <canvas id="c" width="420" height="420"></canvas>
+  <div class="method-select">
+    <button class="method-btn selected" onclick="setMethod('GET')">GET</button>
+    <button class="method-btn" onclick="setMethod('POST')">POST</button>
+    <button class="method-btn" onclick="setMethod('PUT')">PUT</button>
+    <button class="method-btn" onclick="setMethod('DELETE')">DELETE</button>
+  </div>
+  <div class="controls">
+    <span style="font-size:11px;color:#888">力度</span>
+    <input type="range" id="powerSlider" min="20" max="100" value="60" oninput="drawScene()">
+    <button class="btn-shoot" id="shootBtn" onclick="shoot()">🏹 发射！</button>
+  </div>
+</div>
+<footer>HTTP Archer · 🦊 灵犀出品</footer>
+<script>
+const C=document.getElementById('c'),ctx=C.getContext('2d');
+const W=C.width,H=C.height;
+let targets=[],arrow=null,score=0,hits=0,shots=0,method='GET',power=60;
+const METHODS=['GET','POST','PUT','DELETE'];
+const METHOD_COLORS={GET:'#4ade80',POST:'#06b6d4',PUT:'#fbbf24',DELETE:'#ef4444'};
+
+function spawnTarget(){
+  const m=METHODS[Math.floor(Math.random()*METHODS.length)];
+  const x=250+Math.random()*140, y=60+Math.random()*120;
+  targets.push({method:m,x,y,r:20});
+  if(targets.length>4) targets.shift();
+}
+
+function shoot(){
+  if(arrow) return;
+  const btn=document.getElementById('shootBtn');btn.disabled=true;
+  const angle=-45+Math.random()*5;
+  const rad=angle*Math.PI/180;
+  const speed=power/6;
+  arrow={x:50,y:H-60,vx:Math.cos(rad)*speed,vy:Math.sin(rad)*speed,method,trail:[]};
+  shots++;
+  document.getElementById('hShots').textContent=shots;
+  animate();
+}
+
+function animate(){
+  ctx.clearRect(0,0,W,H);
+  drawScene();
+  if(arrow){
+    arrow.x+=arrow.vx;arrow.y+=arrow.vy;arrow.vy+=0.3;arrow.trail.push({x:arrow.x,y:arrow.y});
+    if(arrow.trail.length>15) arrow.trail.shift();
+    // Check hit
+    targets.forEach(t=>{
+      const d=Math.sqrt((arrow.x-t.x)**2+(arrow.y-t.y)**2);
+      if(d<t.r+8){
+        if(arrow.method===t.method){score+=50;hits++}else{score+=10;hits++}
+        t.hit=true;arrow=null;document.getElementById('shootBtn').disabled=false;
+        document.getElementById('hHits').textContent=hits;document.getElementById('hScore').textContent=score;
+        setTimeout(()=>{targets=targets.filter(tt=>!tt.hit);spawnTarget()},500);
+      }
+    });
+    if(arrow&&(arrow.x<0||arrow.x>W||arrow.y>H)){arrow=null;document.getElementById('shootBtn').disabled=false}
+    if(arrow) requestAnimationFrame(animate);
+  }
+}
+
+function drawScene(){
+  ctx.clearRect(0,0,W,H);
+  // Ground
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,.05)';ctx.beginPath();ctx.moveTo(0,H-50);ctx.lineTo(W,H-50);ctx.stroke();
+  // Archer
+  ctx.fillStyle='#a78bfa';ctx.fillRect(30,H-70,20,20);
+  ctx.font='20px sans-serif';ctx.textAlign='center';ctx.fillText('🏹',40,H-72);
+  // Arrow
+  if(arrow){
+    ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=1;ctx.beginPath();
+    arrow.trail.forEach((t,i)=>{if(i===0)ctx.moveTo(t.x,t.y);else ctx.lineTo(t.x,t.y)});ctx.stroke();
+    ctx.fillStyle=METHOD_COLORS[arrow.method];ctx.beginPath();ctx.arc(arrow.x,arrow.y,6,0,Math.PI*2);ctx.fill();
+  }
+  // Targets
+  targets.forEach(t=>{
+    if(t.hit) return;
+    ctx.strokeStyle=METHOD_COLORS[t.method];
+    ctx.lineWidth=3;ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.arc(t.x,t.y,t.r*.5,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle=METHOD_COLORS[t.method];ctx.font='bold 12px sans-serif';ctx.textAlign='center';
+    ctx.fillText(t.method,t.x,t.y+4);
+  });
+  // Power indicator
+  const angle=-45;
+  const rad=angle*Math.PI/180;
+  const len=power/1.2;
+  ctx.strokeStyle='#fbbf24';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();
+  ctx.moveTo(40,H-70);ctx.lineTo(40+Math.cos(rad)*len,H-70+Math.sin(rad)*len);ctx.stroke();
+  ctx.setLineDash([]);
+  document.getElementById('powerSlider').oninput=function(){power=parseInt(this.value);drawScene()};
+}
+
+function setMethod(m){
+  method=m;
+  document.querySelectorAll('.method-btn').forEach(b=>{b.classList.toggle('selected',b.textContent===m)});
+}
+
+spawnTarget();spawnTarget();spawnTarget();drawScene();
+</script>
+</body>
+</html>

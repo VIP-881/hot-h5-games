@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🛡️ SQL Defender — SQL注入防御塔防 | Maton H5 Games</title>
+<meta name="description" content="SQL Defender：在SQL查询到达数据库之前拦截注入攻击。识别并阻止 SELECT/UNION/DROP/OR 1=1 等攻击向量。训练你的安全防御直觉。">
+<meta name="keywords" content="SQL注入,SQL injection,安全防御,数据库安全,网络安全游戏,SQL defender,注入攻击,安全训练,Maton">
+<meta property="og:title" content="SQL Defender — SQL注入防御游戏">
+<meta property="og:description" content="拦截SQL注入攻击，训练数据库安全防御直觉。识别并阻止常见攻击向量。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vip-881.github.io/hot-h5-games/sql-defender.html">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://vip-881.github.io/hot-h5-games/sql-defender.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"SQL Defender","description":"SQL注入防御游戏，拦截攻击向量保护数据库。","applicationCategory":"Game","operatingSystem":"Web","author":{"@type":"Organization","name":"Maton AI Games"},"genre":["Educational","Defense","Security"]}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Fira Code',monospace;background:#0a0a14;color:#e0e0e0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(10,10,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(239,68,68,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#f87171;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(239,68,68,.1);transition:.3s}
+nav a:hover{background:rgba(239,68,68,.2)}
+header{text-align:center;padding:16px;background:linear-gradient(180deg,rgba(239,68,68,.04),transparent)}
+header h1{font-size:1.5em;background:linear-gradient(135deg,#ef4444,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.container{max-width:650px;margin:16px auto;padding:0 16px}
+.db-visual{background:#0d1117;border:2px solid rgba(239,68,68,.15);border-radius:16px;padding:20px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden}
+.db-server{font-size:40px;margin:8px 0}
+.db-server.safe{filter:hue-rotate(120deg)}
+.db-server.breached{animation:shake .5s;filter:hue-rotate(0) brightness(.5)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.query-stream{font-family:monospace;background:rgba(0,0,0,.3);border-radius:10px;padding:12px;margin:12px 0;max-height:120px;overflow-y:auto;text-align:left}
+.query-stream .qline{padding:4px 8px;margin:2px 0;border-radius:6px;font-size:12px;animation:slideIn .4s}
+.query-stream .qline.incoming{background:rgba(139,92,246,.1);border-left:3px solid #a78bfa}
+.query-stream .qline.blocked{background:rgba(34,197,94,.1);border-left:3px solid #4ade80;color:#4ade80}
+.query-stream .qline.passed{background:rgba(239,68,68,.1);border-left:3px solid #ef4444;color:#f87171}
+@keyframes slideIn{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
+.defense-barrier{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 0}
+.barrier-btn{width:60px;height:60px;border-radius:14px;border:2px solid rgba(255,255,255,.1);background:rgba(20,20,35,.9);cursor:pointer;font-size:28px;transition:.3s}
+.barrier-btn:hover{border-color:rgba(139,92,246,.5);transform:scale(1.08)}
+.barrier-btn:disabled{opacity:.3;cursor:not-allowed}
+.barrier-btn.used{background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.4)}
+.hud{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin:12px 0}
+.hud-item{text-align:center}.hud-item .val{font-size:18px;font-weight:700}.hud-item .lbl{font-size:9px;color:#666}
+.result-overlay{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#1a1a2e,#2a1a3e);border:2px solid rgba(139,92,246,.3);border-radius:20px;padding:32px;text-align:center;z-index:200;display:none}
+.result-overlay h2{font-size:28px;margin-bottom:12px}
+.result-overlay button{margin-top:16px;padding:12px 28px;border:none;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:16px;cursor:pointer}
+footer{text-align:center;padding:12px;color:#444;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>🛡️ SQL Defender</span></nav>
+<header><h1>🛡️ SQL Defender</h1><p>拦截 SQL 注入攻击 · 保护数据库安全</p></header>
+<div class="container">
+  <div class="hud">
+    <div class="hud-item"><div class="val" id="hScore" style="color:#fbbf24">0</div><div class="lbl">⭐ 分数</div></div>
+    <div class="hud-item"><div class="val" id="hBlocked" style="color:#4ade80">0</div><div class="lbl">🛡️ 拦截</div></div>
+    <div class="hud-item"><div class="val" id="hBreaches" style="color:#f87171">0/5</div><div class="lbl">⚠️ 入侵</div></div>
+    <div class="hud-item"><div class="val" id="hShields" style="color:#a78bfa">3</div><div class="lbl">🔰 护盾</div></div>
+  </div>
+  <div class="db-visual">
+    <div class="db-server" id="dbServer">🗄️</div>
+    <div style="font-size:11px;color:#888;margin-top:4px">MySQL DB · 生产环境</div>
+  </div>
+  <div class="defense-barrier">
+    <button class="barrier-btn" id="shield0" onclick="useShield(0)" title="参数化查询">🔐</button>
+    <button class="barrier-btn" id="shield1" onclick="useShield(1)" title="输入转义">🧹</button>
+    <button class="barrier-btn" id="shield2" onclick="useShield(2)" title="WAF规则">🛡️</button>
+  </div>
+  <div class="query-stream" id="queryStream"><div style="color:#444;font-size:11px;padding:8px">查询流等待中...</div></div>
+</div>
+<div class="result-overlay" id="overlay"><h2 id="oTitle"></h2><p id="oDesc" style="color:#888;margin:8px 0"></p><button id="oBtn">🔄 重新部署防线</button></div>
+<footer>SQL Defense Training · 🦊 灵犀出品</footer>
+<script>
+const QUERIES=[
+  {q:"SELECT * FROM users WHERE id = 1",attack:false,note:'正常查询'},
+  {q:"SELECT * FROM users WHERE id = 1 OR 1=1",attack:true,note:'OR 注入 — 返回所有用户',shield:'参数化查询'},
+  {q:"SELECT name, email FROM users WHERE id = 42",attack:false,note:'正常查询 — 只读字段'},
+  {q:"SELECT * FROM users WHERE name = 'admin' --'",attack:true,note:'注释注入 — 绕过密码验证',shield:'输入转义'},
+  {q:"INSERT INTO logs (msg) VALUES ('user login')",attack:false,note:'正常日志写入'},
+  {q:"SELECT * FROM users; DROP TABLE users; --",attack:true,note:'语句堆叠 — 删表攻击',shield:'WAF规则'},
+  {q:"UPDATE users SET status = 'active' WHERE id = 5",attack:false,note:'正常更新'},
+  {q:"SELECT * FROM users WHERE email = '' UNION SELECT * FROM passwords --",attack:true,note:'UNION注入 — 窃取密码表',shield:'参数化查询'},
+  {q:"SELECT COUNT(*) FROM users",attack:false,note:'正常统计'},
+  {q:"admin' OR '1'='1",attack:true,note:'认证绕过 — 经典注入',shield:'输入转义'},
+  {q:"SELECT * FROM products WHERE price < 100",attack:false,note:'正常查询'},
+  {q:"1; EXEC xp_cmdshell('dir')",attack:true,note:'命令执行注入',shield:'WAF规则'},
+  {q:"SELECT * FROM orders WHERE user_id = ?",attack:false,note:'参数化查询 — 安全！'},
+  {q:"' UNION SELECT username,password FROM admin_users --",attack:true,note:'联合查询 — 窃取管理员凭据',shield:'WAF规则'},
+  {q:"SELECT * FROM articles ORDER BY created_at DESC LIMIT 10",attack:false,note:'正常分页'},
+  {q:"1'; UPDATE users SET admin=1 WHERE id=1 --",attack:true,note:'权限提升注入',shield:'输入转义'},
+];
+let score=0,blocked=0,breaches=0,maxBreaches=5,shields=[true,true,true],qIdx=0,gameOn=true,streamTimer=null;
+
+function addQLine(q,cls){
+  const s=document.getElementById('queryStream');
+  s.innerHTML='<div class="qline '+cls+'"><span style="color:#888">'+(q.attack?'⚠️':'✅')+'</span> '+q.q.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div>'+s.innerHTML;
+  if(s.children.length>15) s.removeChild(s.lastChild);
+}
+
+function sendQuery(){
+  if(!gameOn||qIdx>=QUERIES.length){endGame(true);return}
+  const q=QUERIES[qIdx];qIdx++;
+  if(!q.attack){addQLine(q,'incoming');score+=10;updateHUD();setTimeout(sendQuery,800+Math.random()*400);return}
+  // Attack! Has 1.5s to block
+  addQLine(q,'incoming');
+  if(shields.some(s=>s)){setTimeout(()=>{if(q.attack&&shields.some(s=>s)){breaches++;document.getElementById('dbServer').classList.add('breached');setTimeout(()=>document.getElementById('dbServer').classList.remove('breached'),500);addQLine(q,'passed');updateHUD();if(breaches>=maxBreaches)endGame(false)}},1500)}else{breaches++;addQLine(q,'passed');updateHUD()}
+  updateHUD();
+  setTimeout(sendQuery,1200+Math.random()*600);
+}
+
+function useShield(i){
+  if(!shields[i]||!gameOn) return;
+  shields[i]=false;blocked++;score+=30;
+  document.getElementById('shield'+i).disabled=true;
+  document.getElementById('shield'+i).classList.add('used');
+  document.getElementById('hShields').textContent=shields.filter(Boolean).length;
+  const q=QUERIES[Math.max(0,qIdx-1)]; // block the current attack
+  addQLine(q,'blocked');
+  // Recharge shield
+  setTimeout(()=>{shields[i]=true;document.getElementById('shield'+i).disabled=false;document.getElementById('shield'+i).classList.remove('used');document.getElementById('hShields').textContent=shields.filter(Boolean).length},4000);
+  updateHUD();
+}
+
+function updateHUD(){
+  document.getElementById('hScore').textContent=score;
+  document.getElementById('hBlocked').textContent=blocked;
+  document.getElementById('hBreaches').textContent=breaches+'/'+maxBreaches;
+  if(breaches>=3)document.getElementById('hBreaches').style.color='#ef4444';
+}
+
+function endGame(win){
+  gameOn=false;
+  const o=document.getElementById('overlay');o.style.display='block';
+  document.getElementById('oTitle').textContent=win?'🛡️ 防御成功！':'💥 数据库被攻破！';
+  document.getElementById('oTitle').style.color=win?'#4ade80':'#f87171';
+  document.getElementById('oDesc').textContent='拦截 '+blocked+' · 入侵 '+breaches+' · 得分 '+score;
+  document.getElementById('oBtn').onclick=()=>{o.style.display='none';score=0;blocked=0;breaches=0;shields=[true,true,true];qIdx=0;gameOn=true;document.getElementById('queryStream').innerHTML='<div style="color:#444;font-size:11px;padding:8px">查询流等待中...</div>';updateHUD();sendQuery()}
+}
+
+sendQuery();
+</script>
+</body>
+</html>

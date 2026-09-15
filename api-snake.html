@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🐍 API Snake — 贪吃蛇吃 API | Maton H5 Games</title>
+<meta name="description" content="API Snake：经典贪吃蛇变体。吃掉 GET/POST/PUT/DELETE 端点得分增长，撞到自己或边界就输。支持触屏滑动手势和键盘控制。">
+<meta name="keywords" content="贪吃蛇,snake game,API贪吃蛇,经典游戏,HTML5 snake,REST API,触屏游戏,休闲,Maton">
+<meta property="og:title" content="API Snake — 贪吃蛇吃 API 端点">
+<meta property="og:description" content="经典贪吃蛇变体，吃掉REST API端点。触屏+键盘双模式。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vip-881.github.io/hot-h5-games/api-snake.html">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://vip-881.github.io/hot-h5-games/api-snake.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"API Snake","description":"经典贪吃蛇变体，吃掉REST API端点。触屏+键盘控制。","applicationCategory":"Game","operatingSystem":"Web","author":{"@type":"Organization","name":"Maton AI Games"},"genre":["Arcade","Casual"]}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a14;color:#e0e0e0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(10,10,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,197,94,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#4ade80;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(34,197,94,.1);transition:.3s}
+nav a:hover{background:rgba(34,197,94,.2)}
+header{text-align:center;padding:16px;background:linear-gradient(180deg,rgba(34,197,94,.04),transparent)}
+header h1{font-size:1.5em;background:linear-gradient(135deg,#4ade80,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.container{text-align:center;padding:0 16px}
+.hud{display:flex;justify-content:center;gap:16px;padding:8px;flex-wrap:wrap}
+.hud-item{text-align:center}.hud-item .val{font-size:18px;font-weight:700}.hud-item .lbl{font-size:9px;color:#666}
+canvas{border:1px solid rgba(34,197,94,.1);border-radius:8px;display:block;margin:8px auto}
+.mobile-dpad{display:none;grid-template-areas:'. up .' 'left . right' '. down .';gap:4px;justify-content:center;margin:8px}
+.mobile-dpad button{width:50px;height:50px;border:none;border-radius:10px;background:rgba(255,255,255,.08);color:#fff;font-size:20px;cursor:pointer}
+.mobile-dpad button:active{background:rgba(34,197,94,.3)}
+@media(max-width:500px){.mobile-dpad{display:grid}}
+.game-over{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#1a1a2e,#2a1a3e);border:2px solid rgba(139,92,246,.3);border-radius:20px;padding:24px;text-align:center;z-index:200;display:none}
+.game-over h2{font-size:24px;margin-bottom:8px}
+.game-over button{margin-top:12px;padding:10px 24px;border:none;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:14px;cursor:pointer}
+footer{text-align:center;padding:12px;color:#444;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>🐍 API Snake</span></nav>
+<header><h1>🐍 API Snake</h1><p>吃掉 REST API 端点 · 越长越强</p></header>
+<div class="container">
+  <div class="hud">
+    <div class="hud-item"><div class="val" id="hScore" style="color:#fbbf24">0</div><div class="lbl">⭐ 分</div></div>
+    <div class="hud-item"><div class="val" id="hLen" style="color:#4ade80">1</div><div class="lbl">📏 长度</div></div>
+    <div class="hud-item"><div class="val" id="hBest" style="color:#a78bfa">0</div><div class="lbl">🏆 最佳</div></div>
+  </div>
+  <canvas id="c" width="400" height="400"></canvas>
+  <div class="mobile-dpad">
+    <div></div><button onclick="setDir(0,-1)" style="grid-area:up">▲</button><div></div>
+    <button onclick="setDir(-1,0)" style="grid-area:left">◀</button><div></div><button onclick="setDir(1,0)" style="grid-area:right">▶</button>
+    <div></div><button onclick="setDir(0,1)" style="grid-area:down">▼</button><div></div>
+  </div>
+  <button class="game-over" style="display:none;position:static;margin:12px auto;background:rgba(139,92,246,.15);border:none;padding:10px 20px;border-radius:12px;color:#a78bfa;cursor:pointer" onclick="init()" id="restartBtn">🔄 重新开始</button>
+</div>
+<div class="game-over" id="go"><h2 id="goTitle"></h2><p id="goDesc" style="color:#888;font-size:13px"></p><button onclick="document.getElementById('go').style.display='none';init()">🔄 再来一局</button></div>
+<footer>API Snake · 🦊 灵犀出品</footer>
+<script>
+const C=document.getElementById('c'),ctx=C.getContext('2d');
+const SIZE=20, COLS=20, ROWS=20;
+const ENDPOINTS=['GET','POST','PUT','DELETE','PATCH'];
+let snake,dir,food,score,best,gameRunning,interval,tickSpeed=120;
+
+function init(){
+  snake=[{x:10,y:10},{x:9,y:10},{x:8,y:10}];dir={x:1,y:0};score=0;
+  gameRunning=true;clearInterval(interval);
+  best=Math.max(best,parseInt(localStorage.getItem('snakeBest')||0));
+  spawnFood();
+  document.getElementById('restartBtn').style.display='block';
+  interval=setInterval(tick,tickSpeed);
+  draw();updateHUD();
+}
+
+function spawnFood(){
+  do{
+    food={x:Math.floor(Math.random()*COLS),y:Math.floor(Math.random()*ROWS),
+      emoji:ENDPOINTS[Math.floor(Math.random()*ENDPOINTS.length)],
+      pts:Math.random()<.2?5:1}
+  }while(snake.some(s=>s.x===food.x&&s.y===food.y))
+}
+
+function tick(){
+  if(!gameRunning) return;
+  const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+  if(head.x<0||head.x>=COLS||head.y<0||head.y>=ROWS||snake.some(s=>s.x===head.x&&s.y===head.y))return endGame();
+  snake.unshift(head);
+  if(head.x===food.x&&head.y===food.y){score+=food.pts;spawnFood()}else{snake.pop()}
+  draw();updateHUD();
+}
+
+function draw(){
+  ctx.fillStyle='#12122a';ctx.fillRect(0,0,C.width,C.height);
+  ctx.fillStyle='rgba(255,255,255,.02)';
+  for(let i=0;i<COLS;i++){ctx.fillRect(i*SIZE,0,1,C.height);ctx.fillRect(0,i*SIZE,C.width,1)}
+  snake.forEach((s,i)=>{
+    const a=1-i/snake.length*.5;
+    ctx.fillStyle=`rgba(34,197,94,${a})`;
+    ctx.fillRect(s.x*SIZE+1,s.y*SIZE+1,SIZE-2,SIZE-2);
+    if(i===0){ctx.fillStyle='#fff';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText('🐍',s.x*SIZE+SIZE/2,s.y*SIZE+SIZE/2+5)}
+  });
+  ctx.font='16px sans-serif';ctx.textAlign='center';
+  ctx.fillText(food.emoji,food.x*SIZE+SIZE/2,food.y*SIZE+SIZE/2+6);
+}
+
+function setDir(dx,dy){
+  if(!gameRunning) return;
+  if(dx!==-dir.x||dy!==-dir.y){dir={x:dx,y:dy}}
+}
+
+function updateHUD(){
+  document.getElementById('hScore').textContent=score;
+  document.getElementById('hLen').textContent=snake.length;
+  document.getElementById('hBest').textContent=best;
+}
+
+function endGame(){
+  gameRunning=false;clearInterval(interval);
+  if(score>best){best=score;localStorage.setItem('snakeBest',best)}
+  document.getElementById('goTitle').textContent='💥 撞墙了！';
+  document.getElementById('goTitle').style.color='#f87171';
+  document.getElementById('goDesc').textContent='得分: '+score+' · 长度: '+snake.length+' · 最佳: '+best;
+  document.getElementById('go').style.display='block';
+  updateHUD();
+}
+
+document.addEventListener('keydown',e=>{
+  const keys={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]};
+  if(keys[e.key]){e.preventDefault();setDir(...keys[e.key])}
+});
+
+// Touch swipe
+let touchStart=null;
+C.addEventListener('touchstart',e=>{touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY}});
+C.addEventListener('touchmove',e=>e.preventDefault());
+C.addEventListener('touchend',e=>{
+  if(!touchStart) return;
+  const dx=e.changedTouches[0].clientX-touchStart.x;
+  const dy=e.changedTouches[0].clientY-touchStart.y;
+  if(Math.abs(dx)>Math.abs(dy)) setDir(dx>0?1:-1,0); else setDir(0,dy>0?1:-1);
+  touchStart=null;
+});
+
+init();
+</script>
+</body>
+</html>
