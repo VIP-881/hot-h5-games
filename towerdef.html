@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🏰 塔防前线 - 热门H5游戏</title>
+<meta name="description" content="塔防前线H5策略游戏，点击放置防御塔阻挡敌人进攻，升级炮塔抵御越来越强的敌人，免费在线">
+<meta property="og:title" content="🏰 塔防前线 - 热门H5游戏"><meta property="og:description" content="放置防御塔，阻挡敌人进攻"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"塔防前线","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px;flex-wrap:wrap;justify-content:center}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:8px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🏰 塔防前线</h1>
+<div class="stats"><span>💰 <b id="gold">100</b></span><span>❤️ <b id="lives">10</b></span><span>🌊 <b id="wave">1</b></span><span>⚔️ <b id="kills">0</b></span></div>
+<canvas id="c" width="360" height="420"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=420;
+let towers=[],enemies=[],bullets=[],gold=100,lives=10,wave=1,kills=0,frame=0,spawnTimer=0,gameover=false;
+const PATH=[{x:0,y:200},{x:100,y:200},{x:100,y:100},{x:260,y:100},{x:260,y:300},{x:W,y:300}];
+const TOWER_COST=30;
+function spawnEnemy(){const hp=10+wave*5;enemies.push({x:0,y:200,hp,maxHp:hp,speed:1+wave*0.3,pathIdx:1,reward:10+wave*3,color:`hsl(${Math.random()*60+300},70%,50%)`,size:10+wave})}
+function placeTower(x,y){if(gold<TOWER_COST)return;towers.push({x,y,range:90,damage:8,cooldown:0,maxCooldown:30});gold-=TOWER_COST;document.getElementById('gold').textContent=gold}
+function update(){if(gameover)return;frame++;spawnTimer++;if(spawnTimer>Math.max(20,60-wave*3)){spawnEnemy();spawnTimer=0}
+  enemies.forEach(e=>{if(e.pathIdx<PATH.length){const t=PATH[e.pathIdx];const dx=t.x-e.x,dy=t.y-e.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<2)e.pathIdx++;else{e.x+=dx/dist*e.speed;e.y+=dy/dist*e.speed}}else{lives--;document.getElementById('lives').textContent=lives;enemies.splice(enemies.indexOf(e),1);if(lives<=0)endGame()}});
+  towers.forEach(t=>{t.cooldown--;if(t.cooldown<=0){let closest=null,cdist=999;enemies.forEach(e=>{const dx=e.x-t.x,dy=e.y-t.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<t.range&&dist<cdist){closest=e;cdist=dist}});if(closest){bullets.push({x:t.x,y:t.y,target:closest,speed:6});t.cooldown=t.maxCooldown}}});
+  for(let i=bullets.length-1;i>=0;i--){const b=bullets[i];const dx=b.target.x-b.x,dy=b.target.y-b.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<5||!enemies.includes(b.target)){b.target.hp-=towers[0]?.damage||8;if(b.target.hp<=0){gold+=b.target.reward;document.getElementById('gold').textContent=gold;kills++;document.getElementById('kills').textContent=kills;enemies.splice(enemies.indexOf(b.target),1)}bullets.splice(i,1)}else{b.x+=dx/dist*b.speed;b.y+=dy/dist*b.speed}};
+  if(enemies.length===0&&spawnTimer>80){wave++;document.getElementById('wave').textContent=wave;gold+=wave*20;document.getElementById('gold').textContent=gold;spawnTimer=0}
+}
+function endGame(){gameover=true;ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#ff4757';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`wave ${wave} · kills ${kills}`,W/2,H/2+20)}
+function draw(){
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#555';ctx.lineWidth=50;ctx.beginPath();ctx.moveTo(PATH[0].x,PATH[0].y);PATH.forEach(p=>ctx.lineTo(p.x,p.y));ctx.stroke();
+  ctx.strokeStyle='#333';ctx.lineWidth=46;ctx.setLineDash([8,8]);ctx.beginPath();ctx.moveTo(PATH[0].x,PATH[0].y);PATH.forEach(p=>ctx.lineTo(p.x,p.y));ctx.stroke();ctx.setLineDash([]);
+  towers.forEach(t=>{ctx.fillStyle='#3498db';ctx.beginPath();ctx.arc(t.x,t.y,14,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#2980b9';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText('🗼',t.x,t.y+5);ctx.strokeStyle='rgba(52,152,219,0.2)';ctx.setLineDash([2,4]);ctx.beginPath();ctx.arc(t.x,t.y,t.range,0,Math.PI*2);ctx.stroke();ctx.setLineDash([])});
+  enemies.forEach(e=>{ctx.fillStyle=e.color;ctx.beginPath();ctx.arc(e.x,e.y,e.size,0,Math.PI*2);ctx.fill();ctx.fillStyle='#000';ctx.fillRect(e.x-e.size/2,e.y-e.size-4,e.size*(e.hp/e.maxHp),3)});
+  bullets.forEach(b=>{ctx.fillStyle='#ff0';ctx.beginPath();ctx.arc(b.x,b.y,4,0,Math.PI*2);ctx.fill()});
+  ctx.fillStyle='#ff4757';ctx.fillRect(W-20,0,20,H);
+}
+c.addEventListener('click',e=>{const r=c.getBoundingClientRect();placeTower(e.clientX-r.left,e.clientY-r.top)});
+c.addEventListener('touchstart',e=>{e.preventDefault();const r=c.getBoundingClientRect();for(const t of e.touches)placeTower(t.clientX-r.left,t.clientY-r.top)});
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
