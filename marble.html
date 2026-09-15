@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎪 弹珠迷宫 - 热门H5游戏</title>
+<meta name="description" content="弹珠迷宫物理游戏，倾斜手机或拖动控制弹珠滚动穿过迷宫到达终点，考验平衡感免费在线">
+<meta property="og:title" content="🎪 弹珠迷宫 - 热门H5游戏"><meta property="og:description" content="倾斜控制弹珠走出迷宫"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"弹珠迷宫","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🎪 弹珠迷宫</h1>
+<div class="stats"><span>🎯 <b id="level">1</b>/4</span><span>⏱ <b id="timer">0</b>s</span><span>🏆 <b id="best">--</b></span></div>
+<canvas id="c" width="340" height="400"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=340,H=400;
+let ball={x:30,y:30,r:8,vx:0,vy:0},goal={x:0,y:0,r:16},walls=[],holes=[],level=1,timer=0,startTime,timerInterval,gameover=false,started=false;
+try{let b=parseInt(localStorage.getItem('marble_best')||'0');if(b)document.getElementById('best').textContent=`${b}s`}catch(e){}
+
+const LEVELS=[
+  {start:[30,30],goal:[310,370],walls:[[80,0,10,180],[160,0,10,150],[240,60,10,250],[160,260,160,10],[80,240,10,140]],holes:[[120,240],[280,80],[200,200]]},
+  {start:[30,370],goal:[310,30],walls:[[60,0,10,200],[120,80,10,100],[120,240,10,100],[200,0,10,200],[260,80,10,100],[260,240,10,100]],holes:[[90,150],[170,300],[230,50],[290,150]]},
+  {start:[170,30],goal:[170,370],walls:[[40,60,260,10],[40,60,10,280],[290,60,10,180],[100,120,140,10],[40,220,10,150],[290,220,10,150],[100,300,140,10]],holes:[[80,90],[260,90],[80,280],[260,280]]},
+  {start:[30,30],goal:[310,370],walls:[[60,40,10,320],[120,40,10,80],[120,200,10,80],[120,320,10,60],[200,40,10,80],[200,200,10,80],[200,320,10,60],[270,40,10,320]],holes:[[90,160],[150,280],[230,160],[290,280]]},
+];
+function loadLevel(l){const lv=LEVELS[l-1];ball={x:lv.start[0],y:lv.start[1],r:8,vx:0,vy:0};goal={x:lv.goal[0],y:lv.goal[1],r:16};walls=lv.walls.map(w=>({x:w[0],y:w[1],w:w[2],h:w[3]}));holes=lv.holes.map(h=>({x:h[0],y:h[1],r:10}));document.getElementById('level').textContent=l;timer=0;started=false;gameover=false}
+function update(){
+  if(gameover||!started)return;
+  ball.vx*=0.97;ball.vy*=0.97;ball.x+=ball.vx;ball.y+=ball.vy;
+  if(ball.x-ball.r<0){ball.x=ball.r;ball.vx*=-0.5}
+  if(ball.x+ball.r>W){ball.x=W-ball.r;ball.vx*=-0.5}
+  if(ball.y-ball.r<0){ball.y=ball.r;ball.vy*=-0.5}
+  if(ball.y+ball.r>H){ball.y=H-ball.r;ball.vy*=-0.5}
+  for(const w of walls){if(ball.x+ball.r>w.x&&ball.x-ball.r<w.x+w.w&&ball.y+ball.r>w.y&&ball.y-ball.r<w.y+w.h){gameover=true;clearInterval(timerInterval);ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#ff4757';ctx.font='bold 22px sans-serif';ctx.textAlign='center';ctx.fillText('碰到墙壁!',W/2,H/2-10);ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.fillText('点击重新开始',W/2,H/2+20);return}}
+  for(const h of holes){if(Math.sqrt((ball.x-h.x)**2+(ball.y-h.y)**2)<ball.r+h.r){gameover=true;clearInterval(timerInterval);ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#ff4757';ctx.font='bold 22px sans-serif';ctx.textAlign='center';ctx.fillText('掉进洞里!',W/2,H/2-10);setTimeout(()=>restart(),1000);return}}
+  if(Math.sqrt((ball.x-goal.x)**2+(ball.y-goal.y)**2)<ball.r+goal.r){clearInterval(timerInterval);let b=parseInt(localStorage.getItem('marble_best')||'0');if(!b||timer<b){try{localStorage.setItem('marble_best',timer)}catch(e){};document.getElementById('best').textContent=`${timer}s`}if(level<4){level++;loadLevel(level)}else{gameover=true;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#2ed573';ctx.font='bold 22px sans-serif';ctx.textAlign='center';ctx.fillText('🏆 全部通关!',W/2,H/2-10);ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.fillText(`${timer}s  点击重来`,W/2,H/2+20)}return}
+}
+function draw(){
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  walls.forEach(w=>{ctx.fillStyle='#636e72';ctx.fillRect(w.x,w.y,w.w,w.h);ctx.strokeStyle='#b2bec3';ctx.lineWidth=1;ctx.strokeRect(w.x,w.y,w.w,w.h)});
+  holes.forEach(h=>{ctx.fillStyle='#000';ctx.shadowColor='#000';ctx.shadowBlur=8;ctx.beginPath();ctx.arc(h.x,h.y,h.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0});
+  ctx.fillStyle='#ffd700';ctx.shadowColor='#ffd700';ctx.shadowBlur=10;ctx.beginPath();ctx.arc(goal.x,goal.y,goal.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText('🏁',goal.x,goal.y+4);
+  ctx.fillStyle='#fff';ctx.shadowColor='#fff';ctx.shadowBlur=6;ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+}
+// Tilt with accelerometer-like drag
+let tiltX=0,tiltY=0,lastTilt=0;
+c.addEventListener('mousemove',e=>{
+  const r=c.getBoundingClientRect(),dx=e.clientX-r.left-W/2,dy=e.clientY-r.top-H/2;
+  tiltX=dx*0.02;tiltY=dy*0.02;
+});
+// Apply tilt every frame
+let applyTilt=setInterval(()=>{if(started&&!gameover){ball.vx+=tiltX*0.3;ball.vy+=tiltY*0.3}},16);
+c.addEventListener('click',()=>{
+  if(gameover){restart();return}
+  if(!started){started=true;startTime=Date.now();timerInterval=setInterval(()=>{timer=Math.floor((Date.now()-startTime)/1000);document.getElementById('timer').textContent=timer},100)}
+});
+function restart(){level=1;clearInterval(timerInterval);loadLevel(1)}
+function loop(){update();draw();requestAnimationFrame(loop)}loadLevel(1);loop();
+</script>
+</body>
+</html>
