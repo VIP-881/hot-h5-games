@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🌈 渐变色挑战 - 热门H5游戏</title>
+<meta name="description" content="渐变色挑战H5益智游戏，将打乱的颜色方块排序成渐变过渡，考验色彩感知能力免费在线">
+<meta property="og:title" content="🌈 渐变色挑战 - 热门H5游戏"><meta property="og:description" content="排序颜色方块成渐变过渡"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"渐变色挑战","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.1);padding:4px 12px;border-radius:20px;font-size:0.9em}.tiles{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px;max-width:380px}.tile{width:60px;height:60px;border-radius:8px;cursor:pointer;transition:transform 0.2s}.tile:active{transform:scale(0.9)}.tile.selected{border:3px solid #fff;transform:scale(1.05)}.btn{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:8px 20px;border-radius:20px;font-size:0.85em;cursor:pointer;margin:4px}</style>
+</head>
+<body>
+<h1>🌈 渐变色挑战</h1>
+<div class="stats"><span>🎨 <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<div class="tiles" id="tiles"></div>
+<button class="btn" onclick="newRound()">🔄 新颜色</button>
+<script>
+let tiles=[],selected=null,score=0,best=0;
+try{best=parseInt(localStorage.getItem('gradient_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function genColors(){const h=Math.floor(Math.random()*360);const tiles2=[];for(let i=0;i<6;i++)tiles2.push({h,s:60+Math.random()*30,l:45+Math.random()*20,pos:i});return tiles2}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function newRound(){
+  tiles=genColors();tiles=shuffle(tiles);selected=null;render();
+}
+function render(){
+  document.getElementById('tiles').innerHTML=tiles.map((t,i)=>`<div class="tile${selected===i?' selected':''}" style="background:hsl(${t.h},${t.s}%,${t.l}%)" onclick="clickTile(${i})"></div>`).join('');
+}
+function clickTile(i){
+  if(selected===null){selected=i}else if(selected===i){selected=null}else{
+    [tiles[selected],tiles[i]]=[tiles[i],tiles[selected]];selected=null;
+    if(checkWin()){score++;document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('gradient_best',best)}catch(e)}setTimeout(newRound,500)}
+  }render();
+}
+function checkWin(){
+  for(let i=1;i<tiles.length;i++)if(tiles[i].h<tiles[i-1].h)return false;
+  return true;
+}
+newRound();
+</script>
+</body>
+</html>
