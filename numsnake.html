@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🔢 数字贪吃蛇 - 热门H5游戏</title>
+<meta name="description" content="数字贪吃蛇益智游戏，控制蛇吃掉正确数字让蛇变长，避开错误数字和墙壁免费在线">
+<meta property="og:title" content="🔢 数字贪吃蛇 - 热门H5游戏"><meta property="og:description" content="吃掉正确数字变长，避开错误"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"数字贪吃蛇"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.1);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:8px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🔢 数字贪吃蛇</h1>
+<div class="stats"><span>🐍 <b id="score">3</b></span><span>🎯 <b id="target">5</b></span><span>🏆 <b id="best">3</b></span></div>
+<canvas id="c" width="400" height="400"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=400,H=400,COLS=20,S=W/COLS;
+let snake=[{x:10,y:10}],foods=[],targetNum=5,score=3,dir={x:1,y:0},nextDir={x:1,y:0},best=3,gameover=false;
+try{best=parseInt(localStorage.getItem('numsnake_best'))||3;document.getElementById('best').textContent=best}catch(e){}
+function spawnFood(){
+  for(let i=0;i<3;i++){
+    const n=-3+Math.floor(Math.random()*7);
+    let x,y;do{x=Math.floor(Math.random()*COLS);y=Math.floor(Math.random()*COLS)}while(snake.some(s=>s.x===x&&s.y===y)||foods.some(f=>f.x===x&&f.y===y));
+    foods.push({x,y,n,color:n>0?'#2ecc71':'#e74c3c'});
+  }
+}
+function update(){if(gameover)return;dir=nextDir;
+  const h=snake[0],nx=h.x+dir.x,ny=h.y+dir.y;
+  if(nx<0||nx>=COLS||ny<0||ny>=COLS||snake.some(s=>s.x===nx&&s.y===ny)){endGame();return}
+  snake.unshift({x:nx,y:ny});
+  let ate=false;
+  for(let i=foods.length-1;i>=0;i--){const f=foods[i];if(nx===f.x&&ny===f.y){score+=f.n;targetNum+=3;if(score<=0){endGame();return}foods.splice(i,1);ate=true;break}}
+  if(!ate)snake.pop();
+  document.getElementById('score').textContent=score;document.getElementById('target').textContent=targetNum;
+  if(score>=targetNum){targetNum+=5;document.getElementById('target').textContent=targetNum;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('numsnake_best',best)}catch(e)}}
+  if(foods.length<5&&Math.random()<0.05)spawnFood();
+}
+function endGame(){gameover=true;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 24px sans-serif';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-10);ctx.font='14px sans-serif';ctx.fillText(`点击重来`,W/2,H/2+20)}
+function draw(){ctx.fillStyle='#0a0a1a';ctx.fillRect(0,0,W,H);
+  for(let x=0;x<COLS;x++)for(let y=0;y<COLS;y++)ctx.fillStyle=(x+y)%2?'#0d0d20':'#101028',ctx.fillRect(x*S,y*S,S,S);
+  foods.forEach(f=>{ctx.fillStyle=f.color;ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.fillText((f.n>0?'+':'')+f.n,f.x*S+S/2,f.y*S+S/2+5)});
+  snake.forEach((s,i)=>{const a=1-i/snake.length*0.5;ctx.fillStyle=`rgba(0,255,136,${a})`;ctx.fillRect(s.x*S+1,s.y*S+1,S-2,S-2)});
+}
+document.addEventListener('keydown',e=>{const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]};if(m[e.key]){e.preventDefault();const nd=m[e.key];if(nd[0]!==-dir.x||nd[1]!==-dir.y)nextDir={x:nd[0],y:nd[1]}}});
+c.addEventListener('touchstart',e=>{e.preventDefault();if(gameover){restart();return}const r=c.getBoundingClientRect();const x=e.touches[0].clientX-r.left,y=e.touches[0].clientY-r.top;const h=snake[0];const dx=x-h.x*S,dy=y-h.y*S;const nd=Math.abs(dx)>Math.abs(dy)?{x:dx>0?1:-1,y:0}:{x:0,y:dy>0?1:-1};if(nd.x!==-dir.x||nd.y!==-dir.y)nextDir=nd});
+c.addEventListener('click',()=>{if(gameover)restart()});
+function restart(){snake=[{x:10,y:10}];foods=[];score=3;targetNum=5;dir={x:1,y:0};nextDir={x:1,y:0};gameover=false;document.getElementById('score').textContent='3';document.getElementById('target').textContent='5';for(let i=0;i<8;i++)spawnFood()}
+for(let i=0;i<8;i++)spawnFood();setInterval(update,120);function loop(){draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
