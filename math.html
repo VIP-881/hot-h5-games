@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🔢 速算达人 - 热门H5游戏</title>
+<meta name="description" content="速算达人H5小游戏，限时心算加减乘除挑战，锻炼计算能力和反应速度，免费在线益智游戏">
+<meta property="og:title" content="🔢 速算达人 - 热门H5游戏">
+<meta property="og:description" content="心算挑战，限时回答数学题">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"速算达人","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#0c2461,#1e3799);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none}
+h1{font-size:1.8em;margin:4px 0}
+.stats{display:flex;gap:12px;margin:6px 0 10px}
+.stats span{background:rgba(255,255,255,0.12);padding:5px 14px;border-radius:20px;font-size:0.95em}
+.card{background:rgba(255,255,255,0.08);border-radius:16px;padding:24px;text-align:center;max-width:380px;width:95vw;border:1px solid rgba(255,255,255,0.1)}
+.question{font-size:3em;font-weight:bold;margin:16px 0}
+.timer-bar{height:6px;background:rgba(255,255,255,0.1);border-radius:3px;margin:10px 0;overflow:hidden}
+.timer-fill{height:100%;background:linear-gradient(90deg,#2ed573,#ffa502,#ff4757);border-radius:3px;transition:width 0.1s linear}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.btn-ans{padding:16px;border-radius:12px;font-size:1.3em;font-weight:bold;cursor:pointer;border:none;color:#fff;transition:all 0.15s;background:rgba(100,150,255,0.25)}
+.btn-ans:hover{background:rgba(100,150,255,0.4)}
+.btn-ans.correct{background:rgba(46,213,115,0.4)!important}
+.btn-ans.wrong{background:rgba(255,71,87,0.4)!important}
+</style>
+</head>
+<body>
+<h1>🔢 速算达人</h1>
+<div class="stats"><span>✅ <b id="correct">0</b></span><span>❌ <b id="wrong">0</b></span><span>🔥 <b id="streak">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<div class="card">
+  <div class="question" id="question">5 + 3</div>
+  <div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+  <div class="answers" id="answers"></div>
+</div>
+<script>
+let correct=0,wrong=0,streak=0,maxStreak=0,best=0,answer=-1,timeLeft=100,timerInterval;
+try{best=parseInt(localStorage.getItem('math_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function genQuestion(){
+  const ops=['+','-','×'];
+  const op=ops[Math.floor(Math.random()*3)];
+  let a,b,ans;
+  if(op==='+'){a=Math.floor(Math.random()*50)+1;b=Math.floor(Math.random()*50)+1;ans=a+b}
+  else if(op==='-'){a=Math.floor(Math.random()*80)+20;b=Math.floor(Math.random()*a);ans=a-b}
+  else{a=Math.floor(Math.random()*12)+2;b=Math.floor(Math.random()*9)+2;ans=a*b}
+  answer=ans;
+  const choices=[ans];
+  while(choices.length<4){const f=ans+(Math.floor(Math.random()*20)-10);if(f>=0&&f!==ans&&!choices.includes(f))choices.push(f)}
+  for(let i=choices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[choices[i],choices[j]]=[choices[j],choices[i]]}
+  document.getElementById('question').textContent=`${a} ${op} ${b} = ?`;
+  document.getElementById('answers').innerHTML=choices.map((c,i)=>`<button class="btn-ans" onclick="select(${c},this,event)">${c}</button>`).join('');
+  timeLeft=100;document.getElementById('timerFill').style.width='100%';
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{timeLeft--;document.getElementById('timerFill').style.width=`${timeLeft}%`;if(timeLeft<=0){timeUp()}},50);
+}
+function select(val,btn,ev){
+  clearInterval(timerInterval);
+  if(val===answer){
+    correct++;streak++;maxStreak=Math.max(maxStreak,streak);
+    document.getElementById('correct').textContent=correct;
+    document.getElementById('streak').textContent=streak;
+    btn.classList.add('correct');
+    if(correct>best){best=correct;document.getElementById('best').textContent=best;try{localStorage.setItem('math_best',best)}catch(e){}}
+  }else{
+    wrong++;streak=0;
+    document.getElementById('wrong').textContent=wrong;
+    document.getElementById('streak').textContent='0';
+    btn.classList.add('wrong');
+    document.querySelectorAll('.btn-ans').forEach(b=>{if(parseInt(b.textContent)===answer)b.classList.add('correct')});
+  }
+  document.querySelectorAll('.btn-ans').forEach(b=>b.style.pointerEvents='none');
+  setTimeout(genQuestion,600);
+}
+function timeUp(){
+  wrong++;streak=0;clearInterval(timerInterval);
+  document.getElementById('wrong').textContent=wrong;
+  document.getElementById('streak').textContent='0';
+  document.querySelectorAll('.btn-ans').forEach(b=>{b.style.pointerEvents='none';if(parseInt(b.textContent)===answer)b.classList.add('correct')});
+  setTimeout(genQuestion,600);
+}
+genQuestion();
+</script>
+</body>
+</html>
