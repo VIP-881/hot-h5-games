@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>⛏️ Data Miner — 数据库挖矿休闲游戏 | Maton H5 Games</title>
+<meta name="description" content="Data Miner 数据库挖矿游戏：在网格地图中挖掘数据宝石，避开 NULL 陷阱和 Schema 错误。收集金数据、银查询、钻石索引，升级你的钻头。">
+<meta name="keywords" content="挖矿游戏,数据挖矿,miner game,数据库游戏,grid game,休闲游戏,HTML5挖矿,收集游戏,Maton">
+<meta property="og:title" content="Data Miner — 数据库挖矿休闲游戏">
+<meta property="og:description" content="网格挖矿，收集数据宝石，避开NULL陷阱。升级钻头，深入数据库地层。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vip-881.github.io/hot-h5-games/data-miner.html">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://vip-881.github.io/hot-h5-games/data-miner.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"Data Miner","description":"数据库挖矿休闲游戏，挖掘数据宝石，避开NULL陷阱。","applicationCategory":"Game","operatingSystem":"Web","author":{"@type":"Organization","name":"Maton AI Games"},"genre":["Casual","Mining"]}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a14;color:#e0e0e0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(10,10,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,197,94,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#4ade80;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(34,197,94,.1);transition:.3s}
+nav a:hover{background:rgba(34,197,94,.2)}
+header{text-align:center;padding:20px;background:linear-gradient(180deg,rgba(34,197,94,.05),transparent)}
+header h1{font-size:1.6em;background:linear-gradient(135deg,#4ade80,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.container{max-width:500px;margin:0 auto;padding:0 16px}
+.hud{display:flex;justify-content:center;gap:16px;padding:10px;flex-wrap:wrap}
+.hud-item{text-align:center}.hud-item .val{font-size:18px;font-weight:700}.hud-item .lbl{font-size:9px;color:#666}
+#gameCanvas{display:block;margin:8px auto;background:#1a1a2e;border:1px solid rgba(34,197,94,.1);border-radius:8px;touch-action:none}
+.shop{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0}
+.shop-item{background:rgba(20,20,35,.9);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 14px;text-align:center;cursor:pointer;transition:.3s;min-width:80px}
+.shop-item:hover{border-color:rgba(139,92,246,.4)}
+.shop-item .icon{font-size:24px}
+.shop-item .name{font-size:11px;color:#888}
+.shop-item .cost{font-size:12px;color:#fbbf24;font-weight:600}
+footer{text-align:center;padding:12px;color:#444;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>⛏️ Data Miner</span></nav>
+<header><h1>⛏️ Data Miner</h1><p>挖掘数据宝石 · 避开 NULL 陷阱 · 深入数据库地层</p></header>
+<div class="container">
+  <div class="hud">
+    <div class="hud-item"><div class="val" id="hScore" style="color:#fbbf24">0</div><div class="lbl">💎 价值</div></div>
+    <div class="hud-item"><div class="val" id="hDepth" style="color:#06b6d4">0m</div><div class="lbl">⛏️ 深度</div></div>
+    <div class="hud-item"><div class="val" id="hFuel" style="color:#4ade80">100</div><div class="lbl">⛽ 能量</div></div>
+    <div class="hud-item"><div class="val" id="hDrill" style="color:#a78bfa">1</div><div class="lbl">🔧 钻头</div></div>
+  </div>
+  <canvas id="gameCanvas" width="360" height="480"></canvas>
+  <div class="shop">
+    <div class="shop-item" onclick="upgrade('fuel')"><div class="icon">⛽</div><div class="name">能量上限</div><div class="cost" id="cost-fuel">50</div></div>
+    <div class="shop-item" onclick="upgrade('drill')"><div class="icon">🔧</div><div class="name">钻头等级</div><div class="cost" id="cost-drill">100</div></div>
+    <div class="shop-item" onclick="upgrade('speed')"><div class="icon">⚡</div><div class="name">挖掘速度</div><div class="cost" id="cost-speed">75</div></div>
+  </div>
+</div>
+<footer>Powered by Maton.ai · 数据矿工 · 🦊 灵犀出品</footer>
+<script>
+const C=document.getElementById('gameCanvas'),ctx=C.getContext('2d');
+const W=360,H=480,CELL=30,COLS=W/CELL,ROWS=H/CELL;
+let score=0,depth=0,fuel=100,maxFuel=100,drillLvl=1,speed=1,grid=[],player={x:COLS/2,y:ROWS-2};
+let upgrades={fuel:{level:0,baseCost:50},drill:{level:0,baseCost:100},speed:{level:0,baseCost:75}};
+
+const ITEMS=[
+  {emoji:'🪨',name:'岩石',score:1,color:'#555',weight:5},
+  {emoji:'💎',name:'金数据',score:10,color:'#fbbf24',weight:2},
+  {emoji:'🔮',name:'银查询',score:5,color:'#c0c0c0',weight:3},
+  {emoji:'💠',name:'钻石索引',score:25,color:'#06b6d4',weight:1},
+  {emoji:'⚫',name:'NULL',score:-5,color:'#ef4444',weight:2,damage:10},
+  {emoji:'🕳️',name:'Schema错误',score:-15,color:'#f87171',weight:1,damage:25},
+  {emoji:'⚪',name:'空',score:0,color:'#333',weight:8},
+];
+
+function generateGrid(){
+  grid=[];const items=[];
+  ITEMS.forEach(it=>{for(let i=0;i<it.weight;i++)items.push(it)});
+  for(let y=0;y<ROWS;y++){grid[y]=[];for(let x=0;x<COLS;x++){grid[y][x]=items[Math.floor(Math.random()*items.length)]}}
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // Draw grid
+  for(let y=0;y<ROWS;y++){
+    for(let x=0;x<COLS;x++){
+      const cell=grid[y][x];
+      const dist=Math.abs(x-player.x)+Math.abs(y-player.y);
+      const visible=dist<=3;
+      ctx.fillStyle=visible?cell.color+'22':cell.color+'05';
+      ctx.fillRect(x*CELL,y*CELL,CELL-1,CELL-1);
+      if(visible){ctx.font='16px sans-serif';ctx.textAlign='center';ctx.fillText(cell.emoji,x*CELL+CELL/2,y*CELL+CELL/2+6)}
+    }
+  }
+  // Player
+  ctx.fillStyle='#4ade80';ctx.fillRect(player.x*CELL+4,player.y*CELL+4,CELL-8,CELL-8);
+  ctx.font='18px sans-serif';ctx.textAlign='center';ctx.fillText('⛏️',player.x*CELL+CELL/2,player.y*CELL+CELL/2+7);
+  // Depth indicator
+  ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(0,0,W,20);
+  ctx.fillStyle='#fff';ctx.font='10px sans-serif';ctx.textAlign='center';
+  ctx.fillText('深度: '+depth+'m | 价值: ¥'+score.toLocaleString(),W/2,14);
+}
+
+function move(dx,dy){
+  const nx=player.x+dx,ny=player.y+dy;
+  if(nx<0||nx>=COLS||ny<0||ny>=ROWS) return;
+  if(fuel<=0) return;
+  fuel--;player.x=nx;player.y=ny;
+  if(ny<player.y+dy) depth++;
+  const cell=grid[ny][nx];
+  if(cell.score>0){score+=cell.score*drillLvl;grid[ny][nx]=ITEMS.find(i=>i.name==='空')}
+  else if(cell.damage){fuel-=cell.damage;grid[ny][nx]=ITEMS.find(i=>i.name==='空')}
+  if(fuel<=0){fuel=0;document.getElementById('hFuel').style.color='#f87171'}
+  updateHUD();draw();
+}
+
+document.addEventListener('keydown',e=>{
+  const moves={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]};
+  if(moves[e.key]){e.preventDefault();move(...moves[e.key])}
+});
+C.addEventListener('click',e=>{
+  const r=C.getBoundingClientRect();
+  const cx=Math.floor((e.clientX-r.left)/CELL),cy=Math.floor((e.clientY-r.top)/CELL);
+  const dx=cx-player.x,dy=cy-player.y;
+  if(Math.abs(dx)<=1&&Math.abs(dy)<=1&&(dx||dy)) move(dx,dy);
+});
+
+function upgrade(type){
+  const u=upgrades[type];
+  const cost=Math.floor(u.baseCost*Math.pow(1.5,u.level));
+  if(score<cost) return;
+  score-=cost;u.level++;
+  if(type==='fuel'){maxFuel+=20;fuel=maxFuel}
+  if(type==='drill') drillLvl++
+  if(type==='speed') speed+=.5
+  document.getElementById('cost-'+type).textContent=Math.floor(u.baseCost*Math.pow(1.5,u.level));
+  updateHUD();draw();
+}
+
+function updateHUD(){
+  document.getElementById('hScore').textContent=score.toLocaleString();
+  document.getElementById('hDepth').textContent=depth+'m';
+  document.getElementById('hFuel').textContent=fuel;
+  document.getElementById('hFuel').style.color=fuel<20?'#f87171':fuel<50?'#fbbf24':'#4ade80';
+  document.getElementById('hDrill').textContent=drillLvl;
+}
+
+// Refuel at top
+setInterval(()=>{
+  if(player.y>=ROWS-2){fuel=Math.min(maxFuel,fuel+speed*2);updateHUD()}
+},1000);
+
+generateGrid();draw();updateHUD();
+</script>
+</body>
+</html>

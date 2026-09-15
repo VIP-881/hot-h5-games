@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>💰 API Clicker — 开发者点击放置挂机游戏 | Maton H5 Games</title>
+<meta name="description" content="API Clicker：点击调用 API 赚取金币，购买自动化升级。从手动 curl 到 Serverless、Docker、K8s 全自动。开发者专属放置挂机游戏。">
+<meta name="keywords" content="点击游戏,放置游戏,idle game,clicker game,API游戏,开发者挂机,curl,serverless,自动化升级,Maton">
+<meta property="og:title" content="API Clicker — 开发者点击放置挂机游戏">
+<meta property="og:description" content="点击调用API赚金币，升级到全自动Serverless/K8s。开发者专属idle game。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vip-881.github.io/hot-h5-games/api-clicker.html">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://vip-881.github.io/hot-h5-games/api-clicker.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"API Clicker","description":"开发者点击放置游戏，手动curl到全自动K8s升级。","applicationCategory":"Game","operatingSystem":"Web","author":{"@type":"Organization","name":"Maton AI Games"},"genre":["Casual","Incremental","Educational"]}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a14;color:#e0e0e0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(10,10,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(251,191,36,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#fbbf24;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(251,191,36,.1);transition:.3s}
+nav a:hover{background:rgba(251,191,36,.2)}
+header{text-align:center;padding:20px;background:linear-gradient(180deg,rgba(251,191,36,.05),transparent)}
+header h1{font-size:1.6em;background:linear-gradient(135deg,#fbbf24,#f59e0b,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.container{max-width:500px;margin:16px auto;padding:0 16px}
+.click-area{text-align:center;padding:30px 0}
+.click-btn{width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,#fbbf24,#f59e0b);border:none;color:#000;font-size:48px;cursor:pointer;transition:all .15s;box-shadow:0 0 30px rgba(251,191,36,.3);user-select:none;position:relative}
+.click-btn:active{transform:scale(.9);box-shadow:0 0 50px rgba(251,191,36,.6)}
+.click-btn .per-click{font-size:11px;color:#000;opacity:.7;position:absolute;bottom:20px;left:50%;transform:translateX(-50%)}
+.float-text{position:absolute;animation:floatUp 1.5s ease-out forwards;font-weight:700;color:#fbbf24;pointer-events:none;font-size:20px;z-index:50}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
+.stats{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin:12px 0}
+.stat-card{background:rgba(20,20,35,.9);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 20px;text-align:center;min-width:90px}
+.stat-card .val{font-size:24px;font-weight:700}
+.stat-card .lbl{font-size:10px;color:#888;margin-top:2px}
+.upgrades{margin-top:16px}
+.upgrade-item{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(20,20,35,.9);border:1px solid rgba(255,255,255,.05);border-radius:12px;margin:6px 0;cursor:pointer;transition:.3s}
+.upgrade-item:hover{border-color:rgba(139,92,246,.3);background:rgba(139,92,246,.05)}
+.upgrade-item.owned{opacity:.4}
+.upgrade-item.owned:hover{opacity:.5}
+.upgrade-icon{font-size:28px;min-width:36px;text-align:center}
+.upgrade-info{flex:1}
+.upgrade-info .name{font-size:13px;font-weight:600}
+.upgrade-info .desc{font-size:10px;color:#888}
+.upgrade-cost{font-size:13px;font-weight:700;color:#fbbf24;min-width:60px;text-align:right}
+.per-second{text-align:center;font-size:13px;color:#4ade80;margin:8px 0}
+.per-second span{font-size:20px;font-weight:700}
+footer{text-align:center;padding:16px;color:#444;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>💰 API Clicker</span></nav>
+<header><h1>💰 API Clicker</h1><p>点击调用 API 赚金币 · 升级到全自动 Serverless</p></header>
+<div class="container">
+  <div class="stats">
+    <div class="stat-card"><div class="val" id="coins" style="color:#fbbf24">0</div><div class="lbl">🪙 API 金币</div></div>
+    <div class="stat-card"><div class="val" id="cps" style="color:#4ade80">0</div><div class="lbl">⚡ 每秒</div></div>
+    <div class="stat-card"><div class="val" id="total" style="color:#a78bfa">0</div><div class="lbl">📊 总计</div></div>
+  </div>
+  <div class="click-area">
+    <button class="click-btn" id="clickBtn" onclick="clickAPI(event)">⚡<span class="per-click" id="perClick">+1</span></button>
+    <div style="font-size:12px;color:#888;margin-top:8px">点击 = curl 一次 API</div>
+  </div>
+  <div class="per-second">每秒: <span id="perSecVal" style="color:#4ade80">0</span> 金币</div>
+  <div class="upgrades">
+    <div class="upgrade-item" id="upg-0" onclick="buyUpgrade(0)">
+      <div class="upgrade-icon">📜</div>
+      <div class="upgrade-info"><div class="name">curl 脚本</div><div class="desc">+1 每次点击</div></div>
+      <div class="upgrade-cost" id="cost-0">10 🪙</div>
+    </div>
+    <div class="upgrade-item" id="upg-1" onclick="buyUpgrade(1)">
+      <div class="upgrade-icon">📦</div>
+      <div class="upgrade-info"><div class="name">npm 包</div><div class="desc">+5 每秒自动</div></div>
+      <div class="upgrade-cost" id="cost-1">50 🪙</div>
+    </div>
+    <div class="upgrade-item" id="upg-2" onclick="buyUpgrade(2)">
+      <div class="upgrade-icon">🔄</div>
+      <div class="upgrade-info"><div class="name">Cron Job</div><div class="desc">+20 每秒自动</div></div>
+      <div class="upgrade-cost" id="cost-2">300 🪙</div>
+    </div>
+    <div class="upgrade-item" id="upg-3" onclick="buyUpgrade(3)">
+      <div class="upgrade-icon">☁️</div>
+      <div class="upgrade-info"><div class="name">Serverless</div><div class="desc">+100 每秒自动</div></div>
+      <div class="upgrade-cost" id="cost-3">2000 🪙</div>
+    </div>
+    <div class="upgrade-item" id="upg-4" onclick="buyUpgrade(4)">
+      <div class="upgrade-icon">🐳</div>
+      <div class="upgrade-info"><div class="name">Docker 集群</div><div class="desc">+500 每秒自动</div></div>
+      <div class="upgrade-cost" id="cost-4">15000 🪙</div>
+    </div>
+    <div class="upgrade-item" id="upg-5" onclick="buyUpgrade(5)">
+      <div class="upgrade-icon">☸️</div>
+      <div class="upgrade-info"><div class="name">K8s 集群</div><div class="desc">+2000 每秒自动</div></div>
+      <div class="upgrade-cost" id="cost-5">100k 🪙</div>
+    </div>
+  </div>
+</div>
+<footer>Powered by Maton.ai · Idle API Empire · 🦊 灵犀出品</footer>
+<script>
+let data=JSON.parse(localStorage.getItem('api_clicker')||'{"coins":0,"total":0,"clickPower":1,"upgrades":[0,0,0,0,0,0],"perSec":0}');
+const UPGRADES=[
+  {name:'curl 脚本',icon:'📜',baseCost:10,perClick:1,desc:'+1 每次点击'},
+  {name:'npm 包',icon:'📦',baseCost:50,perSec:5,desc:'+5/秒'},
+  {name:'Cron Job',icon:'🔄',baseCost:300,perSec:20,desc:'+20/秒'},
+  {name:'Serverless',icon:'☁️',baseCost:2000,perSec:100,desc:'+100/秒'},
+  {name:'Docker',icon:'🐳',baseCost:15000,perSec:500,desc:'+500/秒'},
+  {name:'K8s',icon:'☸️',baseCost:100000,perSec:2000,desc:'+2000/秒'},
+];
+
+function save(){localStorage.setItem('api_clicker',JSON.stringify(data))}
+
+function updateUI(){
+  document.getElementById('coins').textContent=Math.floor(data.coins).toLocaleString();
+  document.getElementById('total').textContent=Math.floor(data.total).toLocaleString();
+  document.getElementById('cps').textContent=Math.floor(data.perSec);
+  document.getElementById('perSecVal').textContent=Math.floor(data.perSec);
+  document.getElementById('perClick').textContent='+'+data.clickPower;
+
+  UPGRADES.forEach((u,i)=>{
+    const owned=data.upgrades[i];
+    const cost=Math.floor(u.baseCost*Math.pow(1.5,owned));
+    document.getElementById('cost-'+i).textContent=cost.toLocaleString()+' 🪙';
+    const el=document.getElementById('upg-'+i);
+    el.classList.toggle('owned',owned>=10);
+    el.style.opacity=data.coins>=cost?'1':'.6';
+  });
+}
+
+function clickAPI(e){
+  data.coins+=data.clickPower;data.total+=data.clickPower;
+  // Float text
+  const btn=document.getElementById('clickBtn');
+  const rect=btn.getBoundingClientRect();
+  const ft=document.createElement('div');ft.className='float-text';
+  ft.textContent='+'+data.clickPower;
+  ft.style.left=(rect.left+rect.width/2-20+Math.random()*40)+'px';
+  ft.style.top=(rect.top-10)+'px';
+  document.body.appendChild(ft);setTimeout(()=>ft.remove(),1500);
+  updateUI();save();
+}
+
+function buyUpgrade(i){
+  const owned=data.upgrades[i];
+  const cost=Math.floor(UPGRADES[i].baseCost*Math.pow(1.5,owned));
+  if(data.coins<cost) return;
+  data.coins-=cost;data.upgrades[i]++;
+  const u=UPGRADES[i];
+  if(u.perClick) data.clickPower+=u.perClick;
+  if(u.perSec) data.perSec+=u.perSec;
+  updateUI();save();
+}
+
+// Auto tick
+setInterval(()=>{
+  if(data.perSec>0){data.coins+=data.perSec/10;data.total+=data.perSec/10}
+  updateUI();save();
+},100);
+
+updateUI();
+</script>
+</body>
+</html>

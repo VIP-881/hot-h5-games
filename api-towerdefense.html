@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🏰 API Tower Defense — 接口塔防策略游戏 | Maton H5 Games</title>
+<meta name="description" content="API塔防游戏：建造防火墙、限流器、缓存塔来抵御流量攻击。每波敌人=API请求峰值，合理布防保护服务器。8种防御塔，无限波数挑战。">
+<meta name="keywords" content="塔防游戏,tower defense,API防御,防火墙,限流,缓存,服务器保护,策略游戏,HTML5塔防,Maton">
+<meta property="og:title" content="API Tower Defense — 接口塔防策略游戏">
+<meta property="og:description" content="建造防御塔抵御API流量攻击。防火墙、限流器、缓存塔——保护你的服务器。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vip-881.github.io/hot-h5-games/api-towerdefense.html">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://vip-881.github.io/hot-h5-games/api-towerdefense.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"API Tower Defense","description":"API塔防策略游戏，建造防御塔抵御流量攻击。8种防御塔，无限波数。","applicationCategory":"Game","operatingSystem":"Web","author":{"@type":"Organization","name":"Maton AI Games"},"genre":["Strategy","TowerDefense"]}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a14;color:#e0e0e0;min-height:100vh;overflow:hidden}
+nav{position:sticky;top:0;z-index:100;background:rgba(10,10,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(239,68,68,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#f87171;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(239,68,68,.1);transition:.3s}
+nav a:hover{background:rgba(239,68,68,.2)}
+#gameCanvas{display:block;margin:0 auto;background:#12122a}
+.hud{display:flex;justify-content:center;gap:14px;padding:8px;flex-wrap:wrap;max-width:600px;margin:0 auto}
+.hud-item{text-align:center}.hud-item .val{font-size:16px;font-weight:700}.hud-item .lbl{font-size:9px;color:#666}
+.tower-select{display:flex;justify-content:center;gap:6px;padding:6px;flex-wrap:wrap;max-width:600px;margin:0 auto}
+.tower-btn{width:48px;height:48px;border-radius:10px;border:2px solid rgba(255,255,255,.1);background:rgba(20,20,35,.9);cursor:pointer;font-size:22px;transition:.3s}
+.tower-btn:hover{border-color:rgba(139,92,246,.5)}
+.tower-btn.selected{border-color:#fbbf24;box-shadow:0 0 12px rgba(251,191,36,.4)}
+.tower-btn:disabled{opacity:.3}
+.game-over{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#1a1a2e,#2a1a3e);border:2px solid rgba(139,92,246,.3);border-radius:20px;padding:32px;text-align:center;z-index:200;display:none}
+.game-over h2{font-size:28px;margin-bottom:12px}
+.game-over button{margin-top:16px;padding:12px 28px;border:none;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:16px;cursor:pointer}
+footer{text-align:center;padding:8px;color:#444;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>🏰 Tower Defense</span></nav>
+<div class="hud">
+  <div class="hud-item"><div class="val" id="hGold" style="color:#fbbf24">200</div><div class="lbl">🪙 金币</div></div>
+  <div class="hud-item"><div class="val" id="hWave" style="color:#06b6d4">1</div><div class="lbl">🌊 波次</div></div>
+  <div class="hud-item"><div class="val" id="hHealth" style="color:#4ade80">10</div><div class="lbl">❤️ 生命</div></div>
+  <div class="hud-item"><div class="val" id="hKills" style="color:#f87171">0</div><div class="lbl">💀 击杀</div></div>
+</div>
+<div class="tower-select" id="towerPalette"></div>
+<canvas id="gameCanvas" width="640" height="400"></canvas>
+<div class="game-over" id="gameOver">
+  <h2 id="goTitle">💥 服务器崩溃！</h2>
+  <p id="goDesc" style="color:#888;margin:8px 0"></p>
+  <button id="goBtn">🔄 重新部署</button>
+</div>
+<footer>API Tower Defense · 🦊 灵犀出品</footer>
+<script>
+const C=document.getElementById('gameCanvas'),ctx=C.getContext('2d');
+const W=C.width,H=C.height,CELL=40,COLS=W/CELL,ROWS=H/CELL;
+
+const TOWERS=[{name:'防火墙',emoji:'🧱',cost:50,range:3,dmg:15,cd:40,color:'#f87171'},
+  {name:'限流器',emoji:'🚦',cost:100,range:4,dmg:30,cd:60,color:'#fbbf24'},
+  {name:'缓存',emoji:'💾',cost:80,range:3,dmg:10,cd:25,color:'#4ade80'},
+  {name:'WAF',emoji:'🛡️',cost:150,range:5,dmg:50,cd:80,color:'#a78bfa'}];
+const PATH=[{x:0,y:4},{x:3,y:4},{x:3,y:1},{x:6,y:1},{x:6,y:6},{x:10,y:6},{x:10,y:3},{x:14,y:3},{x:14,y:5},{x:15,y:5}];
+
+let gold=200,health=10,wave=1,kills=0,enemies=[],towers=[],projectiles=[],spawnTimer=0,selectedTower=0,gameRunning=true;
+
+function drawGrid(){
+  ctx.strokeStyle='rgba(255,255,255,.03)';ctx.lineWidth=.5;
+  for(let x=0;x<W;x+=CELL){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  for(let y=0;y<H;y+=CELL){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+  // Draw path
+  ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(PATH[0].x*CELL+CELL/2,PATH[0].y*CELL+CELL/2);
+  PATH.forEach(p=>ctx.lineTo(p.x*CELL+CELL/2,p.y*CELL+CELL/2));
+  ctx.stroke();
+  // End point
+  ctx.fillStyle='#ef4444';ctx.beginPath();
+  ctx.arc(15*CELL,5*CELL+CELL/2,CELL/3,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='10px sans-serif';ctx.textAlign='center';
+  ctx.fillText('🏠',15*CELL+CELL/2,5*CELL+CELL/2+4);
+}
+
+function drawTowers(){
+  towers.forEach(t=>{
+    ctx.fillStyle=t.color+'33';ctx.beginPath();
+    ctx.arc(t.x*CELL+CELL/2,t.y*CELL+CELL/2,t.range*CELL,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=t.color;ctx.fillRect(t.x*CELL+2,t.y*CELL+2,CELL-4,CELL-4);
+    ctx.font='20px sans-serif';ctx.textAlign='center';
+    ctx.fillText(t.emoji,t.x*CELL+CELL/2,t.y*CELL+CELL/2+7);
+  });
+}
+
+function drawEnemies(){
+  enemies.forEach(e=>{
+    ctx.fillStyle='#'+Math.floor(e.hp/10*255).toString(16).padStart(2,'0')+'3333';
+    ctx.beginPath();ctx.arc(e.x,e.y,14,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.textAlign='center';
+    ctx.fillText('🐛',e.x,e.y+5);
+    // HP bar
+    ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(e.x-14,e.y-20,28,4);
+    ctx.fillStyle=e.hp>50?'#4ade80':e.hp>25?'#fbbf24':'#ef4444';
+    ctx.fillRect(e.x-14,e.y-20,28*e.hp/100,4);
+  });
+}
+
+function drawProjectiles(){
+  projectiles.forEach(p=>{ctx.fillStyle='#fbbf24';ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fill()});
+}
+
+function drawHUD(){document.getElementById('hGold').textContent=gold;document.getElementById('hWave').textContent=wave;document.getElementById('hHealth').textContent=health;document.getElementById('hKills').textContent=kills}
+
+function gameLoop(){
+  if(!gameRunning) return;
+  ctx.clearRect(0,0,W,H);drawGrid();drawTowers();drawEnemies();drawProjectiles();
+
+  // Spawn enemies
+  spawnTimer++;const rate=Math.max(10,60-wave*3);
+  if(spawnTimer>=rate){spawnTimer=0;const hp=50+wave*15;enemies.push({x:PATH[0].x*CELL+CELL/2,y:PATH[0].y*CELL+CELL/2,hp,pathIdx:0,speed:1.2+wave*.1})}
+
+  // Move enemies
+  enemies.forEach(e=>{
+    const target=PATH[e.pathIdx];const tx=target.x*CELL+CELL/2,ty=target.y*CELL+CELL/2;
+    const dx=tx-e.x,dy=ty-e.y,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<2){e.pathIdx++;if(e.pathIdx>=PATH.length){health--;e.hp=0}}
+    else{e.x+=dx/dist*e.speed;e.y+=dy/dist*e.speed}
+  });
+  // Remove dead/reached
+  enemies=enemies.filter(e=>e.hp>0);
+  if(health<=0){endGame(false);return}
+
+  // Towers shoot
+  towers.forEach(t=>{t.cd--;if(t.cd<=0){const target=enemies.find(e=>{const d=Math.sqrt((e.x-(t.x*CELL+CELL/2))**2+(e.y-(t.y*CELL+CELL/2))**2);return d<t.range*CELL});if(target){t.cd=t.baseCd;projectiles.push({x:t.x*CELL+CELL/2,y:t.y*CELL+CELL/2,tx:target.x,ty:target.y,dmg:t.dmg,target})}}});
+
+  // Move projectiles
+  projectiles.forEach(p=>{const dx=p.tx-p.x,dy=p.ty-p.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<8){p.target.hp-=p.dmg;p.done=true}else{p.x+=dx/dist*8;p.y+=dy/dist*8}});
+  projectiles=projectiles.filter(p=>!p.done);
+  // Dead enemies
+  enemies.forEach(e=>{if(e.hp<=0){gold+=10+wave*2;kills++;e.dead=true}});
+  enemies=enemies.filter(e=>!e.dead);
+
+  // Next wave
+  if(enemies.length===0&&spawnTimer>120){wave++;spawnTimer=0;gold+=wave*30}
+
+  drawHUD();requestAnimationFrame(gameLoop);
+}
+
+C.addEventListener('click',e=>{
+  const rect=C.getBoundingClientRect();
+  const gx=Math.floor((e.clientX-rect.left)/CELL),gy=Math.floor((e.clientY-rect.top)/CELL);
+  // Check not on path
+  const onPath=PATH.some(p=>p.x===gx&&p.y===gy);
+  const hasTower=towers.some(t=>t.x===gx&&t.y===gy);
+  if(onPath||hasTower) return;
+  const t=TOWERS[selectedTower];
+  if(gold>=t.cost){gold-=t.cost;towers.push({...t,x:gx,y:gy,cd:0,baseCd:t.cd})}
+});
+
+document.addEventListener('keydown',e=>{
+  const keys=['1','2','3','4'];
+  const idx=keys.indexOf(e.key);
+  if(idx>=0){selectedTower=idx;renderPalette()}
+});
+
+function renderPalette(){
+  document.getElementById('towerPalette').innerHTML=TOWERS.map((t,i)=>'<button class="tower-btn'+(i===selectedTower?' selected':'')+'" onclick="selectedTower='+i+';renderPalette()" title="'+t.name+' ('+t.cost+'g)">'+t.emoji+'</button>').join('');
+}
+
+function endGame(win){gameRunning=false;const o=document.getElementById('gameOver');o.style.display='block';document.getElementById('goTitle').textContent=win?'🎉 防御成功！':'💥 服务器崩溃！';document.getElementById('goTitle').style.color=win?'#4ade80':'#f87171';document.getElementById('goDesc').textContent='波次 '+wave+' · 击杀 '+kills;document.getElementById('goBtn').onclick=()=>{o.style.display='none';gold=200;health=10;wave=1;kills=0;enemies=[];towers=[];projectiles=[];spawnTimer=0;gameRunning=true;gameLoop()}}
+
+renderPalette();gameLoop();
+</script>
+</body>
+</html>
