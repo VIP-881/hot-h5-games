@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎨 像素绘图 - 热门H5游戏</title>
+<meta name="description" content="像素绘图Pixel Art创作工具，在16×16网格上点击绘制像素图案，支持多彩色和导出图片免费在线">
+<meta property="og:title" content="🎨 像素绘图 - 热门H5游戏"><meta property="og:description" content="16×16像素网格绘图创作"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"像素绘图","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.toolbar{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:6px 0}.color-btn{width:24px;height:24px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);cursor:pointer;transition:all 0.2s}.color-btn:hover{transform:scale(1.2)}.color-btn.active{border-color:#fff;box-shadow:0 0 8px currentColor}canvas{display:block;border-radius:6px;max-width:96vw;image-rendering:pixelated;cursor:crosshair}.btn{padding:6px 14px;border-radius:16px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);color:#fff;cursor:pointer;font-size:0.8em;margin:3px}</style>
+</head>
+<body>
+<h1>🎨 像素绘图</h1>
+<div class="toolbar" id="toolbar"></div>
+<div><button class="btn" onclick="clearGrid()">🗑️</button><button class="btn" onclick="fillGrid()">🪣</button><button class="btn" onclick="saveImg()">💾</button></div>
+<canvas id="c" width="320" height="320"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),SIZE=16,N=20;
+let grid=Array(N).fill().map(()=>Array(N).fill('#fff')),currentColor='#000',drawing=false;
+const colors=['#000','#fff','#ff4757','#ffa502','#ffdd59','#2ed573','#1e90ff','#a55eea','#ff6b81','#e67e22','#00cec9','#8B4513','#808080','#FFD700','#ff69b4','#7bed9f'];
+colors.forEach(cl=>{const b=document.createElement('div');b.className='color-btn'+(cl===currentColor?' active':'');b.style.background=cl;b.style.color=cl;b.addEventListener('click',()=>{currentColor=cl;document.querySelectorAll('.color-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active')});document.getElementById('toolbar').appendChild(b)});
+function drawGrid(){ctx.fillStyle='#333';ctx.fillRect(0,0,SIZE*N,SIZE*N);for(let r=0;r<N;r++)for(let c=0;c<N;c++){ctx.fillStyle=grid[r][c];ctx.fillRect(c*SIZE+1,r*SIZE+1,SIZE-2,SIZE-2)}}
+function paint(x,y){const col=Math.floor(x/SIZE),row=Math.floor(y/SIZE);if(row>=0&&row<N&&col>=0&&col<N){grid[row][col]=currentColor;drawGrid()}}
+function erase(x,y){const col=Math.floor(x/SIZE),row=Math.floor(y/SIZE);if(row>=0&&row<N&&col>=0&&col<N){grid[row][col]='#fff';drawGrid()}}
+c.addEventListener('mousedown',e=>{drawing=true;const r=c.getBoundingClientRect();e.button===2?erase(e.clientX-r.left,e.clientY-r.top):paint(e.clientX-r.left,e.clientY-r.top)});
+c.addEventListener('mousemove',e=>{if(!drawing)return;const r=c.getBoundingClientRect();e.buttons===2?erase(e.clientX-r.left,e.clientY-r.top):paint(e.clientX-r.left,e.clientY-r.top)});
+c.addEventListener('mouseup',()=>drawing=false);
+c.addEventListener('contextmenu',e=>e.preventDefault());
+c.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;const r=c.getBoundingClientRect();paint(e.touches[0].clientX-r.left,e.touches[0].clientY-r.top)});
+c.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const r=c.getBoundingClientRect();paint(e.touches[0].clientX-r.left,e.touches[0].clientY-r.top)});
+c.addEventListener('touchend',()=>drawing=false);
+function clearGrid(){grid=Array(N).fill().map(()=>Array(N).fill('#fff'));drawGrid()}
+function fillGrid(){grid=Array(N).fill().map(()=>Array(N).fill(currentColor));drawGrid()}
+function saveImg(){const link=document.createElement('a');link.download='pixel-art.png';link.href=c.toDataURL();link.click()}
+drawGrid();
+</script>
+</body>
+</html>
