@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎣 磁力钓鱼 - 热门H5游戏</title>
+<meta name="description" content="磁力钓鱼休闲游戏，移动磁铁吸引鱼群捕获不同鱼类得分，考验控制力免费在线">
+<meta property="og:title" content="🎣 磁力钓鱼 - 热门H5游戏"><meta property="og:description" content="移动磁铁吸引鱼群"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"磁力钓鱼"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#0077b6,#023e8a);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.18);padding:4px 12px;border-radius:20px;font-size:0.9em;font-weight:600}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🎣 磁力钓鱼</h1>
+<div class="stats"><span>🐟 <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="380" height="480"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=380,H=480;
+let magnet={x:W/2,y:H/2},fish=[],score=0,best=0;
+try{best=parseInt(localStorage.getItem('magfish_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+const FISH=[{e:'🐟',s:16,p:10,sp:0.8},{e:'🐠',s:20,p:20,sp:1},{e:'🐡',s:24,p:30,sp:0.5},{e:'🐙',s:30,p:50,sp:0.6}];
+function spawn(){for(let i=0;i<4;i++){const f=FISH[Math.floor(Math.random()*4)];fish.push({x:20+Math.random()*(W-40),y:40+Math.random()*(H-80),...f,caught:false,wiggle:0})}}
+function update(){
+  fish.forEach(f=>{if(f.caught)return;f.wiggle+=0.03;f.x+=Math.sin(f.wiggle)*f.sp;f.y+=Math.cos(f.wiggle*0.7)*f.sp*0.5;f.x=Math.max(20,Math.min(W-20,f.x));f.y=Math.max(40,Math.min(H-40,f.y));
+    const dx=magnet.x-f.x,dy=magnet.y-f.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<80){f.x+=dx/dist*2;f.y+=dy/dist*2}
+    if(dist<f.s+10){f.caught=true;score+=f.p;document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('magfish_best',best)}catch(e)}}
+  });
+  fish=fish.filter(f=>!f.caught);if(fish.length<3)spawn();
+}
+function draw(){ctx.fillStyle='#0077b6';ctx.fillRect(0,0,W,H);ctx.strokeStyle='rgba(255,255,255,0.05)';for(let y=0;y<H;y+=40)ctx.beginPath(),ctx.moveTo(0,y),ctx.lineTo(W,y),ctx.stroke();
+  fish.forEach(f=>{ctx.font=`${f.s*1.5}px sans-serif`;ctx.textAlign='center';ctx.fillText(f.e,f.x,f.y)});
+  ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.arc(magnet.x,magnet.y,14,0,Math.PI*2);ctx.fill();ctx.fillStyle='#555';ctx.beginPath();ctx.arc(magnet.x,magnet.y,8,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f00';ctx.beginPath();ctx.arc(magnet.x,magnet.y,4,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(255,0,0,0.2)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(magnet.x,magnet.y,80,0,Math.PI*2);ctx.stroke();
+}
+c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();magnet.x=e.clientX-r.left;magnet.y=e.clientY-r.top});
+c.addEventListener('touchmove',e=>{e.preventDefault();const r=c.getBoundingClientRect();magnet.x=e.touches[0].clientX-r.left;magnet.y=e.touches[0].clientY-r.top},{passive:false});
+for(let i=0;i<8;i++)spawn();function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
