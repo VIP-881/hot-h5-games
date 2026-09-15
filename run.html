@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🏃 神庙逃亡 - 热门H5游戏</title>
+<meta name="description" content="神庙逃亡风格跑酷游戏，左右滑动躲避障碍物不断向前奔跑，越远分数越高免费在线">
+<meta property="og:title" content="🏃 神庙逃亡 - 热门H5游戏"><meta property="og:description" content="左右躲避障碍，无限跑酷"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"神庙逃亡","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#87CEEB,#5dade2);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0;text-shadow:0 2px 6px rgba(0,0,0,0.3)}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:20px;font-size:0.9em;font-weight:600}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🏃 神庙逃亡</h1>
+<div class="stats"><span>🏃 <b id="score">0</b>m</span><span>🏆 <b id="best">0</b>m</span></div>
+<canvas id="c" width="360" height="540"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=540;
+let runner={x:W/2,y:H-80,lane:1,targetLane:1},obstacles=[],coins=[],score=0,best=0,speed=4,frame=0,gameover=false;
+try{best=parseInt(localStorage.getItem('run_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+const LANES=[W/3,W/2,W*2/3];
+function spawn(){const lane=Math.floor(Math.random()*3);
+  if(Math.random()<0.4)coins.push({x:LANES[lane],y:-20,r:10});else obstacles.push({x:LANES[lane],y:-40,w:28,h:28});
+}
+function update(){if(gameover)return;frame++;speed=4+score/200;
+  if(frame%Math.max(15,40-score*0.2)===0)spawn();
+  score++;document.getElementById('score').textContent=score;
+  runner.x+=(LANES[runner.targetLane]-runner.x)*0.2;
+  for(let i=obstacles.length-1;i>=0;i--){obstacles[i].y+=speed;if(obstacles[i].y>H+50)obstacles.splice(i,1)}
+  for(let i=coins.length-1;i>=0;i--){coins[i].y+=speed;if(coins[i].y>H+50)coins.splice(i,1)}
+  for(const o of obstacles){if(Math.abs(o.x-runner.x)<28&&Math.abs(o.y-runner.y)<30){endGame();return}}
+  for(let i=coins.length-1;i>=0;i--){const co=coins[i];if(Math.abs(co.x-runner.x)<25&&Math.abs(co.y-runner.y)<30){coins.splice(i,1);score+=50;document.getElementById('score').textContent=score}}
+}
+function endGame(){gameover=true;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('run_best',best)}catch(e)}ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('💥 撞到了!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`${score}m  点击重来`,W/2,H/2+20)}
+function draw(){
+  ctx.fillStyle='#87CEEB';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#8B4513';for(let y=(frame*speed)%40;y<H;y+=40){ctx.fillRect(0,y,W,30)}
+  ctx.fillStyle='rgba(255,255,255,0.3)';for(let y=(frame*speed/2)%30;y<H;y+=30){ctx.fillRect(LANES[0],y,2,15);ctx.fillRect(LANES[2],y,2,15)}
+  coins.forEach(co=>{ctx.fillStyle='#ffd700';ctx.shadowColor='#ffd700';ctx.shadowBlur=8;ctx.beginPath();ctx.arc(co.x,co.y,co.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0});
+  obstacles.forEach(o=>{ctx.fillStyle='#e74c3c';ctx.fillRect(o.x-o.w/2,o.y-o.w/2,o.w,o.w);ctx.fillStyle='#c0392b';ctx.fillRect(o.x-o.w/2+2,o.y-o.w/2+2,o.w-4,o.w-4)});
+  ctx.fillStyle='#DEB887';ctx.beginPath();ctx.arc(runner.x,runner.y,16,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f5cba7';ctx.beginPath();ctx.arc(runner.x-5,runner.y-4,5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#e74c3c';ctx.fillRect(runner.x-3,runner.y-9,6,2);ctx.fillStyle='#fff';ctx.font='18px sans-serif';ctx.textAlign='center';ctx.fillText(`${score}m`,W/2,35)}
+}
+c.addEventListener('mousemove',e=>{const x=e.clientX-c.getBoundingClientRect().left;runner.targetLane=x<W/3?0:x>W*2/3?2:1});
+c.addEventListener('touchmove',e=>{e.preventDefault();const x=e.touches[0].clientX-c.getBoundingClientRect().left;runner.targetLane=x<W/3?0:x>W*2/3?2:1},{passive:false});
+c.addEventListener('click',()=>{if(gameover)restart()});
+function restart(){runner.x=W/2;runner.targetLane=1;obstacles=[];coins=[];score=0;speed=4;frame=0;gameover=false;document.getElementById('score').textContent='0'}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
