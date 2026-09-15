@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🏹 射箭大师 - 热门H5游戏</title>
+<meta name="description" content="射箭大师H5游戏，拖动瞄准松手射箭，精准命中靶心挑战高分，免费在线弓箭射击游戏">
+<meta property="og:title" content="🏹 射箭大师 - 热门H5游戏">
+<meta property="og:description" content="射箭瞄准游戏，拖动控制力度和角度">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"射箭大师","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#87CEEB,#4682B4);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
+h1{font-size:1.8em;margin:4px 0;text-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.stats{display:flex;gap:12px;margin:6px 0 8px}
+.stats span{background:rgba(255,255,255,0.2);padding:5px 14px;border-radius:20px;font-size:0.95em;font-weight:600}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(0,0,0,0.2)}
+</style>
+</head>
+<body>
+<h1>🏹 射箭大师</h1>
+<div class="stats"><span>🎯 <b id="score">0</b></span><span>🏹 <b id="arrows">10</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="420"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=360,H=420,CX=W/2,CY=170,TR=130;
+let arrows=[],score=0,aCount=10,best=0,aiming=false,power=0,drawStart=0,arrowY=CY-30,wind=0,gameover=false;
+try{best=parseInt(localStorage.getItem('archery_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function newWind(){wind=(Math.random()-0.5)*6}
+function fireArrow(p){
+  if(aCount<=0||gameover)return;
+  aCount--;document.getElementById('arrows').textContent=aCount;
+  const ay=CY-30,vy=-(p*0.35);
+  const vx=(CY-50-ay)*0.15+wind;
+  arrows.push({x:50,y:ay,vx,vx,vy,hit:false,life:60});
+  newWind();
+  setTimeout(()=>{if(aCount<=0&&arrows.every(a=>a.hit))endGame()},500);
+}
+function update(){
+  arrows.forEach(a=>{if(!a.hit){a.x+=a.vx;a.y+=a.vy;a.vy+=0.3;a.life--;if(a.x>CX+TR&&a.x<CX+TR+10&&Math.abs(a.y-CY)<TR){a.hit=true;a.x=CX+TR;a.y=Math.min(Math.max(a.y,CY-TR),CY+TR);
+        const dist=Math.sqrt((a.x-CX)**2+(a.y-CY)**2);
+        const ring=Math.floor(dist/(TR/5));
+        const pts=[10,8,6,4,2,1][Math.min(ring,5)];
+        score+=pts;document.getElementById('score').textContent=score;
+        if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('archery_best',best)}catch(e){}}
+      }else if(a.x>W+20||a.life<=0){a.hit=true}}
+  });
+}
+function endGame(){
+  gameover=true;
+  ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#ffd700';ctx.font='bold 26px sans-serif';ctx.textAlign='center';
+  ctx.fillText('🏹 弓箭用完了!',W/2,H/2-15);
+  ctx.font='16px sans-serif';ctx.fillText(`总分: ${score}  点击重新开始`,W/2,H/2+20);
+}
+function draw(){
+  ctx.fillStyle='#87CEEB';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#228B22';ctx.fillRect(0,H-40,W,40);
+  ctx.fillStyle='#2ecc71';ctx.fillRect(0,H-42,W,4);
+  const ringColors=['#fff','#000','#4682B4','#ff0000','#ffd700'];
+  for(let i=4;i>=0;i--){ctx.fillStyle=ringColors[i];ctx.beginPath();ctx.arc(CX,CY,TR-(i*TR/5),0,Math.PI*2);ctx.fill()}
+  ctx.fillStyle='#ffd700';ctx.beginPath();ctx.arc(CX,CY,TR/10,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#ff0000';ctx.beginPath();ctx.arc(CX,CY,TR/20,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#8B4513';ctx.fillRect(0,CY-6,60,12);
+  ctx.fillStyle='#DEB887';ctx.fillRect(0,CY-2,60,4);
+  ctx.strokeStyle='#654321';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,CY-2);ctx.lineTo(60,CY-2);ctx.stroke();
+  if(aiming&&aCount>0&&!gameover){
+    const ex=CX+TR+power*4,ey=arrowY-power*3.5;
+    ctx.strokeStyle=`rgba(255,255,255,${power/100})`;ctx.lineWidth=2;ctx.setLineDash([3,4]);
+    ctx.beginPath();ctx.moveTo(50,arrowY);ctx.quadraticCurveTo(CX,arrowY-(power*2),ex,ey);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(50,arrowY,5,0,Math.PI*2);ctx.fill();
+  }
+  arrows.forEach(a=>{
+    if(a.hit&&a.x>=CX+TR){ctx.fillStyle='#8B4513';ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(a.x-20,a.y-3);ctx.lineTo(a.x-22,a.y);ctx.lineTo(a.x-20,a.y+3);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.beginPath();ctx.arc(a.x-20,a.y,2,0,Math.PI*2);ctx.stroke()}
+    else if(!a.hit){ctx.strokeStyle='#8B4513';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(a.x-15,a.y);ctx.stroke()}
+  });
+  ctx.fillStyle='#fff';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText(`💨 风速: ${wind>0?'→':'←'} ${Math.abs(wind).toFixed(1)}`,W/2,H-15);
+}
+c.addEventListener('mousedown',e=>{if(gameover||aCount<=0)return;aiming=true;power=0;drawStart=Date.now()});
+c.addEventListener('mousemove',e=>{if(!aiming)return;power=Math.min(100,(Date.now()-drawStart)*0.15);const r=c.getBoundingClientRect();arrowY=Math.max(CY-TR,Math.min(CY+TR,e.clientY-r.top))});
+c.addEventListener('mouseup',()=>{if(aiming){aiming=false;fireArrow(power+15)}});
+c.addEventListener('touchstart',e=>{e.preventDefault();if(gameover||aCount<=0)return;const r=c.getBoundingClientRect();arrowY=e.touches[0].clientY-r.top;aiming=true;power=0;drawStart=Date.now()});
+c.addEventListener('touchmove',e=>{e.preventDefault();if(!aiming)return;power=Math.min(100,(Date.now()-drawStart)*0.15);const r=c.getBoundingClientRect();arrowY=Math.max(CY-TR,Math.min(CY+TR,e.touches[0].clientY-r.top))});
+c.addEventListener('touchend',()=>{if(aiming){aiming=false;fireArrow(power+15)}});
+c.addEventListener('click',()=>{if(gameover)restart()});
+function restart(){score=0;aCount=10;arrows=[];gameover=false;newWind();document.getElementById('score').textContent='0';document.getElementById('arrows').textContent='10'}
+function loop(){update();draw();requestAnimationFrame(loop)}
+restart();loop();
+</script>
+</body>
+</html>
