@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🔫 泡泡射手 - 热门H5游戏</title>
+<meta name="description" content="泡泡射手Bubble Shooter经典游戏，瞄准发射同色泡泡形成三连消除的休闲益智免费在线">
+<meta property="og:title" content="🔫 泡泡射手 - 热门H5游戏"><meta property="og:description" content="瞄准发射同色泡泡三连消除"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"泡泡射手"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#1a0533,#0d1b3e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🔫 泡泡射手</h1>
+<div class="stats"><span>🫧 <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="340" height="480"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=340,H=480,CX=W/2;
+const R=14,COLS=9,COLORS=['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6'];
+let bubbles=[],bullet=null,score=0,best=0;
+try{best=parseInt(localStorage.getItem('bubble2_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function getXY(r,c){const x=c*(R*2+2)+R+4+(r%2?R+1:0),y=r*(R*1.8)+R+10;return{x,y}}
+function init(){
+  bubbles=[];score=0;document.getElementById('score').textContent='0';
+  for(let r=0;r<6;r++)for(let c=(r%2?0:0);c<(r%2?COLS-1:COLS);c++){bubbles.push({x:getXY(r,c).x,y:getXY(r,c).y,r:R,color:Math.floor(Math.random()*COLORS.length),row:r,col:c})}
+  spawnBullet();
+}
+function spawnBullet(){bullet={x:CX,y:H-50,r:R,color:Math.floor(Math.random()*COLORS.length),flying:false,angle:-Math.PI/2}}
+function getNeighbors(b){
+  const dirs=b.row%2?[[-1,-1],[-1,0],[0,-1],[0,1],[1,-1],[1,0]]:[[-1,0],[-1,1],[0,-1],[0,1],[1,0],[1,1]];
+  return dirs.map(([dr,dc])=>bubbles.find(b2=>b2.row===b.row+dr&&b2.col===b.col+dc)).filter(Boolean);
+}
+function findCluster(b,c,vis=new Set()){
+  const k=`${b.row},${b.col}`;if(vis.has(k)||b.color!==c)return[];vis.add(k);
+  return [b,...getNeighbors(b).flatMap(n=>findCluster(n,c,vis))];
+}
+function shoot(){if(!bullet||bullet.flying)return;bullet.flying=true;bullet.vx=Math.cos(bullet.angle)*10;bullet.vy=Math.sin(bullet.angle)*10}
+function update(){
+  if(!bullet||!bullet.flying)return;
+  bullet.x+=bullet.vx;bullet.y+=bullet.vy;
+  if(bullet.x-bullet.r<0||bullet.x+bullet.r>W)bullet.vx*=-1;
+  if(bullet.y-bullet.r<0){placeBullet();return}
+  for(const b of bubbles){const dx=bullet.x-b.x,dy=bullet.y-b.y;if(Math.sqrt(dx*dx+dy*dy)<R*2){placeBullet(b);return}}
+}
+function placeBullet(near){
+  if(!bullet)return;let tr=0,tc=Math.round((bullet.x-R-4)/(R*2+2));
+  if(near){tr=near.row;tc=near.col;const a=Math.atan2(bullet.y-near.y,bullet.x-near.x);if(Math.abs(a)<0.7)tc++;else if(Math.abs(a)>2.4)tc--;else tr++}
+  tr=Math.max(0,tr);tc=Math.max(0,tc);if(tr%2&&tc>=COLS-1)tc=COLS-2;
+  const nb={x:getXY(tr,tc).x,y:getXY(tr,tc).y,r:R,color:bullet.color,row:tr,col:tc};bubbles.push(nb);
+  const cluster=findCluster(nb,bullet.color);if(cluster.length>=3){score+=cluster.length*10;cluster.forEach(b=>{const i=bubbles.indexOf(b);if(i>-1)bubbles.splice(i,1)});document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('bubble2_best',best)}catch(e)}}
+  bullet=null;spawnBullet();
+}
+function draw(){ctx.fillStyle='#1a0533';ctx.fillRect(0,0,W,H);
+  bubbles.forEach(b=>{ctx.fillStyle=COLORS[b.color];ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();ctx.arc(b.x-3,b.y-3,R*0.3,0,Math.PI*2);ctx.fill()});
+  if(bullet){ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.setLineDash([3,5]);ctx.beginPath();ctx.moveTo(CX,H-50);ctx.lineTo(CX+Math.cos(bullet.angle)*60,H-50+Math.sin(bullet.angle)*60);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=COLORS[bullet.color];ctx.beginPath();ctx.arc(bullet.x,bullet.y,bullet.r,0,Math.PI*2);ctx.fill()}
+}
+c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();if(!bullet||bullet.flying)return;bullet.angle=Math.atan2(e.clientY-r.top-(H-50),e.clientX-r.left-CX)});
+c.addEventListener('touchmove',e=>{e.preventDefault();const r=c.getBoundingClientRect();if(!bullet||bullet.flying)return;bullet.angle=Math.atan2(e.touches[0].clientY-r.top-(H-50),e.touches[0].clientX-r.left-CX)},{passive:false});
+c.addEventListener('click',shoot);
+function loop(){update();draw();requestAnimationFrame(loop)}init();loop();
+</script>
+</body>
+</html>
