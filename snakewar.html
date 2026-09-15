@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🐍 贪吃蛇大战 - 热门H5游戏</title>
+<meta name="description" content="贪吃蛇大战H5多人对战游戏，在竞技场中与AI蛇争夺食物，策略围堵消灭对手，免费在线IO对战游戏">
+<meta property="og:title" content="🐍 贪吃蛇大战 - 热门H5游戏">
+<meta property="og:description" content="多蛇对战竞技场，吃掉对手壮大自己">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"贪吃蛇大战","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none}
+h1{font-size:1.8em;margin:4px 0;color:#2ed573}
+.stats{display:flex;gap:12px;margin:6px 0 8px}
+.stats span{background:rgba(255,255,255,0.1);padding:5px 14px;border-radius:20px;font-size:0.95em}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(0,255,100,0.15);touch-action:none}
+</style>
+</head>
+<body>
+<h1>🐍 贪吃蛇大战</h1>
+<div class="stats"><span>🍎 <b id="score">0</b></span><span>💀 <b id="kills">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="400" height="400"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=400,H=400,COLS=40,ROWS=40,SIZE=10;
+let snakes=[],foods=[],playerIdx=0,score=0,kills=0,best=0,state='idle',frame=0;
+try{best=parseInt(localStorage.getItem('snakewar_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function createSnake(color,ai=true){
+  const x=Math.floor(Math.random()*10)+5,y=5+Math.floor(Math.random()*(ROWS-10));
+  const dirs=[[1,0],[-1,0],[0,1],[0,-1]];const d=dirs[Math.floor(Math.random()*4)];
+  return {body:[{x,y},{x:d[0]?x-d[0]:x,y:d[1]?y-d[1]:y},{x:d[0]?x-d[0]*2:x,y:d[1]?y-d[1]*2:y}],dir:{x:d[0],y:d[1]},nextDir:{x:d[0],y:d[1]},color,ai,alive:true,aiTimer:0};
+}
+function spawnFood(){
+  const f={x:Math.floor(Math.random()*COLS),y:Math.floor(Math.random()*ROWS),type:'normal'};
+  if(Math.random()<0.08)f.type='gold';foods.push(f);
+}
+function init(){snakes=[createSnake('#2ed573',false)];for(let i=0;i<5;i++)snakes.push(createSnake(`hsl(${i*50+30},70%,55%)`,true));foods=[];score=0;kills=0;state='playing';frame=0;for(let i=0;i<8;i++)spawnFood();document.getElementById('score').textContent='0';document.getElementById('kills').textContent='0'}
+function aiThink(si){
+  const s=snakes[si];if(!s.alive||s.aiTimer>0){s.aiTimer--;return}
+  const head=s.body[0];
+  const dirs=[[0,-1],[0,1],[-1,0],[1,0]];
+  let bestDir=s.dir,bestScore=-999;
+  for(const d of dirs){
+    const nx=head.x+d[0],ny=head.y+d[1];
+    if(nx<0||nx>=COLS||ny<0||ny>=ROWS)continue;
+    let danger=false;
+    for(let j=0;j<snakes.length;j++){
+      if(!snakes[j].alive)continue;
+      for(let k=j===si?1:0;k<snakes[j].body.length;k++){
+        if(nx===snakes[j].body[k].x&&ny===snakes[j].body[k].y){danger=true;break}
+      }if(danger)break;
+    }
+    if(danger)continue;
+    let score2=0;
+    for(const f of foods){const fx=f.x-nx,fy=f.y-ny;score2-=Math.abs(fx)+Math.abs(fy)}
+    if(foods.some(f=>f.x===nx&&f.y===ny))score2+=100;
+    if(score2>bestScore){bestScore=score2;bestDir=d}
+  }
+  if(bestScore>-900)s.nextDir=bestDir;
+  s.aiTimer=1;
+}
+function update(){
+  if(state!=='playing')return;frame++;
+  snakes.forEach((s,i)=>{if(s.alive&&s.ai)aiThink(i)});
+  snakes.forEach((s,i)=>{if(!s.alive)return;s.dir=s.nextDir;const head=s.body[0],nx=head.x+s.dir.x,ny=head.y+s.dir.y;
+    if(nx<0||nx>=COLS||ny<0||ny>=ROWS){s.alive=false;if(i===playerIdx)endGame();return}
+    for(let j=0;j<snakes.length;j++){if(!snakes[j].alive)continue;for(let k=j===i?1:0;k<snakes[j].body.length;k++){if(nx===snakes[j].body[k].x&&ny===snakes[j].body[k].y){
+      if(j!==i&&k===0&&snakes[i].body.length>snakes[j].body.length){killSnake(j);s.alive=true}else{s.alive=false;if(i===playerIdx)endGame()}return}}}
+    s.body.unshift({x:nx,y:ny});
+    let ate=false;
+    for(let f=0;f<foods.length;f++){if(nx===foods[f].x&&ny===foods[f].y){ate=true;score+=(foods[f].type==='gold'?30:10);document.getElementById('score').textContent=score;foods.splice(f,1);break}}
+    if(!ate)s.body.pop();
+    if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('snakewar_best',best)}catch(e){}}
+    if(frame%15===0&&foods.length<10)spawnFood();
+  });
+  snakes=snakes.filter(s=>s.alive||s===snakes[playerIdx]);
+  if(!snakes[playerIdx]?.alive)endGame();
+  // Spawn new AI if too few
+  if(snakes.filter(s=>s.alive).length<3)snakes.push(createSnake(`hsl(${Math.random()*360},70%,55%)`,true));
+}
+function killSnake(idx){
+  const s=snakes[idx];s.alive=false;
+  // Drop food from dead snake
+  s.body.forEach((seg,i)=>{if(i%3===0)foods.push({x:seg.x,y:seg.y,type:'normal'})});
+  kills++;document.getElementById('kills').textContent=kills;
+}
+function endGame(){state='gameover';ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('🐍 被消灭了!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  击杀: ${kills}  点击重来`,W/2,H/2+20)}
+function draw(){
+  ctx.fillStyle='#0a0a1a';ctx.fillRect(0,0,W,H);
+  for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++)ctx.fillStyle=(x+y)%2?'#111':'#0d0d1a',ctx.fillRect(x*SIZE,y*SIZE,SIZE,SIZE);
+  foods.forEach(f=>{ctx.fillStyle=f.type==='gold'?'#ffd700':'#ff4757';ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=f.type==='gold'?10:4;ctx.beginPath();ctx.arc(f.x*SIZE+SIZE/2,f.y*SIZE+SIZE/2,SIZE/2-1,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0});
+  snakes.forEach((s,i)=>{
+    if(!s.alive&&i!==playerIdx)return;
+    s.body.forEach((seg,j)=>{
+      const alpha=i===playerIdx?1:0.7;
+      ctx.fillStyle=s.color;
+      ctx.globalAlpha=alpha;ctx.fillRect(seg.x*SIZE+1,seg.y*SIZE+1,SIZE-2,SIZE-2);
+      if(j===0){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(seg.x*SIZE+SIZE*0.35,seg.y*SIZE+SIZE*0.35,SIZE*0.15,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(seg.x*SIZE+SIZE*0.65,seg.y*SIZE+SIZE*0.35,SIZE*0.15,0,Math.PI*2);ctx.fill()}
+      ctx.globalAlpha=1;
+    });
+  });
+}
+document.addEventListener('keydown',e=>{const m={ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},w:{x:0,y:-1},s:{x:0,y:1},a:{x:-1,y:0},d:{x:1,y:0}};if(m[e.key]&&snakes[playerIdx]?.alive){e.preventDefault();const nd=m[e.key];if(nd.x!==-snakes[playerIdx].dir.x||nd.y!==-snakes[playerIdx].dir.y)snakes[playerIdx].nextDir=nd}});
+c.addEventListener('click',()=>{if(state==='gameover'){init()}});
+c.addEventListener('touchstart',e=>{e.preventDefault();if(state==='idle'||state==='gameover'){init();return}if(!snakes[playerIdx]?.alive)return;const r=c.getBoundingClientRect();const tx=e.touches[0].clientX-r.left,ty=e.touches[0].clientY-r.top;const h=snakes[playerIdx].body[0];const dx=tx-h.x*SIZE,dy=ty-h.y*SIZE;if(Math.abs(dx)>Math.abs(dy)){snakes[playerIdx].nextDir={x:dx>0?1:-1,y:0}}else{snakes[playerIdx].nextDir={x:0,y:dy>0?1:-1}}});
+function loop(){update();draw();requestAnimationFrame(loop)}
+init();loop();
+</script>
+</body>
+</html>
