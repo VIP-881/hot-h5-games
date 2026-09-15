@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🧩 七巧板 - 热门H5游戏</title>
+<meta name="description" content="七巧板经典益智游戏，拖动旋转7块拼板组合成指定形状，锻炼空间想象力免费在线">
+<meta property="og:title" content="🧩 七巧板 - 热门H5游戏"><meta property="og:description" content="拖动7块拼板，组合成指定形状"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"七巧板","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:10px;max-width:96vw}.btn{background:rgba(100,150,255,0.2);color:#8cf;border:1px solid #8cf;padding:8px 20px;border-radius:20px;font-size:0.85em;cursor:pointer;margin:4px}</style>
+</head>
+<body>
+<h1>🧩 七巧板</h1>
+<div class="stats"><span>🎯 <b id="puzzle">1</b>/5</span><span>🏆 <b id="best">--</b></span></div>
+<canvas id="c" width="360" height="360"></canvas>
+<div><button class="btn" onclick="nextPuzzle()">⏭ 下一关</button><button class="btn" onclick="rotatePiece()">↻ 旋转</button></div>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=360,SIZE=40;
+// 7 tangram pieces: 2 large triangles, 1 medium, 2 small, 1 square, 1 parallelogram
+const BASE_PIECES = [
+  {pts:[[0,0],[2,2],[0,4]],color:'#e74c3c'}, // large triangle
+  {pts:[[0,0],[2,2],[-2,2]],color:'#f39c12'}, // medium
+  {pts:[[0,0],[1,1],[0,2]],color:'#3498db'}, // small
+  {pts:[[0,0],[1,1],[-1,1]],color:'#2ecc71'}, // small 2
+  {pts:[[0,0],[1,1],[0,2]],color:'#9b59b6'}, // large 2
+  {pts:[[0,0],[1,0],[1,1],[0,1]],color:'#1abc9c'}, // square
+  {pts:[[0,0],[1,0],[2,1],[1,1]],color:'#e67e22'}, // parallelogram
+];
+let pieces=[],selectedIdx=-1,dragOff={x:0,y:0},puzzleNum=1,solved=0;
+try{let b=parseInt(localStorage.getItem('tangram_best')||'0');if(b)document.getElementById('best').textContent=`${b}关`}catch(e){}
+
+function initPieces(){
+  pieces=BASE_PIECES.map(p=>({pts:p.pts.map(q=>[q[0]*SIZE,q[1]*SIZE]),color:p.color,x:40+Math.random()*120,y:60+Math.random()*200,rotation:0}));
+  selectedIdx=-1;
+}
+function drawPiece(p){
+  ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rotation);
+  ctx.fillStyle=p.color;ctx.beginPath();
+  p.pts.forEach((pt,i)=>{const[px,py]=pt;i===0?ctx.moveTo(px,py):ctx.lineTo(px,py)});
+  ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.stroke();
+  ctx.restore();
+}
+function draw(){
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  // Target area
+  ctx.fillStyle='rgba(255,255,255,0.05)';ctx.fillRect(W-160,20,140,140);
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText('目标区域→',W-160,15);
+  // Draw target shape
+  const targetShape = getTargetShape();
+  ctx.fillStyle='rgba(255,255,255,0.15)';ctx.beginPath();
+  targetShape.forEach((pt,i)=>{const[px,py]=[W-160+40+pt[0]*SIZE,40+pt[1]*SIZE];i===0?ctx.moveTo(px,py):ctx.lineTo(px,py)});
+  ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
+  
+  pieces.forEach((p,i)=>drawPiece(p));
+  if(selectedIdx>=0){const p=pieces[selectedIdx];ctx.strokeStyle='#ffd700';ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,25,0,Math.PI*2);ctx.stroke()}
+}
+function getTargetShape(){return puzzleNum===1?[[0,0],[2,2],[0,4]]:puzzleNum===2?[[0,0],[2,0],[2,2],[0,2]]:puzzleNum===3?[[0,0],[3,0],[1.5,2]]:puzzleNum===4?[[0,0],[1,0],[2,2],[0,2]]:[[0,0],[0,3],[3,3],[3,0]]}
+
+function findPiece(x,y){
+  for(let i=pieces.length-1;i>=0;i--){
+    const p=pieces[i],dx=x-p.x,dy=y-p.y;
+    let maxDist=0;p.pts.forEach(pt=>{const[px,py]=pt;maxDist=Math.max(maxDist,Math.sqrt(px*px+py*py))});
+    if(Math.sqrt(dx*dx+dy*dy)<maxDist+15)return i;
+  }
+  return -1;
+}
+c.addEventListener('mousedown',e=>{const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;selectedIdx=findPiece(x,y);if(selectedIdx>=0){const p=pieces[selectedIdx];dragOff={x:p.x-x,y:p.y-y}}});
+c.addEventListener('mousemove',e=>{if(selectedIdx<0)return;const r=c.getBoundingClientRect();pieces[selectedIdx].x=e.clientX-r.left+dragOff.x;pieces[selectedIdx].y=e.clientY-r.top+dragOff.y});
+c.addEventListener('mouseup',()=>{selectedIdx=-1});
+c.addEventListener('touchstart',e=>{e.preventDefault();const r=c.getBoundingClientRect(),x=e.touches[0].clientX-r.left,y=e.touches[0].clientY-r.top;selectedIdx=findPiece(x,y);if(selectedIdx>=0){const p=pieces[selectedIdx];dragOff={x:p.x-x,y:p.y-y}}});
+c.addEventListener('touchmove',e=>{e.preventDefault();if(selectedIdx<0)return;const r=c.getBoundingClientRect();pieces[selectedIdx].x=e.touches[0].clientX-r.left+dragOff.x;pieces[selectedIdx].y=e.touches[0].clientY-r.top+dragOff.y});
+c.addEventListener('touchend',()=>{selectedIdx=-1});
+function rotatePiece(){if(selectedIdx>=0)pieces[selectedIdx].rotation+=Math.PI/2}
+function nextPuzzle(){puzzleNum=puzzleNum%5+1;solved++;document.getElementById('puzzle').textContent=`${puzzleNum}/5`;initPieces();if(solved>parseInt(localStorage.getItem('tangram_best')||'0')){document.getElementById('best').textContent=`${solved}关`;try{localStorage.setItem('tangram_best',solved)}catch(e){}}}
+initPieces();loop();function loop(){draw();requestAnimationFrame(loop)}
+</script>
+</body>
+</html>
