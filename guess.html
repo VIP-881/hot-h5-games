@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🎲 猜数字 × 天气</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0f0;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+nav{width:100%;position:sticky;top:0;z-index:100;background:rgba(15,15,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(139,92,246,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#a78bfa;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(139,92,246,.1);transition:.3s}
+nav a:hover{background:rgba(139,92,246,.2)}
+.container{max-width:500px;margin:30px auto;padding:0 20px;width:100%}
+.weather-card{background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(6,182,212,.08));border:1px solid rgba(59,130,246,.2);border-radius:20px;padding:24px;text-align:center;margin-bottom:20px}
+.weather-card .city{font-size:16px;color:#60a5fa;margin-bottom:4px}
+.weather-card .temp{font-size:48px;font-weight:700;background:linear-gradient(135deg,#60a5fa,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.weather-card .condition{font-size:14px;color:#888;margin:4px 0}
+.weather-card .hint{font-size:12px;color:#666;margin-top:8px;background:rgba(255,255,255,.05);padding:6px 14px;border-radius:10px;display:inline-block}
+.game-card{background:rgba(20,20,35,.9);border:1px solid rgba(139,92,246,.2);border-radius:20px;padding:24px;text-align:center}
+.game-card h2{font-size:18px;color:#c084fc;margin-bottom:12px}
+.range{font-size:13px;color:#888;margin-bottom:16px;padding:6px 14px;background:rgba(255,255,255,.05);border-radius:10px;display:inline-block}
+.input-area{display:flex;gap:10px;justify-content:center;margin:16px 0}
+.input-area input{width:120px;padding:12px 16px;border:none;border-radius:12px;background:rgba(255,255,255,.08);color:#fff;font-size:20px;text-align:center;border:1px solid rgba(255,255,255,.1);outline:none;transition:.3s}
+.input-area input:focus{border-color:rgba(139,92,246,.5);box-shadow:0 0 20px rgba(139,92,246,.15)}
+.input-area button{padding:12px 24px;border:none;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:.3s}
+.input-area button:hover{box-shadow:0 4px 20px rgba(139,92,246,.4);transform:translateY(-1px)}
+.history{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:16px 0;min-height:30px}
+.history span{padding:4px 10px;border-radius:8px;font-size:13px}
+.history .low{background:rgba(59,130,246,.15);color:#60a5fa}
+.history .high{background:rgba(239,68,68,.15);color:#f87171}
+.history .hit{background:rgba(34,197,94,.2);color:#4ade80;font-weight:700;animation:pop .5s}
+@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.3)}100%{transform:scale(1)}}
+.result{font-size:15px;color:#a78bfa;margin:8px 0;min-height:24px}
+.score-board{display:flex;justify-content:center;gap:20px;margin:16px 0}
+.score-item{text-align:center}
+.score-item .val{font-size:22px;font-weight:700}
+.score-item .lbl{font-size:10px;color:#888}
+.win .val{color:#fbbf24}
+.best .val{color:#4ade80}
+.btn-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn-row button{padding:10px 20px;border:none;border-radius:12px;font-size:13px;cursor:pointer;transition:.3s}
+.btn-new{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.btn-new:hover{box-shadow:0 4px 15px rgba(34,197,94,.4)}
+.btn-loc{background:rgba(255,255,255,.08);color:#aaa}
+.btn-loc:hover{background:rgba(255,255,255,.12)}
+footer{text-align:center;padding:20px;color:#555;font-size:12px;margin-top:auto}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>🎲 猜数字 × 天气</span></nav>
+<div class="container">
+  <div class="weather-card">
+    <div class="city" id="city">加载天气...</div>
+    <div class="temp" id="temp">--°</div>
+    <div class="condition" id="cond"></div>
+    <div class="hint" id="hint"></div>
+  </div>
+  <div class="game-card">
+    <h2>🎲 猜猜今天的神秘数字</h2>
+    <div class="range" id="range">范围: 1 - 100</div>
+    <div class="input-area">
+      <input type="number" id="guess" min="1" max="100" placeholder="?" onkeydown="if(event.key==='Enter')guess()">
+      <button onclick="guess()">猜！</button>
+    </div>
+    <div class="result" id="result"></div>
+    <div class="history" id="history"></div>
+    <div class="score-board">
+      <div class="score-item win"><div class="val" id="wins">0</div><div class="lbl">🏆 胜利</div></div>
+      <div class="score-item best"><div class="val" id="best">-</div><div class="lbl">🥇 最佳</div></div>
+      <div class="score-item"><div class="val" id="attempts" style="color:#a78bfa">0</div><div class="lbl">🎯 本次</div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-new" onclick="newGame()">🔄 新游戏</button>
+      <button class="btn-loc" onclick="loadWeather()">📍 刷新天气</button>
+    </div>
+  </div>
+</div>
+<footer>天气来自 wttr.in · 🦊 灵犀出品</footer>
+<script>
+let secret=0, attempts=0, minR=1, maxR=100, guesses=[];
+let wins=parseInt(localStorage.getItem('guessWins')||'0'),best=parseInt(localStorage.getItem('guessBest')||'0');
+document.getElementById('wins').textContent=wins;
+document.getElementById('best').textContent=best||'-';
+
+async function loadWeather(){
+  document.getElementById('city').textContent='加载中...';
+  try{
+    const r=await fetch('https://wttr.in/Shanghai?format=j1');
+    const d=await r.json();
+    const c=d.current_condition[0];
+    const t=parseInt(c.temp_C);
+    const h=parseInt(c.humidity);
+    const cond=c.weatherDesc[0].value;
+    document.getElementById('city').textContent='📍 上海';
+    document.getElementById('temp').textContent=t+'°C';
+    document.getElementById('cond').textContent=cond+' · 湿度 '+h+'%';
+    // Weather defines the range
+    minR=Math.max(1,t-10);
+    maxR=Math.min(100,t+20);
+    document.getElementById('range').textContent='范围: '+minR+' - '+maxR;
+    document.getElementById('hint').innerHTML='🌡 气温='+t+'°C → 范围 ['+minR+','+maxR+']<br>💧 湿度='+h+'% → '+(h>70?'数字偏大':h<40?'数字偏小':'正常');
+    // Seed the number based on weather
+    secret=Math.floor((t*7+h*3+c.winddirDegree/30)%(maxR-minR+1))+minR;
+    secret=Math.max(1,Math.min(100,secret));
+  }catch(e){
+    document.getElementById('city').textContent='⚠️ 天气加载失败';
+    document.getElementById('temp').textContent='--°';
+    document.getElementById('hint').textContent='使用默认范围';
+    newGame();
+  }
+}
+
+function newGame(){
+  if(secret===0){minR=1;maxR=100;secret=Math.floor(Math.random()*100)+1;document.getElementById('range').textContent='范围: 1 - 100'}
+  attempts=0;guesses=[];
+  document.getElementById('history').innerHTML='';
+  document.getElementById('result').textContent='';
+  document.getElementById('attempts').textContent='0';
+  document.getElementById('guess').value='';
+  document.getElementById('guess').focus();
+}
+
+function guess(){
+  const v=parseInt(document.getElementById('guess').value);
+  if(isNaN(v)||v<1||v>100){document.getElementById('result').textContent='⚠️ 请输入 1-100 的数字';return}
+  if(secret===0)newGame();
+  attempts++;guesses.push(v);
+  document.getElementById('attempts').textContent=attempts;
+  const h=document.getElementById('history');
+  if(v===secret){
+    h.innerHTML+='<span class="hit">'+v+' ✅</span>';
+    document.getElementById('result').textContent='🎉 恭喜！答案就是 '+secret+'！用了 '+attempts+' 次';
+    wins++;
+    if(!best||attempts<best)best=attempts;
+    localStorage.setItem('guessWins',wins);localStorage.setItem('guessBest',best);
+    document.getElementById('wins').textContent=wins;document.getElementById('best').textContent=best;
+    secret=0;
+  }else if(v<secret){
+    h.innerHTML+='<span class="low">'+v+' ↑</span>';
+    document.getElementById('result').textContent='📈 太小了，再大点！';
+  }else{
+    h.innerHTML+='<span class="high">'+v+' ↓</span>';
+    document.getElementById('result').textContent='📉 太大了，再小点！';
+  }
+  document.getElementById('guess').value='';
+  document.getElementById('guess').focus();
+  if(secret===0)setTimeout(newGame,2000);
+}
+
+loadWeather();
+</script>
+</body>
+</html>

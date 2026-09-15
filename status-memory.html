@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🎛️ HTTP Status Code Memory — 状态码记忆卡片游戏 | Maton H5 Games</title>
+<meta name="description" content="HTTP 状态码记忆卡片游戏：翻转匹配 2xx/3xx/4xx/5xx 状态码与其含义。16张卡片 8 组配对，训练你对 REST API 状态码的肌肉记忆。开发者面试必备。">
+<meta name="keywords" content="HTTP状态码,status code,记忆游戏,API状态码,REST API,200,404,500,开发者面试,匹配游戏,Maton">
+<meta property="og:title" content="HTTP Status Code Memory — 状态码记忆卡片">
+<meta property="og:description" content="翻转匹配HTTP状态码(200/301/404/500等)与其含义。开发者面试和日常必备知识。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://hot-h5-games.netlify.app/status-memory.html">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://hot-h5-games.netlify.app/status-memory.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"HTTP Status Code Memory","description":"HTTP状态码记忆卡片游戏，翻转匹配状态码(200/301/404/500等)与其含义。训练REST API知识。","applicationCategory":"Game","operatingSystem":"Web","author":{"@type":"Organization","name":"Maton AI Games"},"genre":["Educational","Card"]}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a14;color:#e0e0e0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(10,10,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(59,130,246,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#60a5fa;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(59,130,246,.1);transition:.3s}
+nav a:hover{background:rgba(59,130,246,.2)}
+header{text-align:center;padding:20px;background:linear-gradient(180deg,rgba(59,130,246,.05),transparent)}
+header h1{font-size:1.6em;background:linear-gradient(135deg,#3b82f6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.container{max-width:600px;margin:16px auto;padding:0 16px}
+.hud{display:flex;justify-content:center;gap:20px;padding:10px;flex-wrap:wrap}
+.hud-item{text-align:center}.hud-item .val{font-size:20px;font-weight:700}.hud-item .lbl{font-size:9px;color:#666}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:440px;margin:16px auto}
+.card{aspect-ratio:1;border-radius:12px;cursor:pointer;perspective:600px;transition:transform .2s}
+.card:hover{transform:scale(1.04)}
+.card-inner{width:100%;height:100%;position:relative;transition:transform .5s;transform-style:preserve-3d}
+.card.flipped .card-inner{transform:rotateY(180deg)}
+.card.matched .card-inner{transform:rotateY(180deg)}
+.card.matched{animation:matchPop .5s}
+@keyframes matchPop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+.card-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;border:2px solid rgba(255,255,255,.08)}
+.card-back{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.3);font-size:24px}
+.card-front{transform:rotateY(180deg)}
+.card-front.code2xx{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:#4ade80}
+.card-front.code3xx{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.3);color:#fbbf24}
+.card-front.code4xx{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#f87171}
+.card-front.code5xx{background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.3);color:#a78bfa}
+.card-front.meaning{background:rgba(20,20,35,.9);color:#ccc;font-size:12px;text-align:center;padding:4px;line-height:1.3}
+.card .code-num{font-size:22px}
+.card .code-cat{font-size:9px;opacity:.7}
+.controls{text-align:center;margin:12px 0}
+.controls button{padding:10px 24px;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:.3s;margin:4px}
+.btn-new{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
+.btn-new:hover{box-shadow:0 4px 15px rgba(59,130,246,.4)}
+.result-overlay{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#1a1a2e,#2a1a3e);border:2px solid rgba(139,92,246,.3);border-radius:20px;padding:32px;text-align:center;z-index:200;display:none}
+.result-overlay h2{font-size:28px;margin-bottom:12px}
+.result-overlay button{margin-top:16px;padding:12px 28px;border:none;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:16px;cursor:pointer}
+footer{text-align:center;padding:16px;color:#444;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>🎛️ Status Memory</span></nav>
+<header><h1>🎛️ HTTP Status Code Memory</h1><p>翻转卡片 · 匹配状态码与含义 · 训练 REST API 肌肉记忆</p></header>
+<div class="container">
+  <div class="hud">
+    <div class="hud-item"><div class="val" id="hMoves" style="color:#3b82f6">0</div><div class="lbl">🔄 步数</div></div>
+    <div class="hud-item"><div class="val" id="hMatched" style="color:#4ade80">0/8</div><div class="lbl">✅ 匹配</div></div>
+    <div class="hud-item"><div class="val" id="hTime" style="color:#fbbf24">0s</div><div class="lbl">⏱ 用时</div></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="controls">
+    <button class="btn-new" onclick="initGame()">🔄 新游戏</button>
+  </div>
+</div>
+<div class="result-overlay" id="overlay"><h2 id="oTitle"></h2><p id="oDesc" style="color:#888;margin:8px 0"></p><button id="oBtn">🔄 再来一局</button></div>
+<footer>Powered by Maton.ai · HTTP 状态码训练 · 🦊 灵犀出品</footer>
+<script>
+const PAIRS=[
+  {code:'200',cat:'2xx OK',meaning:'请求成功',cls:'code2xx'},
+  {code:'201',cat:'2xx Created',meaning:'资源创建成功',cls:'code2xx'},
+  {code:'301',cat:'3xx Redirect',meaning:'永久重定向',cls:'code3xx'},
+  {code:'304',cat:'3xx Cached',meaning:'未修改，用缓存',cls:'code3xx'},
+  {code:'400',cat:'4xx Bad Req',meaning:'请求参数错误',cls:'code4xx'},
+  {code:'404',cat:'4xx Not Found',meaning:'资源不存在',cls:'code4xx'},
+  {code:'500',cat:'5xx Server Err',meaning:'服务器内部错误',cls:'code5xx'},
+  {code:'503',cat:'5xx Unavailable',meaning:'服务暂时不可用',cls:'code5xx'},
+];
+let cards=[],flipped=[],matched=[],moves=0,startTime=0,timer=null,locked=false;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function initGame(){
+  clearInterval(timer);moves=0;startTime=Date.now();matched=[];flipped=[];locked=false;
+  cards=shuffle(PAIRS.flatMap((p,i)=>[{id:i,type:'code',...p},{id:i,type:'meaning',display:p.meaning,cls:'meaning'}]));
+  document.getElementById('hMoves').textContent='0';document.getElementById('hMatched').textContent='0/8';document.getElementById('hTime').textContent='0s';
+  document.getElementById('overlay').style.display='none';
+  timer=setInterval(()=>{document.getElementById('hTime').textContent=Math.floor((Date.now()-startTime)/1000)+'s'},500);
+  renderGrid();
+}
+
+function renderGrid(){
+  document.getElementById('grid').innerHTML=cards.map((c,i)=>'<div class="card'+(flipped.includes(i)||matched.includes(c.id)?' flipped':'')+(matched.includes(c.id)?' matched':'')+'" onclick="flip('+i+')"><div class="card-inner"><div class="card-face card-back">❓</div><div class="card-face card-front '+(c.type==='code'?c.cls:'meaning')+'">'+(c.type==='code'?'<span class="code-num">'+c.code+'</span><span class="code-cat">'+c.cat+'</span>':'<span>'+c.display+'</span>')+'</div></div></div>').join('');
+}
+
+function flip(i){
+  if(locked||flipped.includes(i)||matched.includes(cards[i].id)) return;
+  flipped.push(i);moves++;
+  document.getElementById('hMoves').textContent=moves;
+  renderGrid();
+  if(flipped.length===2){
+    locked=true;
+    const[a,b]=flipped.map(j=>cards[j]);
+    if(a.id===b.id&&a.type!==b.type){
+      matched.push(a.id);
+      flipped=[];
+      document.getElementById('hMatched').textContent=matched.length+'/8';
+      locked=false;
+      renderGrid();
+      if(matched.length===8) endGame();
+    }else{
+      setTimeout(()=>{flipped=[];locked=false;renderGrid()},800);
+    }
+  }
+}
+
+function endGame(){
+  clearInterval(timer);
+  const elapsed=Math.floor((Date.now()-startTime)/1000);
+  const score=Math.max(0,1000-moves*10-elapsed*5);
+  const o=document.getElementById('overlay');o.style.display='block';
+  document.getElementById('oTitle').textContent='🎉 '+score+' 分';
+  document.getElementById('oTitle').style.color='#fbbf24';
+  document.getElementById('oDesc').textContent=moves+' 步 · '+elapsed+'s · 全部匹配！';
+  document.getElementById('oBtn').onclick=initGame;
+}
+
+initGame();
+</script>
+</body>
+</html>

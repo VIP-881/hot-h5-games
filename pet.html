@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>🌱 打卡养成宠</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0f0;min-height:100vh;text-align:center}
+nav{position:sticky;top:0;z-index:100;background:rgba(15,15,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(139,92,246,.2);padding:8px 12px;display:flex;align-items:center;gap:8px;text-align:left}
+nav a{color:#a78bfa;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(139,92,246,.1)}
+nav span{color:#888;font-size:13px}
+.scene{max-width:500px;margin:30px auto;background:linear-gradient(180deg,rgba(30,20,40,.8),rgba(20,25,30,.8));border-radius:20px;padding:32px;border:1px solid rgba(34,197,94,.2)}
+.sprite{font-size:100px;animation:bounce 2s infinite;margin:20px 0;display:inline-block}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.sprite.hungry{animation:bounce 3s infinite;filter:grayscale(.6)}
+.sprite.evolving{animation:evolve 1s ease-out;filter:hue-rotate(180deg)}
+@keyframes evolve{0%{transform:scale(1) rotate(0)}50%{transform:scale(1.6) rotate(180deg)}100%{transform:scale(1) rotate(360deg)}}
+h2{color:#c084fc;margin:8px 0;font-size:20px}
+.stats{display:flex;justify-content:center;gap:24px;margin:16px 0}
+.stat{text-align:center}.stat .val{font-size:26px;font-weight:700}.stat .lbl{font-size:11px;color:#888;margin-top:2px}
+.pbar{width:240px;height:10px;background:rgba(255,255,255,.08);border-radius:5px;margin:12px auto;overflow:hidden}
+.pbar div{height:100%;transition:width .5s;border-radius:5px}
+.btn{padding:12px 32px;border:none;border-radius:20px;font-size:15px;cursor:pointer;font-weight:600;transition:all .3s;margin:8px}
+.feed{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+.feed:hover{background:rgba(34,197,94,.25);transform:scale(1.05)}
+.refresh{background:rgba(139,92,246,.1);color:#a78bfa;border:1px solid rgba(139,92,246,.2)}
+.status{font-size:13px;color:#888;margin-top:12px}
+footer{text-align:center;padding:20px;color:#555;font-size:12px}
+</style></head><body>
+<nav><a href="index.html">← 大厅</a><span>🌱 养成宠</span></nav>
+<div class="scene">
+  <p style="color:#888;font-size:13px">任务完成率决定宠物的生命力</p>
+  <div class="sprite" id="sprite">🐣</div>
+  <h2 id="name">任务小精灵</h2>
+  <div class="stats">
+    <div class="stat"><div class="val" id="health" style="color:#4ade80">100</div><div class="lbl">❤️ 生命</div></div>
+    <div class="stat"><div class="val" id="streak" style="color:#fbbf24">0</div><div class="lbl">🔥 连续</div></div>
+    <div class="stat"><div class="val" id="level" style="color:#c084fc">1</div><div class="lbl">⭐ 等级</div></div>
+  </div>
+  <div class="pbar"><div id="hbar" style="width:100%;background:#4ade80"></div></div>
+  <p style="font-size:11px;color:#888;margin:8px 0">30% 以下会虚弱，0% 会饿死</p>
+  <button class="btn feed" onclick="feed()">🍖 完成任务投喂</button>
+  <button class="btn refresh" onclick="load()">🔄 刷新状态</button>
+  <div class="status" id="st">加载中...</div>
+</div>
+<footer>数据实时来自 Notion · 🦊 灵犀出品</footer>
+<script>
+const AK='v2.xOedfPfv9hou9ht8BXTbk7OKPlRUUvh5WuyJNC8Q3mLrU5dQVGL5rARouO2DNnC-IKG0UGeYm79Cfw1aIjsOw48Fram7uaVouZHiYKGTZzMBg4SuQLJLz4gY';
+const TDS='3ba68c53-ba18-806b-a725-000b464317ad';
+let pet=JSON.parse(localStorage.getItem('pet')||'{"health":100,"streak":0,"level":1,"lastFed":""}');
+function a(url){return fetch('https://gateway.maton.ai'+url,{headers:{'Authorization':'Bearer '+AK,'Notion-Version':'2025-09-03'}}).then(r=>r.json());}
+async function load(){try{const d=await a('/notion/v1/data_sources/'+TDS+'/query',{method:'POST',body:JSON.stringify({page_size:50})});const t=d.results||[];const done=t.filter(x=>(x.properties?.状态?.status?.name||'')==='已完成').length;const rate=t.length?done/t.length:1;document.getElementById('health').textContent=Math.round(rate*100);const bar=document.getElementById('hbar');bar.style.width=(rate*100)+'%';bar.style.background=rate>.7?'#4ade80':rate>.4?'#fbbf24':'#ef4444';const sp=document.getElementById('sprite');sp.className=rate<.3?'sprite hungry':'sprite';const evos=['🐣','🐥','🐔','🦅','🐲'];const lvl=Math.min(Math.floor(rate*4),4);pet.level=lvl+1;sp.textContent=evos[lvl];document.getElementById('level').textContent=pet.level;document.getElementById('streak').textContent=pet.streak;document.getElementById('st').innerHTML=rate>.5?'<span style="color:#4ade80">🌿 '+done+'/'+t.length+' 任务完成 — 宠物健康！</span>':'<span style="color:#f87171">⚠️ '+done+'/'+t.length+' 任务完成 — 该投喂了！</span>';localStorage.setItem('pet',JSON.stringify(pet))}catch(e){document.getElementById('st').innerHTML='<span style="color:#f87171">❌ '+e.message+'</span>'}}
+function feed(){pet.streak++;pet.health=Math.min(100,pet.health+20);pet.lastFed=new Date().toISOString();document.getElementById('sprite').classList.add('evolving');setTimeout(()=>document.getElementById('sprite').classList.remove('evolving'),1000);load()}load();
+</script></body></html>

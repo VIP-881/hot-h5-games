@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🐉 任务打怪 RPG</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0f0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(15,15,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(139,92,246,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#a78bfa;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(139,92,246,.1);transition:.3s}
+nav a:hover{background:rgba(139,92,246,.2)}
+nav span{color:#888;font-size:13px}
+.arena{max-width:700px;margin:20px auto;background:linear-gradient(180deg,rgba(30,20,50,.8),rgba(20,15,35,.8));border-radius:20px;padding:24px;text-align:center;border:1px solid rgba(139,92,246,.25)}
+.hero{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px}
+.hero-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#fbbf24,#f59e0b);display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 0 30px rgba(251,191,36,.4)}
+.hero-info{text-align:left}
+.hero-info h3{font-size:18px;color:#fbbf24}
+.hero-info .level{font-size:12px;color:#888}
+.xp-bar{width:200px;height:6px;background:rgba(255,255,255,.1);border-radius:3px;margin:4px 0;overflow:hidden}
+.xp-bar div{height:100%;background:linear-gradient(90deg,#fbbf24,#f59e0b);border-radius:3px;transition:width .5s}
+.monsters{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;max-width:700px;margin:0 auto;padding:16px}
+.monster-card{background:rgba(30,20,45,.9);border:1px solid rgba(239,68,68,.2);border-radius:14px;padding:16px;cursor:pointer;transition:all .3s;text-align:center}
+.monster-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(239,68,68,.2);border-color:rgba(239,68,68,.5)}
+.monster-card .monster-icon{font-size:40px;margin-bottom:8px}
+.monster-card .monster-name{font-size:14px;font-weight:600;margin-bottom:4px}
+.monster-card .monster-stats{font-size:11px;color:#888}
+.diff-hard{background:rgba(40,10,10,.9)!important;border-color:rgba(239,68,68,.6)!important}
+.diff-medium{background:rgba(30,25,10,.9)!important;border-color:rgba(251,191,36,.4)!important}
+.diff-easy{background:rgba(15,25,15,.9)!important;border-color:rgba(34,197,94,.3)!important}
+.victory-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#8b5cf6,#6366f1);padding:20px 40px;border-radius:16px;font-size:20px;font-weight:700;z-index:200;animation:pop .5s ease-out;box-shadow:0 20px 60px rgba(139,92,246,.5)}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}70%{transform:translate(-50%,-50%) scale(1.1)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.empty{text-align:center;padding:40px;color:#666}.empty .icon{font-size:48px;margin-bottom:12px}
+footer{text-align:center;padding:20px;color:#555;font-size:12px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>🐉 任务打怪 RPG</span></nav>
+<div class="arena">
+  <div class="hero">
+    <div class="hero-avatar" id="heroAvatar">⚔️</div>
+    <div class="hero-info">
+      <h3 id="heroName">勇者</h3>
+      <span class="level" id="heroLevel">Lv.1</span>
+      <div class="xp-bar"><div id="xpFill" style="width:0%"></div></div>
+      <span class="level" id="xpText">0 / 100 XP</span>
+    </div>
+  </div>
+  <p style="color:#888;font-size:13px">点击怪物发动攻击！击杀自动标记 Notion 任务为「已完成」</p>
+</div>
+<div class="monsters" id="monstersGrid"></div>
+<div class="empty" id="empty" style="display:none"><div class="icon">🎉</div><p>所有任务已完成！去 Notion 加几个怪物吧</p></div>
+<footer>任务数据实时来自 Notion · 🦊 灵犀出品</footer>
+<script>
+const AK='v2.xOedfPfv9hou9ht8BXTbk7OKPlRUUvh5WuyJNC8Q3mLrU5dQVGL5rARouO2DNnC-IKG0UGeYm79Cfw1aIjsOw48Fram7uaVouZHiYKGTZzMBg4SuQLJLz4gY';
+const TDS='3ba68c53-ba18-806b-a725-000b464317ad';
+let hero=JSON.parse(localStorage.getItem('hero')||'{"xp":0,"level":1,"kills":0}');
+function a(url,o={}){const h={'Authorization':'Bearer '+AK,'Content-Type':'application/json',...(o.headers||{})};if(url.includes('/notion/'))h['Notion-Version']='2025-09-03';return fetch('https://gateway.maton.ai'+url,{...o,headers:h}).then(r=>r.json());}
+function u(){const n=hero.level*100;document.getElementById('xpFill').style.width=Math.min(100,hero.xp/n*100)+'%';document.getElementById('xpText').textContent=hero.xp+' / '+n+' XP';document.getElementById('heroLevel').textContent='Lv.'+hero.level;document.getElementById('heroName').textContent='勇者 ('+hero.kills+' 击杀)';document.getElementById('heroAvatar').textContent=['⚔️','🛡️','🗡️','🏹','🔮','👑'][Math.min(hero.level-1,5)]}
+u();
+async function load(){try{const d=await a('/notion/v1/data_sources/'+TDS+'/query',{method:'POST',body:JSON.stringify({page_size:50,sorts:[{property:'截止日期',direction:'ascending'}]})});const t=(d.results||[]).filter(x=>(x.properties?.状态?.status?.name||'')!=='已完成');document.getElementById('empty').style.display=t.length? 'none':'block';document.getElementById('monstersGrid').innerHTML=t.map(x=>{const p=x.properties||{};const n=p.名称?.title?.map(y=>y.plain_text).join('')||'无名';const dl=p.截止日期?.date?.start||null;let u=0;if(dl){const dy=(new Date(dl)-new Date())/86400000;u=dy<1?3:dy<3?2:1;}const xp=u*30+10;const diffs=['difficulty-easy','difficulty-easy','difficulty-medium','difficulty-hard'];return'<div class="monster-card '+diffs[u]+'" onclick="attack(\''+x.id+'\',\''+n.replace(/'/g,"\\'")+'\','+xp+',this)" data-id="'+x.id+'"><div class="monster-icon">'+['🐛','🐍','🐺','🐉'][u]+'</div><div class="monster-name">'+n+'</div><div class="monster-stats">'+['❤️❤️❤️','❤️❤️','❤️'][u]||'❤️'+' · +'+xp+'XP · '+(dl?'⏰ '+dl:'无截止')+'</div></div>'}).join('')}catch(e){document.getElementById('monstersGrid').innerHTML='<div class="empty"><p style="color:#f87171">❌ '+e.message+'</p></div>'}}
+async function attack(id,name,xp,el){el.style.opacity='0.3';el.style.pointerEvents='none';const t=document.createElement('div');t.className='victory-toast';t.textContent='⚔️ 击败了 '+name+'!';document.body.appendChild(t);setTimeout(()=>t.remove(),2000);try{await a('/notion/v1/pages/'+id,{method:'PATCH',body:JSON.stringify({properties:{'状态':{status:{name:'已完成'}}}})});hero.xp+=xp;hero.kills++;const n=hero.level*100;if(hero.xp>=n){hero.xp-=n;hero.level++;setTimeout(()=>{const l=document.createElement('div');l.className='victory-toast';l.style.background='linear-gradient(135deg,#fbbf24,#f59e0b)';l.textContent='🎉 升级！Lv.'+hero.level;document.body.appendChild(l);setTimeout(()=>l.remove(),2000)},600)}localStorage.setItem('hero',JSON.stringify(hero));u();setTimeout(load,1500)}catch(e){t.textContent='❌ 失败: '+e.message;el.style.opacity='1';el.style.pointerEvents='auto'}}
+load();
+</script>
+</body>
+</html>

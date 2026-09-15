@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🧬 Regex Challenge — 正则表达式闯关游戏 | Maton H5 Games</title>
+<meta name="description" content="正则表达式闯关游戏：输入正则来匹配目标字符串。从邮箱、URL、手机号到高级捕获组，10关递增难度。实时高亮匹配，训练你的正则肌肉记忆。">
+<meta name="keywords" content="正则表达式,regex,regexp,正则游戏,编程学习,文本匹配,regex challenge,正则测试,开发者游戏,Maton">
+<meta property="og:title" content="Regex Challenge — 正则表达式闯关游戏">
+<meta property="og:description" content="输入正则表达式匹配目标字符串。10关从简单到高级，实时高亮。训练正则肌肉记忆。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://hot-h5-games.netlify.app/regex-challenge.html">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://hot-h5-games.netlify.app/regex-challenge.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"Regex Challenge","description":"正则表达式闯关游戏，输入正则匹配目标字符串。10关从邮箱到高级捕获组。","applicationCategory":"Game","operatingSystem":"Web","author":{"@type":"Organization","name":"Maton AI Games"},"genre":["Educational","Puzzle"]}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Fira Code',monospace;background:#0a0a14;color:#e0e0e0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(10,10,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,197,94,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#4ade80;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(34,197,94,.1);transition:.3s}
+nav a:hover{background:rgba(34,197,94,.2)}
+header{text-align:center;padding:20px;background:linear-gradient(180deg,rgba(34,197,94,.05),transparent)}
+header h1{font-size:1.6em;background:linear-gradient(135deg,#4ade80,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.container{max-width:700px;margin:16px auto;padding:0 16px}
+.hud{display:flex;justify-content:center;gap:20px;padding:10px;flex-wrap:wrap}
+.hud-item{text-align:center}.hud-item .val{font-size:20px;font-weight:700}.hud-item .lbl{font-size:9px;color:#666}
+.level-card{background:rgba(15,15,30,.9);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;margin-bottom:16px}
+.level-card.cleared{border-color:rgba(34,197,94,.3)}
+.level-info{font-size:12px;color:#888;margin-bottom:8px}
+.targets{margin:12px 0}
+.target-item{padding:8px 12px;background:rgba(0,0,0,.2);border-radius:8px;margin:4px 0;font-size:13px;font-family:monospace;display:flex;align-items:center;gap:8px}
+.target-item .label{font-size:10px;padding:2px 8px;border-radius:6px;min-width:40px;text-align:center}
+.label-match{background:rgba(34,197,94,.15);color:#4ade80}
+.label-nomatch{background:rgba(239,68,68,.15);color:#f87171}
+.target-item .text{flex:1}
+.target-item .status{font-size:18px;min-width:24px;text-align:center}
+.regex-input{display:flex;gap:8px;margin:12px 0}
+.regex-input input{flex:1;padding:12px 16px;background:rgba(0,0,0,.3);border:2px solid rgba(255,255,255,.1);border-radius:10px;color:#4ade80;font-family:inherit;font-size:16px;outline:none;transition:.3s}
+.regex-input input:focus{border-color:rgba(34,197,94,.5);box-shadow:0 0 20px rgba(34,197,94,.1)}
+.regex-input .prefix{font-size:20px;color:#666;display:flex;align-items:center}
+.regex-input .suffix{font-size:20px;color:#666;display:flex;align-items:center}
+.highlight-area{margin-top:8px}
+.highlight-area .sample{padding:8px 12px;background:rgba(0,0,0,.2);border-radius:8px;font-size:13px;word-break:break-all;line-height:1.8}
+.highlight-area .sample .match-hl{background:rgba(34,197,94,.25);color:#4ade80;padding:1px 2px;border-radius:2px}
+.hint-area{font-size:11px;color:#888;margin-top:8px;min-height:20px}
+.controls{text-align:center;margin:12px 0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.controls button{padding:10px 24px;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:.3s}
+.btn-check{background:linear-gradient(135deg,#4ade80,#16a34a);color:#000}
+.btn-check:hover:not(:disabled){box-shadow:0 4px 15px rgba(34,197,94,.4)}
+.btn-hint{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)}
+.result-overlay{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#1a1a2e,#2a1a3e);border:2px solid rgba(139,92,246,.3);border-radius:20px;padding:32px;text-align:center;z-index:200;display:none}
+.result-overlay h2{font-size:28px;margin-bottom:12px}
+.result-overlay button{margin-top:16px;padding:12px 28px;border:none;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:16px;cursor:pointer}
+footer{text-align:center;padding:16px;color:#444;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>🧬 Regex Challenge</span></nav>
+<header><h1>🧬 Regex Challenge</h1><p>输入正则表达式匹配目标 · 10关从简单到高级</p></header>
+<div class="container">
+  <div class="hud">
+    <div class="hud-item"><div class="val" id="hScore" style="color:#fbbf24">0</div><div class="lbl">⭐ 分</div></div>
+    <div class="hud-item"><div class="val" id="hLevel" style="color:#4ade80">1/10</div><div class="lbl">🧬 关</div></div>
+    <div class="hud-item"><div class="val" id="hCombo" style="color:#06b6d4">x1</div><div class="lbl">🔥 连击</div></div>
+  </div>
+  <div class="level-card">
+    <div class="level-info" id="levelDesc"></div>
+    <div class="targets" id="targets"></div>
+    <div class="regex-input">
+      <span class="prefix">/</span>
+      <input type="text" id="regexInput" placeholder="输入正则表达式..." spellcheck="false" autocomplete="off" onkeydown="if(event.key==='Enter')checkRegex()">
+      <span class="suffix">/g</span>
+    </div>
+    <div class="highlight-area"><div class="sample" id="sample"></div></div>
+    <div class="hint-area" id="hintArea"></div>
+  </div>
+  <div class="controls">
+    <button class="btn-check" id="checkBtn" onclick="checkRegex()">✅ 验证</button>
+    <button class="btn-hint" onclick="showHint()">💡 提示</button>
+    <button class="btn-hint" style="background:rgba(139,92,246,.1);color:#a78bfa;border:1px solid rgba(139,92,246,.15)" onclick="skipLevel()">⏭ 跳过</button>
+  </div>
+</div>
+<div class="result-overlay" id="overlay"><h2 id="oTitle"></h2><p id="oDesc" style="color:#888;margin:8px 0"></p><button id="oBtn">🔄 重新开始</button></div>
+<footer>Powered by Maton.ai · Regex 训练场 · 🦊 灵犀出品</footer>
+<script>
+const LEVELS=[
+  {desc:'匹配所有数字',samples:[{text:'abc123def',shouldMatch:true,target:'123'},{text:'hello456world',shouldMatch:true,target:'456'},{text:'no numbers here',shouldMatch:false}],hint:'用 \\\\d+ 匹配一个或多个数字'},
+  {desc:'匹配邮箱地址',samples:[{text:'user@example.com',shouldMatch:true},{text:'hello world',shouldMatch:false},{text:'admin@test.cn',shouldMatch:true}],hint:'[\\\\w.]+@[\\\\w]+\\\\.[\\\\w]+'},
+  {desc:'匹配以 # 开头的标签',samples:[{text:'#javascript #css',shouldMatch:true,target:'#javascript/#css'},{text:'no tags here',shouldMatch:false},{text:'#react is great',shouldMatch:true,target:'#react'}],hint:'#\\\\w+'},
+  {desc:'匹配手机号 (1开头11位)',samples:[{text:'13812345678',shouldMatch:true},{text:'12345678901',shouldMatch:false},{text:'我的号是13987654321',shouldMatch:true,target:'13987654321'}],hint:'1[3-9]\\\\d{9}'},
+  {desc:'匹配 URL',samples:[{text:'https://github.com',shouldMatch:true},{text:'not a url',shouldMatch:false},{text:'http://localhost:3000',shouldMatch:true}],hint:'https?://\\\\S+'},
+  {desc:'匹配日期 YYYY-MM-DD',samples:[{text:'2024-01-15',shouldMatch:true},{text:'99-01-15',shouldMatch:false},{text:'生于2023-12-31',shouldMatch:true,target:'2023-12-31'}],hint:'\\\\d{4}-\\\\d{2}-\\\\d{2}'},
+  {desc:'匹配重复单词',samples:[{text:'the the cat',shouldMatch:true,target:'the the'},{text:'hello hello world',shouldMatch:true,target:'hello hello'},{text:'no repeats here',shouldMatch:false}],hint:'(\\\\w+)\\\\s+\\\\1'},
+  {desc:'匹配合法 IPv4',samples:[{text:'192.168.1.1',shouldMatch:true},{text:'256.1.1.1',shouldMatch:false},{text:'10.0.0.255',shouldMatch:true}],hint:'((25[0-5]|2[0-4]\\\\d|1\\\\d{2}|\\\\d{1,2})\\\\.){3}(25[0-5]|2[0-4]\\\\d|1\\\\d{2}|\\\\d{1,2})'},
+  {desc:'提取引号内内容',samples:[{text:'say "hello world" now',shouldMatch:true,target:'\\\"hello world\\\"'},{text:'no quotes',shouldMatch:false},{text:'name="Alice" age=30',shouldMatch:true,target:'\\\"Alice\\\"'}],hint:'"[^"]*"'},
+  {desc:'匹配密码 (8位+ 含大小写数字)',samples:[{text:'Pass1234',shouldMatch:true},{text:'short1',shouldMatch:false},{text:'STRONGpass99',shouldMatch:true}],hint:'(?=.*[a-z])(?=.*[A-Z])(?=.*\\\\d).{8,}'},
+];
+let score=0,combo=0,level=0;
+
+function renderLevel(){
+  if(level>=LEVELS.length){endGame();return}
+  const l=LEVELS[level];
+  document.getElementById('hLevel').textContent=(level+1)+'/'+LEVELS.length;
+  document.getElementById('levelDesc').textContent='🎯 '+l.desc;
+  document.getElementById('regexInput').value='';
+  document.getElementById('hintArea').textContent='';
+  document.getElementById('targets').innerHTML=l.samples.map(s=>'<div class="target-item"><span class="label '+(s.shouldMatch?'label-match':'label-nomatch')+'">'+(s.shouldMatch?'匹配':'不匹配')+'</span><span class="text">'+(s.text.replace(/&/g,'&amp;').replace(/</g,'&lt;'))+'</span><span class="status" id="st-'+s.text+'">⏳</span></div>').join('');
+  document.getElementById('sample').innerHTML=l.samples.map(s=>'<span>'+s.text.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>').join(' | ');
+  document.getElementById('regexInput').focus();
+}
+
+document.getElementById('regexInput').addEventListener('input',function(){
+  const r=this.value;
+  if(!r){document.getElementById('sample').innerHTML=LEVELS[level].samples.map(s=>'<span>'+s.text.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>').join(' | ');return}
+  try{
+    const re=new RegExp(r,'g');
+    document.getElementById('sample').innerHTML=LEVELS[level].samples.map(s=>{
+      const hl=s.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(re,function(m){return'<span class="match-hl">'+m.replace(/&/g,'&amp;')+'</span>'});
+      return'<span>'+hl+'</span>';
+    }).join(' | ');
+  }catch(e){document.getElementById('hintArea').textContent='⚠️ '+e.message}
+});
+
+function checkRegex(){
+  const r=document.getElementById('regexInput').value;
+  if(!r) return;
+  const l=LEVELS[level];
+  try{new RegExp(r)}catch(e){document.getElementById('hintArea').textContent='❌ 无效的正则: '+e.message;return}
+  const re=new RegExp(r);
+  let allCorrect=true;
+  l.samples.forEach(s=>{
+    const matched=re.test(s.text);
+    const correct=matched===s.shouldMatch;
+    if(!correct) allCorrect=false;
+    document.getElementById('st-'+s.text).textContent=correct?'✅':'❌';
+  });
+  if(allCorrect){combo++;score+=100+combo*15;document.getElementById('hintArea').innerHTML='<span style="color:#4ade80">✅ 完美！+'+(100+combo*15)+' 分</span>'}else{combo=0;document.getElementById('hintArea').innerHTML='<span style="color:#f87171">❌ 部分不匹配，再试一次</span>'}
+  updateHUD();
+  if(allCorrect) setTimeout(nextLevel,800);
+}
+
+function showHint(){document.getElementById('hintArea').textContent='💡 '+LEVELS[level].hint}
+function skipLevel(){combo=0;score=Math.max(0,score-15);updateHUD();nextLevel()}
+function nextLevel(){level++;renderLevel()}
+function updateHUD(){document.getElementById('hScore').textContent=score;document.getElementById('hCombo').textContent='x'+(combo+1)}
+
+function endGame(){
+  const o=document.getElementById('overlay');o.style.display='block';
+  document.getElementById('oTitle').textContent='🧬 '+score+' 分';
+  document.getElementById('oTitle').style.color='#fbbf24';
+  document.getElementById('oDesc').textContent=LEVELS.length+' 关完成 · 最大连击 x'+(Math.max(1,combo+1));
+  document.getElementById('oBtn').onclick=()=>{o.style.display='none';score=0;combo=0;level=0;renderLevel()}
+}
+
+renderLevel();
+</script>
+</body>
+</html>

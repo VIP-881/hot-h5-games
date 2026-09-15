@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>⭐ GitHub Star Hunter</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0f0;min-height:100vh;overflow:hidden}
+nav{position:sticky;top:0;z-index:100;background:rgba(15,15,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(139,92,246,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#a78bfa;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(139,92,246,.1);transition:.3s}
+nav a:hover{background:rgba(139,92,246,.2)}
+#gameCanvas{display:block;margin:0 auto;background:#12122a;border-bottom:1px solid rgba(255,255,255,.05)}
+.hud{display:flex;justify-content:center;gap:20px;padding:12px;flex-wrap:wrap;max-width:600px;margin:0 auto}
+.hud-item{text-align:center;min-width:70px}
+.hud-item .val{font-size:22px;font-weight:700}
+.hud-item .lbl{font-size:10px;color:#888}
+.stars{color:#fbbf24}.score{color:#4ade80}.combo{color:#ef4444}.health{color:#f87171}
+.game-over{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#1a1a2e,#2a1a3e);border:2px solid rgba(239,68,68,.5);border-radius:20px;padding:40px;text-align:center;z-index:200;display:none}
+.game-over h2{font-size:28px;color:#fbbf24;margin-bottom:12px}
+.game-over .final-stats{font-size:14px;color:#888;margin:8px 0}
+.game-over .final-stats span{color:#e0e0f0;font-weight:600}
+.game-over button{margin-top:16px;padding:12px 32px;border:none;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:16px;cursor:pointer}
+.start-msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#888;pointer-events:none}
+footer{text-align:center;padding:12px;color:#555;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>⭐ Star Hunter</span></nav>
+<div class="hud">
+  <div class="hud-item stars"><div class="val" id="hStars">0</div><div class="lbl">⭐ Stars</div></div>
+  <div class="hud-item score"><div class="val" id="hScore">0</div><div class="lbl">🎯 分数</div></div>
+  <div class="hud-item combo"><div class="val" id="hCombo">x1</div><div class="lbl">🔥 连击</div></div>
+  <div class="hud-item health"><div class="val" id="hHealth">❤️❤️❤️</div><div class="lbl">生命</div></div>
+</div>
+<canvas id="gameCanvas" width="600" height="500"></canvas>
+<div class="game-over" id="gameOver">
+  <h2>💥 游戏结束</h2>
+  <div class="final-stats">收集了 <span id="fStars">0</span> ⭐ · 得分 <span id="fScore">0</span></div>
+  <div class="final-stats">最大连击 <span id="fCombo">x1</span></div>
+  <button onclick="restartGame()">🔄 再来一局</button>
+</div>
+<div class="start-msg" id="startMsg">按 空格键 或 点击开始</div>
+<footer>Powered by Maton.ai · GitHub VIP-881 · 🦊 灵犀出品</footer>
+<script>
+const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
+const W=canvas.width,H=canvas.height;
+let player={x:W/2,y:H-60,w:40,h:40,speed:6};
+let stars=[],forks=[],prs=[],score=0,starCount=0,combo=1,comboTimer=0,health=3,invincible=0;
+let gameRunning=false,frame=0;
+let keys={};
+
+document.addEventListener('keydown',e=>{keys[e.key]=true;if(e.key===' '&&!gameRunning)startGame();e.preventDefault()});
+document.addEventListener('keyup',e=>{keys[e.key]=false});
+canvas.addEventListener('click',()=>{if(!gameRunning)startGame()});
+canvas.addEventListener('touchmove',e=>{e.preventDefault();const r=canvas.getBoundingClientRect();player.x=(e.touches[0].clientX-r.left)*(W/r.width)});
+
+function startGame(){
+  stars=[];forks=[];prs=[];score=0;starCount=0;combo=1;comboTimer=0;health=3;invincible=0;frame=0;
+  player.x=W/2;gameRunning=true;
+  document.getElementById('startMsg').style.display='none';
+  document.getElementById('gameOver').style.display='none';
+  loop();
+}
+
+function loop(){
+  if(!gameRunning) return;
+  frame++;ctx.clearRect(0,0,W,H);
+
+  // Move player
+  if(keys['ArrowLeft']||keys['a'])player.x-=player.speed;
+  if(keys['ArrowRight']||keys['d'])player.x+=player.speed;
+  player.x=Math.max(20,Math.min(W-20,player.x));
+
+  // Spawn
+  if(frame%30===0)stars.push({x:Math.random()*(W-40)+20,y:-20,r:12,speed:2+Math.random()*3});
+  if(frame%50===0)forks.push({x:Math.random()*(W-40)+20,y:-20,r:14,speed:2+Math.random()*2.5,angle:0});
+  if(frame%120===0&&prs.length<2)prs.push({x:Math.random()*(W-40)+20,y:-20,r:16,text:'PR',speed:1.5});
+
+  // Update & draw stars (golden)
+  stars=stars.filter(s=>s.y<H+30);
+  stars.forEach(s=>{s.y+=s.speed;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle='#fbbf24';ctx.fill();ctx.fillStyle='#f59e0b';ctx.beginPath();ctx.arc(s.x-3,s.y-3,s.r*.3,0,Math.PI*2);ctx.fill();if(invincible<=0&&dist(s,player)<s.r+20){starCount++;score+=10*combo;comboTimer=60;combo=Math.min(10,combo+1);s.y=H+50}});
+
+  // Update & draw forks (red hazards)
+  forks=forks.filter(f=>f.y<H+30);
+  forks.forEach(f=>{f.y+=f.speed;f.angle+=0.1;ctx.save();ctx.translate(f.x,f.y);ctx.rotate(f.angle);ctx.fillStyle='#ef4444';ctx.fillRect(-f.r,-2,f.r*2,4);ctx.fillRect(-2,-f.r,4,f.r*2);ctx.restore();if(invincible<=0&&dist(f,player)<f.r+18){health--;invincible=60;combo=1;if(health<=0)endGame();}});
+
+  // Update & draw PRs (powerup - extra points)
+  prs=prs.filter(p=>p.y<H+30);
+  prs.forEach(p=>{p.y+=p.speed;ctx.fillStyle='#a78bfa';ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.fillText('PR',p.x,p.y);ctx.strokeStyle='#8b5cf6';ctx.lineWidth=2;ctx.strokeText('PR',p.x,p.y);if(invincible<=0&&dist(p,player)<p.r+20){score+=50;p.y=H+50}});
+
+  // Draw player
+  ctx.fillStyle=invincible>0&&frame%10<5?'transparent':'#c084fc';
+  ctx.fillRect(player.x-18,player.y-20,36,40);
+  ctx.fillStyle=invincible>0&&frame%10<5?'transparent':'#a78bfa';
+  ctx.fillRect(player.x-22,player.y+20,44,8);
+  ctx.fillStyle='#fff';ctx.font='16px sans-serif';ctx.textAlign='center';
+  if(invincible<=0||frame%10<5)ctx.fillText('🦊',player.x,player.y+8);
+
+  // Combo timer
+  if(comboTimer>0){comboTimer--;if(comboTimer===0)combo=1}
+  if(invincible>0)invincible--;
+
+  // Draw HUD
+  document.getElementById('hStars').textContent=starCount;
+  document.getElementById('hScore').textContent=score;
+  document.getElementById('hCombo').textContent='x'+combo;
+  const hearts=['','❤️','❤️❤️','❤️❤️❤️'];
+  document.getElementById('hHealth').textContent=hearts[Math.max(0,health)]||'💀';
+
+  // Combo indicator
+  if(combo>1){ctx.fillStyle='rgba(251,191,36,'+(.3+combo*.05)+')';ctx.font='bold 24px sans-serif';ctx.fillText('🔥 x'+combo,player.x,player.y-40)}
+
+  requestAnimationFrame(loop);
+}
+
+function dist(a,b){return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2)}
+
+function endGame(){
+  gameRunning=false;
+  document.getElementById('fStars').textContent=starCount;
+  document.getElementById('fScore').textContent=score;
+  document.getElementById('fCombo').textContent='x'+combo;
+  document.getElementById('gameOver').style.display='block';
+}
+
+function restartGame(){startGame()}
+</script>
+</body>
+</html>

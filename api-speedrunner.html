@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>⚡ API Speedrunner — 开发者 API 响应竞速游戏 | Maton H5 Games</title>
+<meta name="description" content="API 响应竞速游戏：在限定时间内调用 Maton 网关的 GitHub、Notion、Gmail API 并拿到正确响应。多关卡递增难度，实时计时排名。开发者专属 H5 游戏。">
+<meta name="keywords" content="API游戏,API竞速,开发者游戏,REST API,接口测试,Notion API,GitHub API,Gmail API,编程游戏,Maton">
+<meta property="og:title" content="API Speedrunner — 开发者 API 响应竞速">
+<meta property="og:description" content="限时调用真实 API，拿到正确响应即可过关。GitHub、Notion、Gmail 多服务挑战，实时计时。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://hot-h5-games.netlify.app/api-speedrunner.html">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://hot-h5-games.netlify.app/api-speedrunner.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"API Speedrunner","description":"开发者API响应竞速游戏，限时调用真实REST API获取正确响应。支持GitHub、Notion、Gmail等多服务挑战。","applicationCategory":"Game","operatingSystem":"Web","author":{"@type":"Organization","name":"Maton AI Games"},"genre":["Educational","Racing","Puzzle"]}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',monospace;background:#0a0a14;color:#e0e0e0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(10,10,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(6,182,212,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#06b6d4;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(6,182,212,.1);transition:.3s}
+nav a:hover{background:rgba(6,182,212,.2)}
+header{text-align:center;padding:20px;background:linear-gradient(180deg,rgba(6,182,212,.06),transparent)}
+header h1{font-size:1.6em;background:linear-gradient(135deg,#06b6d4,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header p{font-size:12px;color:#666;margin-top:4px}
+.container{max-width:700px;margin:16px auto;padding:0 16px}
+.level-card{background:rgba(15,15,30,.9);border:2px solid rgba(6,182,212,.15);border-radius:16px;padding:20px;margin-bottom:16px;position:relative}
+.level-card.active{border-color:rgba(6,182,212,.5);box-shadow:0 0 30px rgba(6,182,212,.1)}
+.level-card.completed{border-color:rgba(34,197,94,.3)}
+.level-card.failed{border-color:rgba(239,68,68,.3)}
+.level-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.level-num{font-size:14px;font-weight:700;color:#06b6d4}
+.level-service{font-size:11px;padding:3px 10px;border-radius:8px;background:rgba(139,92,246,.15);color:#a78bfa}
+.level-task{font-size:13px;color:#ccc;margin-bottom:12px;line-height:1.6}
+.level-task code{background:rgba(255,255,255,.06);padding:2px 8px;border-radius:4px;font-size:12px;color:#fbbf24}
+.api-display{background:#0d1117;border-radius:10px;padding:12px;font-family:monospace;font-size:12px;color:#4ade80;margin:8px 0;white-space:pre-wrap;word-break:break-all;max-height:100px;overflow-y:auto}
+.api-display.loading{color:#fbbf24}
+.api-display.error{color:#ef4444}
+.level-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px}
+.level-time{font-size:20px;font-weight:700;color:#fbbf24;font-family:monospace}
+.level-status{font-size:12px;padding:4px 12px;border-radius:8px}
+.status-success{background:rgba(34,197,94,.15);color:#4ade80}
+.status-fail{background:rgba(239,68,68,.15);color:#f87171}
+.status-pending{background:rgba(255,255,255,.05);color:#888}
+.timer-bar{height:4px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:8px;overflow:hidden}
+.timer-bar div{height:100%;background:linear-gradient(90deg,#06b6d4,#fbbf24,#ef4444);border-radius:2px;transition:width .1s linear}
+.controls{text-align:center;margin:16px 0;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.controls button{padding:12px 28px;border:none;border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;transition:.3s}
+.btn-start{background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff}
+.btn-start:hover:not(:disabled){box-shadow:0 4px 20px rgba(6,182,212,.5)}
+.btn-start:disabled{opacity:.3;cursor:not-allowed}
+.global-timer{text-align:center;font-size:36px;font-weight:700;margin:12px 0;background:linear-gradient(135deg,#06b6d4,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.score-final{text-align:center;padding:20px}
+.score-final h2{font-size:28px;color:#fbbf24}
+.score-final .detail{font-size:13px;color:#888;margin:8px 0}
+footer{text-align:center;padding:16px;color:#444;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>⚡ API Speedrunner</span></nav>
+<header><h1>⚡ API Speedrunner</h1><p>限时调用真实 API · 拿到正确响应过关 · 开发者专属</p></header>
+<div class="container">
+  <div class="global-timer" id="globalTimer">60.0s</div>
+  <div id="levels"></div>
+  <div class="controls">
+    <button class="btn-start" id="runBtn" onclick="runLevel(0)">▶ 开始挑战！</button>
+  </div>
+</div>
+<footer>Powered by Maton.ai · 真实 API 调用 · 🦊 灵犀出品</footer>
+<script>
+const AK='v2.xOedfPfv9hou9ht8BXTbk7OKPlRUUvh5WuyJNC8Q3mLrU5dQVGL5rARouO2DNnC-IKG0UGeYm79Cfw1aIjsOw48Fram7uaVouZHiYKGTZzMBg4SuQLJLz4gY';
+const TDS='3ba68c53-ba18-806b-a725-000b464317ad';
+
+const levels=[
+  {service:'GitHub',name:'获取用户信息',desc:'GET /github/user 拿到 <code>login</code> 字段',endpoint:'/github/user',check:(r)=>!!r.login,target:'VIP-881',timeout:15},
+  {service:'Notion',name:'查询任务数据库',desc:'POST /notion/v1/data_sources/{TDS}/query 拿到至少 <code>1</code> 条结果',endpoint:'/notion/v1/data_sources/'+TDS+'/query',method:'POST',body:{page_size:5},headers:{'Notion-Version':'2025-09-03'},check:(r)=>r.results&&r.results.length>0,target:'≥1条',timeout:15},
+  {service:'GitHub',name:'仓库列表',desc:'GET /github/user/repos 拿到至少 <code>1</code> 个仓库',endpoint:'/github/user/repos?per_page=5',check:(r)=>Array.isArray(r)&&r.length>0,target:'≥1个',timeout:15},
+  {service:'Gmail',name:'收件箱概览',desc:'GET /google-mail/gmail/v1/users/me/profile 拿到 <code>emailAddress</code>',endpoint:'/google-mail/gmail/v1/users/me/profile',check:(r)=>!!r.emailAddress,target:'zzw1998...',timeout:15},
+  {service:'Notion',name:'搜索读书笔记',desc:'POST /notion/v1/data_sources/{DDS}/query 筛选 <code>类型=读书笔记</code>',endpoint:'/notion/v1/data_sources/3ba68c53-ba18-8054-9cb7-000b80ae86dc/query',method:'POST',body:{filter:{property:'类型',select:{equals:'读书笔记'}},page_size:50},headers:{'Notion-Version':'2025-09-03'},check:(r)=>r.results!==undefined,target:'任意结果',timeout:15},
+];
+
+let gameRunning=false,gameTimer=null,gameTime=60,currentLevel=0,levelResults=[],levelTimers=[];
+
+function renderLevels(){
+  const services={GitHub:'🐙',Notion:'📝',Gmail:'📧'};
+  let html='';
+  levels.forEach((l,i)=>{
+    const r=levelResults[i];
+    const cls=r?r.success?'completed':'failed':'';
+    const active=i===currentLevel&&gameRunning?'active':'';
+    html+='<div class="level-card '+cls+' '+active+'" id="level-'+i+'">';
+    html+='<div class="level-header"><span class="level-num">'+services[l.service]+' 关卡 '+(i+1)+'/'+levels.length+'</span><span class="level-service">'+l.service+'</span></div>';
+    html+='<div class="level-task">'+l.desc+'</div>';
+    html+='<div class="timer-bar"><div id="timer-bar-'+i+'" style="width:100%"></div></div>';
+    html+='<div class="api-display" id="api-display-'+i+'">'+(r?r.result:'等待执行...')+'</div>';
+    html+='<div class="level-footer"><span class="level-time" id="level-time-'+i+'">'+(r?r.time.toFixed(1)+'s':l.timeout.toFixed(0)+'s')+'</span>';
+    html+='<span class="level-status '+(r?r.success?'status-success':'status-fail':'status-pending')+'">'+(r?r.success?'✅ 成功 '+r.data:'❌ 失败':'⏳ 等待')+'</span></div>';
+    html+='</div>';
+  });
+  document.getElementById('levels').innerHTML=html;
+}
+
+function updateGlobalTimer(){document.getElementById('globalTimer').textContent=gameTime.toFixed(1)+'s'}
+
+async function runLevel(idx){
+  if(!gameRunning&&idx===0){gameRunning=true;gameTime=60;currentLevel=0;levelResults=[];levelTimers=[];document.getElementById('runBtn').disabled=true;renderLevels();updateGlobalTimer();
+    gameTimer=setInterval(()=>{gameTime-=0.1;updateGlobalTimer();if(gameTime<=0){clearInterval(gameTimer);gameRunning=false;finishGame()}},100)}
+  if(idx>=levels.length){finishGame();return}
+  currentLevel=idx;renderLevels();
+  const l=levels[idx];const start=performance.now();levelTimers[idx]=setInterval(()=>{const el=document.getElementById('timer-bar-'+idx);if(el)el.style.width=Math.max(0,(l.timeout-(performance.now()-start)/1000)/l.timeout*100)+'%'},100);
+  const disp=document.getElementById('api-display-'+idx);disp.textContent='⏳ 调用中...';disp.className='api-display loading';
+  try{
+    const method=l.method||'GET';const opts={headers:{'Authorization':'Bearer '+AK,'Content-Type':'application/json',...(l.headers||{})}};
+    if(method==='POST')opts.method='POST';opts.body=JSON.stringify(l.body||{});
+    if(l.endpoint.includes('/notion/'))opts.headers['Notion-Version']='2025-09-03';
+    const resp=await fetch('https://gateway.maton.ai'+l.endpoint,opts);
+    const data=await resp.json();
+    const elapsed=(performance.now()-start)/1000;
+    clearInterval(levelTimers[idx]);
+    const ok=l.check(data);
+    const resultText=ok?'✅ '+l.target+' ('+elapsed.toFixed(1)+'s)':'❌ 响应异常';
+    disp.textContent=JSON.stringify(data,null,2).substring(0,300);disp.className='api-display';
+    levelResults[idx]={success:ok,time:elapsed,data:l.target,result:resultText};
+    document.getElementById('level-time-'+idx).textContent=elapsed.toFixed(1)+'s';
+    renderLevels();
+    if(ok){setTimeout(()=>runLevel(idx+1),500)}else{setTimeout(()=>runLevel(idx+1),500)}
+  }catch(e){
+    clearInterval(levelTimers[idx]);
+    disp.textContent='❌ '+e.message;disp.className='api-display error';
+    levelResults[idx]={success:false,time:levels[idx].timeout,data:'Error',result:'❌ '+e.message};
+    renderLevels();setTimeout(()=>runLevel(idx+1),500);
+  }
+}
+
+function finishGame(){
+  clearInterval(gameTimer);gameRunning=false;currentLevel=-1;levelTimers.forEach(clearInterval);
+  const passed=levelResults.filter(r=>r&&r.success).length;
+  const totalTime=levelResults.reduce((s,r)=>s+(r?r.time:0),0);
+  document.getElementById('runBtn').disabled=false;
+  document.getElementById('globalTimer').textContent='🏁';
+  document.getElementById('levels').insertAdjacentHTML('beforeend','<div class="score-final"><h2>'+(passed===levels.length?'🏆 完美通关！':passed+'/'+levels.length+' 过关')+'</h2><div class="detail">总API耗时: '+totalTime.toFixed(1)+'s | 剩余时间: '+gameTime.toFixed(1)+'s</div><div class="detail" style="margin-top:8px"><button class="btn-start" onclick="runLevel(0)" style="font-size:12px;padding:8px 20px">🔄 重新挑战</button></div></div>');
+  renderLevels();
+}
+
+renderLevels();
+</script>
+</body>
+</html>

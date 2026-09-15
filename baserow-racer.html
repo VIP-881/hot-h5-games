@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🗄️ Baserow 数据赛车</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0f0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(15,15,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(139,92,246,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#a78bfa;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(139,92,246,.1);transition:.3s}
+nav a:hover{background:rgba(139,92,246,.2)}
+header{text-align:center;padding:20px;background:linear-gradient(180deg,rgba(34,197,94,.06),transparent)}
+header h1{font-size:1.6em;background:linear-gradient(135deg,#22c55e,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header p{font-size:12px;color:#888;margin-top:4px}
+.raceway{max-width:750px;margin:16px auto;padding:0 16px}
+.track{background:linear-gradient(180deg,rgba(20,30,20,.8),rgba(20,20,25,.8));border:2px solid rgba(34,197,94,.15);border-radius:20px;padding:20px;position:relative;min-height:350px;overflow:hidden}
+.finish{position:absolute;right:20px;top:20px;bottom:20px;width:4px;background:repeating-linear-gradient(0deg,#fbbf24,#fbbf24 10px,transparent 10px,transparent 20px)}
+.car-lane{height:52px;margin:8px 0;background:rgba(255,255,255,.02);border-radius:10px;position:relative;overflow:hidden}
+.car-lane .car{position:absolute;top:8px;left:10px;font-size:24px;transition:left .1s linear;z-index:3;filter:drop-shadow(0 0 6px currentColor)}
+.car-lane .trail{position:absolute;top:0;left:0;height:52px;background:linear-gradient(90deg,transparent,rgba(34,197,94,.1));transition:width .1s linear}
+.car-lane .cname{position:absolute;left:10px;top:4px;font-size:9px;color:#666;z-index:2}
+.controls{text-align:center;margin:16px 0}
+.controls button{padding:12px 28px;border:none;border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;transition:.3s;margin:4px}
+.btn-go{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.btn-go:hover{box-shadow:0 4px 20px rgba(34,197,94,.5)}
+.btn-sync{background:rgba(139,92,246,.15);color:#a78bfa}
+.leader{text-align:center;padding:12px;font-size:14px;color:#fbbf24}
+.scoreboard{margin-top:16px}
+.scoreboard h3{font-size:13px;color:#888;margin-bottom:8px}
+.race-result{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(20,20,35,.9);border-radius:10px;margin:4px 0;font-size:12px}
+.race-result .pos{font-weight:700;width:20px}
+.pos-1{color:#fbbf24}.pos-2{color:#c0c0c0}.pos-3{color:#cd7f32}
+.race-result .details{flex:1;color:#888;font-size:10px}
+.race-result .time{font-weight:600;color:#4ade80}
+footer{text-align:center;padding:16px;color:#555;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>🗄️ Baserow 数据赛车</span></nav>
+<header><h1>🗄️ Baserow 数据赛车</h1><p>你的数据库表 = 赛道 · 每行数据 = 一辆赛车 · 填写数据加速！</p></header>
+<div class="raceway">
+  <div class="track">
+    <div class="finish"></div>
+    <div id="lanes"></div>
+  </div>
+  <div class="leader" id="leader">🏁 等待发车...</div>
+  <div class="controls">
+    <button class="btn-go" onclick="startRace()">🏎️ 发车！</button>
+    <button class="btn-sync" onclick="init()">🔄 同步 Baserow</button>
+  </div>
+</div>
+<div class="scoreboard">
+  <h3>🏆 比赛结果</h3>
+  <div id="results"><div style="color:#666;font-size:12px;padding:12px">尚未比赛</div></div>
+</div>
+<footer>Powered by Maton.ai · Baserow · 🦊 灵犀出品</footer>
+<script>
+const AK='v2.xOedfPfv9hou9ht8BXTbk7OKPlRUUvh5WuyJNC8Q3mLrU5dQVGL5rARouO2DNnC-IKG0UGeYm79Cfw1aIjsOw48Fram7uaVouZHiYKGTZzMBg4SuQLJLz4gY';
+let tables=[], cars=[], racing=false, positions={};
+
+async function api(url){const r=await fetch('https://gateway.maton.ai'+url,{headers:{'Authorization':'Bearer '+AK}});return r.json()}
+
+async function init(){
+  document.getElementById('leader').textContent='⏳ 同步 Baserow...';
+  try{
+    // List Baserow databases
+    const dbs=await api('/baserow/api/databases');
+    tables=[];
+    for(const db of (dbs||[]).slice(0,3)){
+      try{
+        const tbls=await api('/baserow/api/database/'+db.id+'/tables');
+        for(const t of tbls||[]){
+          try{
+            const rows=await api('/baserow/api/database/'+t.id+'/table/'+t.id+'/?size=100');
+            tables.push({name:t.name,db:db.name,count:(rows.results||rows||[]).length,fields:t.fields?.length||0});
+          }catch(e){tables.push({name:t.name,db:db.name,count:0,fields:t.fields?.length||0})}
+        }
+      }catch(e){}
+    }
+    if(tables.length===0) tables=Array.from({length:6},(_,i)=>({name:'模拟表_'+(i+1),db:'模拟库',count:Math.floor(Math.random()*50)+5,fields:Math.floor(Math.random()*10)+2}));
+    document.getElementById('leader').textContent='✅ 发现 '+tables.length+' 张数据表';
+    renderLanes(0);
+  }catch(e){
+    document.getElementById('leader').textContent='⚠️ Baserow 未连接，使用模拟数据';
+    tables=Array.from({length:8},(_,i)=>({name:'模拟表_'+(i+1),db:'Local',count:Math.floor(Math.random()*60)+5,fields:Math.floor(Math.random()*12)+2}));
+    renderLanes(0);
+  }
+}
+
+function renderLanes(progress){
+  const icons=['🏎️','🚗','🚙','🚕','🚓','🏍️','🚌','🚐','🚛','🚜','🚲','🛵'];
+  let html='';
+  tables.slice(0,10).forEach((t,i)=>{
+    const speed=(t.count*2+t.fields*10)/Math.max(1,tables.length);
+    const pct=Math.min(progress*100,100);
+    const pos=10+(progress*speed/200)*location.href.includes('?')?600:500;
+    html+='<div class="car-lane"><div class="cname">'+t.name.substring(0,14)+' ('+t.count+'行)</div><div class="trail" style="width:'+pct+'%"></div><div class="car" style="left:'+pos+'px;color:'+['#4ade80','#06b6d4','#fbbf24','#ef4444','#a78bfa','#fb923c','#22c55e','#ec4899'][i%8]+'">'+icons[i%12]+'</div></div>';
+  });
+  document.getElementById('lanes').innerHTML=html;
+}
+
+function startRace(){
+  if(racing) return; racing=true;
+  const speeds=tables.map(t=>({name:t.name,count:t.count,fields:t.fields,speed:(t.count*2+t.fields*10)/20}));
+  let frame=0; const maxFrames=200;
+  const interval=setInterval(()=>{
+    frame++;
+    const pct=frame/maxFrames;
+    renderLanes(pct);
+    if(frame>=maxFrames){clearInterval(interval);racing=false;showResults(speeds)}
+  },50);
+}
+
+function showResults(speeds){
+  speeds.sort((a,b)=>b.speed-a.speed);
+  const posCls=['pos-1','pos-2','pos-3'];
+  const posEmoji=['🥇','🥈','🥉'];
+  document.getElementById('results').innerHTML=speeds.map((s,i)=>'<div class="race-result"><span class="pos '+(posCls[i]||'')+'">'+(posEmoji[i]||(i+1))+'</span><span>'+s.name+'</span><span class="details">'+s.count+'行 · '+s.fields+'字段</span><span class="time">速度: '+Math.round(s.speed)+'</span></div>').join('');
+  document.getElementById('leader').textContent='🏁 比赛结束！冠军: '+speeds[0].name;
+}
+
+init();
+</script>
+</body>
+</html>

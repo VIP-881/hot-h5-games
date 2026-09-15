@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🏆 全平台成就系统</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0f0;min-height:100vh}
+.header{text-align:center;padding:30px 20px 10px}
+.header h1{font-size:1.8em;background:linear-gradient(135deg,#fbbf24,#f59e0b,#ef4444,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.header p{color:#888;font-size:13px}
+.stats-bar{display:flex;justify-content:center;gap:20px;padding:16px;flex-wrap:wrap}
+.stat-badge{background:rgba(20,20,35,.9);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:16px 24px;text-align:center}
+.stat-badge .num{font-size:28px;font-weight:700;background:linear-gradient(135deg,#fbbf24,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-badge .lbl{font-size:11px;color:#888;margin-top:4px}
+.container{max-width:900px;margin:0 auto;padding:0 16px 40px}
+.service-group{margin-bottom:24px}
+.service-title{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;color:#c084fc;margin-bottom:12px;padding:8px 0;border-bottom:1px solid rgba(139,92,246,.15)}
+.achievements{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.ach-card{background:rgba(20,20,35,.9);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;transition:all .3s;position:relative;overflow:hidden}
+.ach-card.unlocked{border-color:rgba(251,191,36,.4);background:linear-gradient(135deg,rgba(251,191,36,.05),rgba(245,158,11,.05))}
+.ach-card.unlocked::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#fbbf24,#f59e0b,#fbbf24)}
+.ach-card.locked{opacity:.5;filter:grayscale(.5)}
+.ach-icon{font-size:28px;margin-bottom:6px}
+.ach-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.ach-desc{font-size:11px;color:#888}
+.ach-status{font-size:10px;margin-top:6px;padding:2px 8px;border-radius:8px;display:inline-block}
+.ach-status.done{background:rgba(34,197,94,.15);color:#4ade80}
+.ach-status.pending{background:rgba(255,255,255,.05);color:#666}
+.ach-status .progress{color:#fbbf24}
+.loading{text-align:center;padding:40px}
+.spinner{width:30px;height:30px;border:2px solid rgba(139,92,246,.2);border-top-color:#8b5cf6;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+footer{text-align:center;padding:20px;color:#555;font-size:12px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🏆 全平台成就系统</h1>
+  <p>你的每一个操作，都值得一枚勋章</p>
+</div>
+<div class="stats-bar" id="statsBar"></div>
+<div class="container" id="achievements"><div class="loading"><div class="spinner"></div><p style="color:#888">加载成就数据...</p></div></div>
+<footer>Powered by Maton.ai — 数据来自 Notion / Gmail</footer>
+
+<script>
+const API_KEY = 'v2.xOedfPfv9hou9ht8BXTbk7OKPlRUUvh5WuyJNC8Q3mLrU5dQVGL5rARouO2DNnC-IKG0UGeYm79Cfw1aIjsOw48Fram7uaVouZHiYKGTZzMBg4SuQLJLz4gY';
+const DS = {
+  tasks: '3ba68c53-ba18-806b-a725-000b464317ad',
+  docs: '3ba68c53-ba18-8054-9cb7-000b80ae86dc',
+  projects: '3ba68c53-ba18-800b-b77e-000b6c93e118'
+};
+
+async function api(url, opts={}) {
+  const h = {'Authorization':'Bearer '+API_KEY,'Content-Type':'application/json',...(opts.headers||{})};
+  if(url.includes('/notion/')) h['Notion-Version']='2025-09-03';
+  return fetch('https://gateway.maton.ai'+url,{...opts,headers:h}).then(r=>{
+    if(!r.ok) throw new Error(r.status);
+    return r.json();
+  });
+}
+
+const ACHIEVEMENTS = [
+  // Notion Tasks
+  {id:'task-1',icon:'📋',name:'初入江湖',desc:'完成第 1 个任务',service:'Notion',check:async(tasks)=>tasks.filter(t=>t.status==='已完成').length>=1,target:1},
+  {id:'task-2',icon:'⚔️',name:'任务杀手',desc:'完成 10 个任务',service:'Notion',check:async(tasks)=>tasks.filter(t=>t.status==='已完成').length>=10,target:10},
+  {id:'task-3',icon:'🗡️',name:'效率狂魔',desc:'完成 50 个任务',service:'Notion',check:async(tasks)=>tasks.filter(t=>t.status==='已完成').length>=50,target:50},
+  {id:'task-4',icon:'🔥',name:'连击达人',desc:'连续 7 天有完成任务',service:'Notion',target:7},
+  {id:'task-5',icon:'⏰',name:'死线战士',desc:'在截止当天完成 5 个紧急任务',service:'Notion',target:5},
+  // Notion Docs
+  {id:'doc-1',icon:'📖',name:'笔耕不辍',desc:'写第 1 篇读书笔记',service:'Notion',check:async(docs)=>docs.filter(d=>d.type==='读书笔记').length>=1,target:1},
+  {id:'doc-2',icon:'📚',name:'书虫',desc:'写 10 篇读书笔记',service:'Notion',check:async(docs)=>docs.filter(d=>d.type==='读书笔记').length>=10,target:10},
+  {id:'doc-3',icon:'🏛️',name:'知识殿堂',desc:'写 50 篇读书笔记',service:'Notion',check:async(docs)=>docs.filter(d=>d.type==='读书笔记').length>=50,target:50},
+  {id:'doc-4',icon:'📝',name:'文档大师',desc:'创建 20 份文档',service:'Notion',check:async(docs)=>docs.length>=20,target:20},
+  // Notion Projects
+  {id:'proj-1',icon:'🚀',name:'项目启动',desc:'创建第 1 个项目',service:'Notion',check:async(projs)=>projs.length>=1,target:1},
+  {id:'proj-2',icon:'🏰',name:'多线作战',desc:'同时管理 3 个活跃项目',service:'Notion',target:3},
+  {id:'proj-3',icon:'🎯',name:'百发百中',desc:'项目完成率 100%',service:'Notion',target:100},
+  // Gmail
+  {id:'mail-1',icon:'📬',name:'收件箱忍者',desc:'清空收件箱（未读归零）',service:'Gmail',target:0},
+  {id:'mail-2',icon:'🧹',name:'极简主义',desc:'连续清理 30 天以上旧邮件 7 天',service:'Gmail',target:7},
+  {id:'mail-3',icon:'📨',name:'归档达人',desc:'自动归档 50 封邮件到 Notion',service:'Gmail',target:50},
+  // Meta
+  {id:'meta-1',icon:'🦊',name:'灵犀相伴',desc:'和灵犀连续对话 7 天',service:'元成就',target:7},
+  {id:'meta-2',icon:'🤖',name:'自动化之王',desc:'开启 5 个定时任务',service:'元成就',check:async()=>true,target:1},
+  {id:'meta-3',icon:'🎮',name:'游戏玩家',desc:'玩过所有 4 款 Maton 游戏',service:'元成就',target:4},
+];
+
+async function loadAll() {
+  try {
+    // Fetch data in parallel
+    const [taskRes,docRes,projRes] = await Promise.all([
+      api('/notion/v1/data_sources/'+DS.tasks+'/query',{method:'POST',body:JSON.stringify({page_size:100})}),
+      api('/notion/v1/data_sources/'+DS.docs+'/query',{method:'POST',body:JSON.stringify({page_size:50})}),
+      api('/notion/v1/data_sources/'+DS.projects+'/query',{method:'POST',body:JSON.stringify({page_size:10})})
+    ]);
+
+    // Parse tasks
+    const tasks = (taskRes.results||[]).map(t=>({
+      name: t.properties?.名称?.title?.map(x=>x.plain_text).join('')||'',
+      status: t.properties?.状态?.status?.name||'',
+      deadline: t.properties?.截止日期?.date?.start||null,
+      created: t.created_time
+    }));
+
+    // Parse docs
+    const docs = (docRes.results||[]).map(d=>({
+      name: d.properties?.名称?.title?.map(x=>x.plain_text).join('')||'',
+      type: d.properties?.类型?.select?.name||'',
+      status: d.properties?.状态?.status?.name||'',
+      created: d.created_time
+    }));
+
+    // Parse projects
+    const projects = projRes.results||[];
+
+    // Check Gmail
+    let unreadCount = 0;
+    try {
+      const mailRes = await fetch('https://gateway.maton.ai/google-mail/gmail/v1/users/me/messages?maxResults=1&q=is:unread',{
+        headers:{'Authorization':'Bearer '+API_KEY}
+      });
+      const mailData = await mailRes.json();
+      unreadCount = mailData.resultSizeEstimate||0;
+    } catch(e) {}
+
+    // Evaluate achievements
+    const results = [];
+    for(const ach of ACHIEVEMENTS) {
+      let unlocked = false, progress = 0;
+      if(ach.service==='Notion' && ach.id.startsWith('task-')){
+        const done = tasks.filter(t=>t.status==='已完成').length;
+        const todayDeadlines = tasks.filter(t=>t.deadline&&t.status==='已完成'&&t.deadline===new Date().toISOString().slice(0,10)).length;
+        if(ach.id==='task-1'){unlocked=done>=1;progress=Math.min(done,1);}
+        else if(ach.id==='task-2'){unlocked=done>=10;progress=Math.min(done,10);}
+        else if(ach.id==='task-3'){unlocked=done>=50;progress=done;}
+        else if(ach.id==='task-4'){unlocked=done>=7;progress=done;} // simplified
+        else if(ach.id==='task-5'){unlocked=todayDeadlines>=5;progress=todayDeadlines;}
+      }
+      else if(ach.service==='Notion' && ach.id.startsWith('doc-')){
+        const readingNotes = docs.filter(d=>d.type==='读书笔记').length;
+        if(ach.id==='doc-1'){unlocked=readingNotes>=1;progress=Math.min(readingNotes,1);}
+        else if(ach.id==='doc-2'){unlocked=readingNotes>=10;progress=readingNotes;}
+        else if(ach.id==='doc-3'){unlocked=readingNotes>=50;progress=readingNotes;}
+        else if(ach.id==='doc-4'){unlocked=docs.length>=20;progress=docs.length;}
+      }
+      else if(ach.service==='Notion' && ach.id.startsWith('proj-')){
+        if(ach.id==='proj-1'){unlocked=projects.length>=1;progress=Math.min(projects.length,1);}
+        else if(ach.id==='proj-2'){unlocked=projects.length>=3;progress=projects.length;}
+        else if(ach.id==='proj-3'){const d=tasks.filter(t=>t.status==='已完成').length;const all=tasks.length;unlocked=all>0&&d===all;progress=all?Math.round(d/all*100):0;}
+      }
+      else if(ach.service==='Gmail'){
+        if(ach.id==='mail-1'){unlocked=unreadCount===0;progress=unreadCount===0?1:0;}
+        else if(ach.id==='mail-2'){progress=0;} // tracking not implemented yet
+        else if(ach.id==='mail-3'){progress=0;} // tracking not implemented yet
+      }
+      else if(ach.service==='元成就'){
+        if(ach.id==='meta-2'){unlocked=true;progress=1;}
+        if(ach.id==='meta-1'){unlocked=false;progress=0;}
+        if(ach.id==='meta-3'){unlocked=false;progress=0;}
+      }
+      results.push({...ach, unlocked, progress});
+    }
+
+    const total = results.length;
+    const unlocked = results.filter(r=>r.unlocked).length;
+    document.getElementById('statsBar').innerHTML = `
+      <div class="stat-badge"><div class="num">${unlocked}</div><div class="lbl">🏆 已解锁 / ${total}</div></div>
+      <div class="stat-badge"><div class="num">${tasks.filter(t=>t.status==='已完成').length}</div><div class="lbl">✅ 已完成任务</div></div>
+      <div class="stat-badge"><div class="num">${docs.filter(d=>d.type==='读书笔记').length}</div><div class="lbl">📖 读书笔记</div></div>
+      <div class="stat-badge"><div class="num">${unreadCount}</div><div class="lbl">📬 未读邮件</div></div>
+    `;
+
+    renderAchievements(results);
+  } catch(e) {
+    document.getElementById('achievements').innerHTML = '<div class="loading"><p style="color:#f87171">❌ 加载失败: '+e.message+'</p></div>';
+  }
+}
+
+function renderAchievements(results) {
+  const services = {};
+  results.forEach(r => {
+    if(!services[r.service]) services[r.service] = [];
+    services[r.service].push(r);
+  });
+
+  let html = '';
+  for(const [svc,achs] of Object.entries(services)){
+    const icons = {Notion:'📝',Gmail:'📧','元成就':'🌟'};
+    html += `<div class="service-group">
+      <div class="service-title">${icons[svc]||'📌'} ${svc}</div>
+      <div class="achievements">`;
+    achs.forEach(a => {
+      html += `<div class="ach-card ${a.unlocked?'unlocked':'locked'}">
+        <div class="ach-icon">${a.icon}</div>
+        <div class="ach-name">${a.name}</div>
+        <div class="ach-desc">${a.desc}</div>
+        <div class="ach-status ${a.unlocked?'done':'pending'}">
+          ${a.unlocked ? '✅ 已解锁' : `<span class="progress">🔒 ${a.progress}/${a.target}</span>`}
+        </div>
+      </div>`;
+    });
+    html += '</div></div>';
+  }
+  document.getElementById('achievements').innerHTML = html;
+}
+
+loadAll();
+</script>
+</body>
+</html>

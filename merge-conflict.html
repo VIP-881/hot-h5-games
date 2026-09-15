@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🔀 Merge Conflict Resolver — Git 合并冲突解决游戏 | Maton H5 Games</title>
+<meta name="description" content="Git 合并冲突解决游戏：在限定时间内正确解决代码合并冲突。模拟真实 Git merge 场景，选择正确的冲突解决方案。训练你的代码审查和版本控制能力。">
+<meta name="keywords" content="Git合并冲突,merge conflict,代码审查,版本控制,Git游戏,编程游戏,开发者训练,代码合并,分支管理,Maton">
+<meta property="og:title" content="Merge Conflict Resolver — Git 合并冲突解决">
+<meta property="og:description" content="限时解决 Git 合并冲突，训练你的代码审查和版本控制能力。多关卡递增难度。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://hot-h5-games.netlify.app/merge-conflict.html">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://hot-h5-games.netlify.app/merge-conflict.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"Merge Conflict Resolver","description":"Git合并冲突解决训练游戏，模拟真实merge场景，限时选择正确的冲突解决方案。","applicationCategory":"Game","operatingSystem":"Web","author":{"@type":"Organization","name":"Maton AI Games"},"genre":["Educational","Puzzle","Simulation"]}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Fira Code',monospace;background:#0a0a14;color:#e0e0e0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(10,10,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(239,68,68,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#f87171;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(239,68,68,.1);transition:.3s}
+nav a:hover{background:rgba(239,68,68,.2)}
+header{text-align:center;padding:20px;background:linear-gradient(180deg,rgba(239,68,68,.05),transparent)}
+header h1{font-size:1.6em;background:linear-gradient(135deg,#ef4444,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.container{max-width:750px;margin:16px auto;padding:0 16px}
+.hud{display:flex;justify-content:center;gap:20px;padding:10px;flex-wrap:wrap}
+.hud-item{text-align:center;min-width:60px}
+.hud-item .val{font-size:20px;font-weight:700}
+.hud-item .lbl{font-size:9px;color:#666}
+.score-h{color:#fbbf24}.level-h{color:#06b6d4}.combo-h{color:#4ade80}
+.diff-view{background:#0d1117;border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.diff-header{display:flex;gap:8px;padding:10px 14px;background:rgba(0,0,0,.3);font-size:11px;color:#888}
+.diff-header .branch{display:flex;align-items:center;gap:4px}
+.diff-header .branch::before{content:'';width:8px;height:8px;border-radius:50%}
+.diff-header .head::before{background:#4ade80}
+.diff-header .incoming::before{background:#a78bfa}
+.diff-lines{padding:10px;font-size:13px;line-height:1.7}
+.diff-lines .line{padding:2px 10px;white-space:pre-wrap;font-family:inherit}
+.diff-lines .line.add{background:rgba(34,197,94,.08);color:#4ade80;border-left:3px solid #4ade80}
+.diff-lines .line.del{background:rgba(239,68,68,.08);color:#f87171;border-left:3px solid #f87171}
+.diff-lines .line.conflict{background:rgba(251,191,36,.08);color:#fbbf24;border-left:3px solid #fbbf24;animation:pulse 2s infinite}
+.diff-lines .line.context{color:#666}
+.diff-lines .line.marker{color:#888;text-align:center;font-size:11px;letter-spacing:2px}
+@keyframes pulse{0%,100%{background:rgba(251,191,36,.06)}50%{background:rgba(251,191,36,.12)}}
+.choices{display:flex;gap:10px;flex-wrap:wrap}
+.choice-btn{flex:1;min-width:150px;padding:14px;border:2px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(20,20,35,.9);color:#ccc;cursor:pointer;transition:.3s;text-align:center;font-size:13px;font-family:inherit}
+.choice-btn:hover{border-color:rgba(139,92,246,.5);background:rgba(139,92,246,.08)}
+.choice-btn.correct{background:rgba(34,197,94,.15);border-color:#4ade80;color:#4ade80;animation:correctPop .5s}
+.choice-btn.wrong{background:rgba(239,68,68,.15);border-color:#ef4444;color:#f87171}
+@keyframes correctPop{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+.choice-btn .key{display:block;font-size:24px;margin-bottom:6px}
+.choice-btn .desc{font-size:11px;color:#888}
+.feedback{text-align:center;padding:10px;font-size:14px;min-height:28px}
+.feedback .right{color:#4ade80}.feedback .wrong{color:#f87171}
+.timer-bar{height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;margin:8px 0}
+.timer-bar div{height:100%;background:linear-gradient(90deg,#4ade80,#fbbf24,#ef4444);border-radius:2px;transition:width .1s linear}
+.result-overlay{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#1a1a2e,#2a1a3e);border:2px solid rgba(139,92,246,.3);border-radius:20px;padding:32px;text-align:center;z-index:200}
+.result-overlay h2{font-size:28px;margin-bottom:12px}
+.result-overlay button{margin-top:16px;padding:12px 28px;border:none;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:16px;cursor:pointer}
+footer{text-align:center;padding:16px;color:#444;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>🔀 Merge Conflict</span></nav>
+<header><h1>🔀 Merge Conflict Resolver</h1><p>限时解决合并冲突 · 训练你的 Git 肌肉记忆</p></header>
+<div class="container">
+  <div class="hud">
+    <div class="hud-item score-h"><div class="val" id="hScore">0</div><div class="lbl">⭐ 分数</div></div>
+    <div class="hud-item level-h"><div class="val" id="hLevel">1/8</div><div class="lbl">📊 关卡</div></div>
+    <div class="hud-item combo-h"><div class="val" id="hCombo">x1</div><div class="lbl">🔥 连击</div></div>
+  </div>
+  <div class="timer-bar" id="timerBar"><div id="timerFill" style="width:100%"></div></div>
+  <div class="diff-view">
+    <div class="diff-header">
+      <span class="branch head">HEAD (main)</span>
+      <span class="branch incoming">incoming (feature)</span>
+    </div>
+    <div class="diff-lines" id="diffLines"></div>
+  </div>
+  <div class="choices" id="choices"></div>
+  <div class="feedback" id="feedback"></div>
+</div>
+<div class="result-overlay" id="resultOverlay" style="display:none"></div>
+<footer>Powered by Maton.ai · Git Merge 训练 · 🦊 灵犀出品</footer>
+<script>
+const CONFLICTS=[
+  {file:'src/utils.js',head:'const API_URL = "https://api.prod.com";',incoming:'const API_URL = "https://api.staging.com";',question:'API 基础 URL 冲突。生产环境应该用哪个？',choices:[{key:'1',label:'Keep HEAD',desc:'使用 prod.com',correct:true},{key:'2',label:'Accept incoming',desc:'使用 staging.com',correct:false},{key:'3',label:'Keep both',desc:'两行都保留',correct:false}]},
+  {file:'package.json',head:'"react": "^18.2.0"',incoming:'"react": "^19.0.0"',question:'React 版本冲突。incoming 分支带来了大版本更新。',choices:[{key:'1',label:'Accept incoming',desc:'升级到 React 19',correct:true},{key:'2',label:'Keep HEAD',desc:'保持 React 18',correct:false},{key:'3',label:'Keep both',desc:'同时安装两个版本',correct:false}]},
+  {file:'src/auth.ts',head:'const expiresIn = "24h";',incoming:'const expiresIn = "7d";',question:'Token 过期时间冲突。安全策略相关。',choices:[{key:'1',label:'Accept incoming',desc:'改为 7 天过期',correct:false},{key:'2',label:'Keep HEAD',desc:'保持 24 小时',correct:true},{key:'3',label:'Manual fix',desc:'设为 48h 折中',correct:false}]},
+  {file:'.gitignore',head:'node_modules/\n.env',incoming:'node_modules/\n.env\n*.log',question:'.gitignore 冲突。incoming 想加入日志文件忽略。',choices:[{key:'1',label:'Accept incoming',desc:'加入 *.log 忽略',correct:true},{key:'2',label:'Keep HEAD',desc:'不忽略日志文件',correct:false},{key:'3',label:'Reject',desc:'拒绝此修改',correct:false}]},
+  {file:'src/config.ts',head:'port: 3000,\ndebug: false',incoming:'port: 8080,\ndebug: true',question:'配置冲突。端口和调试模式都被改了。生产环境部署应该怎么办？',choices:[{key:'1',label:'Accept incoming',desc:'8080 + debug=true',correct:false},{key:'2',label:'Keep HEAD',desc:'3000 + debug=false',correct:true},{key:'3',label:'Manual - port:3000, debug:false',desc:'手动合并',correct:false}]},
+  {file:'README.md',head:'## Installation\nnpm install',incoming:'## Installation\nyarn install\n\n## Contributing\nSee CONTRIBUTING.md',question:'README 冲突。incoming 改了包管理器还加了新章节。',choices:[{key:'1',label:'Accept incoming',desc:'yarn + 新章节',correct:true},{key:'2',label:'Keep HEAD',desc:'保持 npm',correct:false},{key:'3',label:'Selective',desc:'只接受新章节',correct:false}]},
+  {file:'Dockerfile',head:'FROM node:18-alpine',incoming:'FROM node:20-alpine',question:'Docker 基础镜像版本冲突。',choices:[{key:'1',label:'Accept incoming',desc:'升级到 node:20',correct:true},{key:'2',label:'Keep HEAD',desc:'保持 node:18',correct:false},{key:'3',label:'Multi-stage',desc:'两个都保留',correct:false}]},
+  {file:'tsconfig.json',head:'"strict": true',incoming:'"strict": false',question:'TypeScript 严格模式被关了。代码质量风险。',choices:[{key:'1',label:'Keep HEAD',desc:'保持 strict:true',correct:true},{key:'2',label:'Accept incoming',desc:'改为 strict:false',correct:false},{key:'3',label:'Ignore',desc:'跳过此配置',correct:false}]},
+];
+let score=0,combo=0,maxCombo=0,level=0,levelTimer=null,levelTime=15,answering=false;
+
+function renderConflict(){
+  if(level>=CONFLICTS.length){endGame();return}
+  const c=CONFLICTS[level];
+  document.getElementById('hLevel').textContent=(level+1)+'/'+CONFLICTS.length;
+  let html='<div class="line marker">≪≪≪≪≪≪ HEAD</div>';
+  html+='<div class="line add">+ '+c.head.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div>';
+  html+='<div class="line marker">═══════</div>';
+  html+='<div class="line conflict">'+c.incoming.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div>';
+  html+='<div class="line marker">≫≫≫≫≫≫ incoming/feature</div>';
+  document.getElementById('diffLines').innerHTML=html;
+  document.getElementById('choices').innerHTML='<div style="margin-bottom:8px;font-size:13px;color:#fbbf24">'+c.question+'</div>'+c.choices.map(ch=>'<button class="choice-btn" onclick="choose('+ch.correct+',this)"><span class="key">'+ch.key+'</span>'+ch.label+'<span class="desc">'+ch.desc+'</span></button>').join('');
+  document.getElementById('feedback').innerHTML='';
+  startLevelTimer();
+}
+
+function startLevelTimer(){
+  levelTime=15;updateTimer();
+  clearInterval(levelTimer);
+  levelTimer=setInterval(()=>{levelTime-=0.1;updateTimer();if(levelTime<=0){clearInterval(levelTimer);timeout()}},100);
+}
+
+function updateTimer(){document.getElementById('timerFill').style.width=Math.max(0,levelTime/15*100)+'%'}
+
+function choose(correct,el){
+  if(answering) return;answering=true;clearInterval(levelTimer);
+  const btns=document.querySelectorAll('.choice-btn');btns.forEach(b=>b.style.pointerEvents='none');
+  if(correct){el.classList.add('correct');combo++;maxCombo=Math.max(maxCombo,combo);const bonus=Math.floor(levelTime);score+=100+bonus*5;document.getElementById('feedback').innerHTML='<span class="right">✅ 正确！+'+ (100+bonus*5) +' 分 · 剩余 '+levelTime.toFixed(1)+'s</span>'}else{el.classList.add('wrong');combo=0;const correctBtn=document.querySelectorAll('.choice-btn');Array.from(correctBtn).forEach(b=>{if(b.textContent.includes('Keep HEAD')&&correct||b.textContent.includes('Accept incoming')&&correct)b.classList.add('correct')});document.getElementById('feedback').innerHTML='<span class="wrong">❌ 错误！连击中断</span>'}
+  updateHUD();
+  setTimeout(()=>{answering=false;level++;renderConflict()},1200);
+}
+
+function timeout(){answering=false;combo=0;document.getElementById('feedback').innerHTML='<span class="wrong">⏰ 超时！</span>';updateHUD();setTimeout(()=>{level++;renderConflict()},1000)}
+
+function updateHUD(){document.getElementById('hScore').textContent=score;document.getElementById('hCombo').textContent='x'+(combo+1)}
+
+function endGame(){
+  clearInterval(levelTimer);document.getElementById('timerBar').style.display='none';
+  const overlay=document.getElementById('resultOverlay');
+  overlay.innerHTML='<h2 style="color:#fbbf24">'+score+' 分</h2><p style="color:#888">'+CONFLICTS.length+' 个冲突全部解决</p><p style="color:#4ade80;margin:8px 0">🔥 最大连击: x'+(maxCombo+1)+'</p><button onclick="restart()">🔄 再来一轮</button>';
+  overlay.style.display='block';
+}
+
+function restart(){document.getElementById('resultOverlay').style.display='none';document.getElementById('timerBar').style.display='block';score=0;combo=0;maxCombo=0;level=0;updateHUD();renderConflict()}
+
+renderConflict();
+</script>
+</body>
+</html>

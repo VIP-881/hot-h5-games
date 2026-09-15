@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>🎴 读书笔记卡牌</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0f0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(15,15,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(139,92,246,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#a78bfa;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(139,92,246,.1)}
+nav a:hover{background:rgba(139,92,246,.2)}
+nav span{color:#888;font-size:13px}
+header{text-align:center;padding:30px 20px;background:linear-gradient(180deg,rgba(139,92,246,.08),transparent)}
+header h1{font-size:1.8em;background:linear-gradient(135deg,#c084fc,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+header p{color:#888;font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;max-width:900px;margin:20px auto;padding:0 16px}
+.card{background:linear-gradient(135deg,rgba(139,92,246,.1),rgba(99,102,241,.08));border:1px solid rgba(139,92,246,.2);border-radius:16px;padding:20px;text-align:center;transition:all .3s;position:relative}
+.card:hover{transform:translateY(-6px) rotateY(3deg);box-shadow:0 12px 32px rgba(139,92,246,.25);border-color:rgba(139,92,246,.5)}
+.card .icon{font-size:40px;margin-bottom:8px}
+.card .name{font-size:14px;font-weight:600;color:#c084fc;word-break:break-word}
+.card .stat{font-size:11px;color:#888;margin-top:4px}
+.card .rarity{margin-top:6px;font-size:12px}
+.stats{display:flex;justify-content:center;gap:20px;padding:10px;flex-wrap:wrap}
+.stats span{padding:4px 12px;border-radius:12px;font-size:12px;background:rgba(139,92,246,.1);color:#a78bfa}
+.empty{text-align:center;padding:60px;color:#666}.empty .icon{font-size:48px;margin-bottom:12px}
+footer{text-align:center;padding:20px;color:#555;font-size:12px}
+</style></head><body>
+<nav><a href="index.html">← 大厅</a><span>🎴 笔记卡牌</span></nav>
+<header><h1>🎴 读书笔记卡牌</h1><p>每篇读书笔记 = 一张卡牌 · 笔记越多卡组越强</p>
+<div class="stats"><span id="total">📖 加载中...</span><span id="atk">⚔️ 计算中...</span></div></header>
+<div class="cards" id="cards"></div>
+<div class="empty" id="empty" style="display:none"><div class="icon">📖</div><p>还没有读书笔记卡牌</p><p style="font-size:12px;color:#888">在 Notion 文档库添加「读书笔记」类型</p></div>
+<footer>数据实时来自 Notion · 🦊 灵犀出品</footer>
+<script>
+const AK='v2.xOedfPfv9hou9ht8BXTbk7OKPlRUUvh5WuyJNC8Q3mLrU5dQVGL5rARouO2DNnC-IKG0UGeYm79Cfw1aIjsOw48Fram7uaVouZHiYKGTZzMBg4SuQLJLz4gY';
+const DDS='3ba68c53-ba18-8054-9cb7-000b80ae86dc';
+function a(url,o={}){const h={'Authorization':'Bearer '+AK,'Content-Type':'application/json',...(o.headers||{})};if(url.includes('/notion/'))h['Notion-Version']='2025-09-03';return fetch('https://gateway.maton.ai'+url,{...o,headers:h}).then(r=>r.json());}
+async function load(){try{const d=await a('/notion/v1/data_sources/'+DDS+'/query',{method:'POST',body:JSON.stringify({filter:{property:'类型',select:{equals:'读书笔记'}},sorts:[{timestamp:'created_time',direction:'descending'}],page_size:50})});const notes=d.results||[];document.getElementById('total').textContent='📖 '+notes.length+' 张卡牌';const icons=['📘','📗','📙','📕','📓','📔','📒'];if(notes.length===0){document.getElementById('empty').style.display='block';document.getElementById('cards').innerHTML='';return}document.getElementById('empty').style.display='none';let totalAtk=0;document.getElementById('cards').innerHTML=notes.map((n,i)=>{const name=n.properties?.名称?.title?.map(x=>x.plain_text).join('')||'笔记';const atk=Math.floor(Math.random()*40)+60+(notes.length-i)*3;totalAtk+=atk;const rarity=i<3?'⭐⭐⭐':i<6?'⭐⭐':'⭐';return'<div class="card"><div class="icon">'+icons[i%7]+'</div><div class="name">'+name.replace(/&/g,'&amp;').replace(/</g,'&lt;').substring(0,16)+'</div><div class="stat">⚔️ ATK '+atk+'</div><div class="rarity">'+rarity+'</div></div>'}).join('');document.getElementById('atk').textContent='⚔️ 总战力 '+totalAtk}}catch(e){document.getElementById('cards').innerHTML='<div class="empty"><p style="color:#f87171">❌ '+e.message+'</p></div>'}}load();
+</script></body></html>

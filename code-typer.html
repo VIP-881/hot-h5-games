@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>⌨️ 代码打字竞速 | Code Typer Racer — 提升编程打字速度</title>
+<meta name="description" content="程序员打字竞速游戏，用 GitHub 热门代码片段练习打字速度。支持 JavaScript、Python、Go 等多种语言，实时 WPM 统计和排行榜。Maton × GitHub 数据驱动。">
+<meta name="keywords" content="打字游戏,代码打字,程序员,编程练习,typing game,code typer,WPM,键盘速度,GitHub,Maton">
+<meta property="og:title" content="⌨️ 代码打字竞速 — Maton H5 游戏">
+<meta property="og:description" content="用 GitHub 代码片段练打字速度，多语言支持，实时统计 WPM">
+<meta property="og:type" content="website">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://hot-h5-games.netlify.app/code-typer.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"代码打字竞速","description":"程序员打字竞速游戏，用 GitHub 代码片段练习打字","applicationCategory":"Game","operatingSystem":"Web","author":{"@type":"Organization","name":"Maton AI Games"},"genre":["Educational","Typing"]}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Fira Code','Cascadia Code','JetBrains Mono',monospace;background:#0a0a14;color:#e0e0e0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(10,10,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,197,94,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#4ade80;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(34,197,94,.1);transition:.3s}
+nav a:hover{background:rgba(34,197,94,.2)}
+header{text-align:center;padding:20px;background:linear-gradient(180deg,rgba(34,197,94,.04),transparent)}
+header h1{font-size:1.6em;background:linear-gradient(135deg,#4ade80,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header p{font-size:12px;color:#666;margin-top:4px}
+.game-container{max-width:750px;margin:16px auto;padding:0 16px}
+.code-editor{background:#0d1117;border:2px solid rgba(34,197,94,.15);border-radius:16px;padding:20px;position:relative}
+.editor-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.editor-lang{font-size:12px;color:#4ade80;padding:4px 10px;background:rgba(34,197,94,.1);border-radius:8px}
+.stats-row{display:flex;gap:16px;flex-wrap:wrap}
+.stat-badge{text-align:center;min-width:60px}
+.stat-badge .val{font-size:20px;font-weight:700}
+.stat-badge .lbl{font-size:9px;color:#666;text-transform:uppercase}
+.wpm{color:#fbbf24}.acc{color:#4ade80}.time{color:#06b6d4}.combo{color:#a78bfa}
+.code-display{background:rgba(0,0,0,.3);border-radius:10px;padding:16px;font-size:15px;line-height:1.8;min-height:100px;position:relative;overflow:hidden;white-space:pre-wrap;word-break:break-all}
+.code-display .typed{color:#4ade80}
+.code-display .current{background:rgba(34,197,94,.15);border-bottom:2px solid #4ade80;animation:blink 1s infinite}
+.code-display .error{color:#ef4444;background:rgba(239,68,68,.1)}
+.code-display .untyped{color:#555}
+@keyframes blink{0%,100%{border-bottom-color:#4ade80}50%{border-bottom-color:transparent}}
+.input-area{margin-top:12px}
+.input-area input{width:100%;padding:12px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#e0e0e0;font-family:inherit;font-size:15px;outline:none;transition:.3s}
+.input-area input:focus{border-color:rgba(34,197,94,.5);box-shadow:0 0 20px rgba(34,197,94,.1)}
+.result-bar{text-align:center;margin-top:12px;font-size:13px;color:#888;min-height:20px}
+.btn-row{text-align:center;margin:16px 0;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn-row button{padding:10px 24px;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:.3s}
+.btn-start{background:linear-gradient(135deg,#4ade80,#16a34a);color:#000}
+.btn-start:hover{box-shadow:0 4px 20px rgba(34,197,94,.4)}
+.btn-lang{background:rgba(255,255,255,.06);color:#888;font-size:12px}
+.btn-lang:hover{background:rgba(255,255,255,.1);color:#ccc}
+.btn-lang.active{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+.history-panel{max-width:750px;margin:16px auto;padding:0 16px}
+.history-panel h3{font-size:13px;color:#666;margin-bottom:8px}
+.history-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(20,20,35,.9);border-radius:8px;margin:4px 0;font-size:12px;border-left:3px solid #4ade80}
+.history-item .lang{color:#4ade80;font-weight:600;min-width:50px}
+.history-item .stats{flex:1;color:#888}
+.history-item .wpm-val{font-weight:700;color:#fbbf24;min-width:50px;text-align:right}
+footer{text-align:center;padding:16px;color:#444;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>⌨️ Code Typer</span></nav>
+<header>
+  <h1>⌨️ 代码打字竞速</h1>
+  <p>用 GitHub 热门代码片段练打字 · 多语言 · 实时 WPM</p>
+</header>
+<div class="game-container">
+  <div class="code-editor">
+    <div class="editor-header">
+      <div style="display:flex;gap:6px">
+        <button class="btn-lang active" onclick="setLang('js')">JS</button>
+        <button class="btn-lang" onclick="setLang('py')">Python</button>
+        <button class="btn-lang" onclick="setLang('go')">Go</button>
+        <button class="btn-lang" onclick="setLang('rs')">Rust</button>
+      </div>
+      <div class="stats-row">
+        <div class="stat-badge wpm"><div class="val" id="sWPM">0</div><div class="lbl">WPM</div></div>
+        <div class="stat-badge acc"><div class="val" id="sACC">100%</div><div class="lbl">准确率</div></div>
+        <div class="stat-badge time"><div class="val" id="sTIME">0s</div><div class="lbl">用时</div></div>
+        <div class="stat-badge combo"><div class="val" id="sCOMBO">x1</div><div class="lbl">连击</div></div>
+      </div>
+    </div>
+    <div class="code-display" id="codeDisplay"></div>
+    <div class="input-area">
+      <input type="text" id="codeInput" placeholder="点击开始，输入代码..." disabled autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    </div>
+    <div class="result-bar" id="resultBar">按 Enter 或点击开始 开始挑战</div>
+  </div>
+  <div class="btn-row">
+    <button class="btn-start" id="startBtn" onclick="startGame()">▶ 开始</button>
+  </div>
+</div>
+<div class="history-panel">
+  <h3>📜 最近记录</h3>
+  <div id="history"><div style="color:#444;font-size:12px;padding:12px">暂无记录</div></div>
+</div>
+<footer>Powered by Maton.ai · 代码片段来自 GitHub · 🦊 灵犀出品</footer>
+<script>
+const SNIPPETS={
+  js:[
+    'const fibonacci = n => n <= 1 ? n : fibonacci(n-1) + fibonacci(n-2);',
+    'const sorted = arr.sort((a, b) => a - b);',
+    'const fetchData = async (url) => { const res = await fetch(url); return res.json(); };',
+    'const memoize = (fn) => { const cache = {}; return (...args) => { const key = JSON.stringify(args); return cache[key] ??= fn(...args); }; };',
+    'const debounce = (fn, ms) => { let timer; return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); }; };',
+    'const groupBy = (arr, key) => arr.reduce((acc, item) => { (acc[item[key]] ??= []).push(item); return acc; }, {});',
+  ],
+  py:[
+    'def quicksort(arr): return arr if len(arr) <= 1 else quicksort([x for x in arr[1:] if x < arr[0]]) + [arr[0]] + quicksort([x for x in arr[1:] if x >= arr[0]])',
+    'from collections import defaultdict; counts = defaultdict(int)',
+    'with open("data.json", "r") as f: data = json.load(f)',
+    'result = [x * 2 for x in range(10) if x % 2 == 0]',
+    'async def fetch_data(url): async with aiohttp.ClientSession() as session: async with session.get(url) as resp: return await resp.json()',
+    'def singleton(cls): instances = {}; def wrapper(*a, **k): return instances.setdefault(cls, cls(*a, **k)); return wrapper',
+  ],
+  go:[
+    'func fibonacci(n int) int { if n <= 1 { return n }; return fibonacci(n-1) + fibonacci(n-2) }',
+    'ch := make(chan string, 10); go func() { ch <- "hello" }(); msg := <-ch',
+    'type Server struct { host string; port int; mu sync.RWMutex }',
+    'defer file.Close(); scanner := bufio.NewScanner(file)',
+    'var wg sync.WaitGroup; wg.Add(1); go func() { defer wg.Done(); process() }(); wg.Wait()',
+  ],
+  rs:[
+    'let result: Vec<i32> = numbers.iter().map(|x| x * 2).filter(|x| x > &10).collect();',
+    'impl<T: Display> Summary for T { fn summarize(&self) -> String { format!("{}", self) } }',
+    'match result { Ok(val) => println!("{}", val), Err(e) => eprintln!("Error: {}", e), }',
+    'async fn fetch(url: &str) -> Result<String, reqwest::Error> { reqwest::get(url).await?.text().await }',
+  ]
+};
+let currentLang='js',snippet='',pos=0,started=false,startTime=0,timer=null,errors=0,combo=0,maxCombo=0;
+let history=JSON.parse(localStorage.getItem('typer_history')||'[]');
+let totalChars=0;
+
+function setLang(l){currentLang=l;document.querySelectorAll('.btn-lang').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');resetGame()}
+
+function resetGame(){
+  clearInterval(timer);started=false;pos=0;errors=0;combo=0;maxCombo=0;totalChars=0;
+  const snips=SNIPPETS[currentLang];
+  snippet=snips[Math.floor(Math.random()*snips.length)];
+  document.getElementById('codeInput').value='';document.getElementById('codeInput').disabled=true;
+  document.getElementById('sWPM').textContent='0';document.getElementById('sACC').textContent='100%';
+  document.getElementById('sTIME').textContent='0s';document.getElementById('sCOMBO').textContent='x1';
+  document.getElementById('resultBar').textContent='按 Enter 或点击开始 开始挑战';
+  document.getElementById('startBtn').textContent='▶ 开始';
+  renderCode();
+}
+
+function renderCode(){
+  let html='';
+  for(let i=0;i<snippet.length;i++){
+    if(i<pos) html+='<span class="typed">'+esc(snippet[i])+'</span>';
+    else if(i===pos&&started) html+='<span class="current">'+esc(snippet[i])+'</span>';
+    else html+='<span class="untyped">'+esc(snippet[i])+'</span>';
+  }
+  document.getElementById('codeDisplay').innerHTML=html;
+}
+
+function esc(c){return c===' '?'&nbsp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='&'?'&amp;':c}
+
+function startGame(){
+  resetGame();
+  document.getElementById('codeInput').disabled=false;
+  document.getElementById('codeInput').focus();
+  started=true;startTime=Date.now();errors=0;combo=0;maxCombo=0;
+  document.getElementById('startBtn').textContent='🔄 重新开始';
+  renderCode();
+  timer=setInterval(updateStats,100);
+}
+
+function updateStats(){
+  const elapsed=(Date.now()-startTime)/1000;
+  document.getElementById('sTIME').textContent=Math.floor(elapsed)+'s';
+  const words=pos/5;
+  const wpm=elapsed>0?Math.round(words/(elapsed/60)):0;
+  document.getElementById('sWPM').textContent=wpm;
+  const acc=pos>0?Math.round((pos-errors)/pos*100):100;
+  document.getElementById('sACC').textContent=acc+'%';
+  document.getElementById('sCOMBO').textContent='x'+(combo+1);
+}
+
+document.getElementById('codeInput').addEventListener('input',function(e){
+  if(!started) return;
+  const typed=e.target.value;
+  if(typed.length>0&&typed[typed.length-1]===snippet[pos]){
+    pos++;combo++;if(combo>maxCombo)maxCombo=combo;
+    e.target.value='';
+    renderCode();updateStats();
+    if(pos>=snippet.length) finishGame();
+  }else if(typed.length>0){
+    errors++;combo=0;
+    document.getElementById('codeDisplay').innerHTML+='<span class="error">'+esc(typed[typed.length-1])+'</span>';
+    e.target.value='';
+    updateStats();
+  }
+});
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!started)startGame()});
+
+function finishGame(){
+  clearInterval(timer);started=false;
+  const elapsed=((Date.now()-startTime)/1000).toFixed(1);
+  const wpm=Math.round((pos/5)/(elapsed/60));
+  const acc=Math.round((pos-errors)/pos*100);
+  document.getElementById('resultBar').innerHTML='<span style="color:#4ade80">✅ 完成！</span> '+wpm+' WPM · '+acc+'% 准确率 · '+elapsed+'s';
+  document.getElementById('codeInput').disabled=true;
+  document.getElementById('sCOMBO').textContent='🔥 x'+(maxCombo+1);
+  history.unshift({lang:currentLang,wpm,acc,time:parseFloat(elapsed),date:new Date().toISOString()});
+  history=history.slice(0,20);
+  localStorage.setItem('typer_history',JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory(){
+  const langs={js:'JS',py:'Python',go:'Go',rs:'Rust'};
+  document.getElementById('history').innerHTML=history.length?history.map(h=>'<div class="history-item"><span class="lang">'+langs[h.lang]+'</span><span class="stats">'+h.wpm+' WPM · '+h.acc+'% · '+h.time+'s</span><span class="wpm-val">🏆 '+h.wpm+'</span></div>').join(''):'<div style="color:#444;font-size:12px;padding:12px">暂无记录</div>';
+}
+
+resetGame();renderHistory();
+</script>
+</body>
+</html>

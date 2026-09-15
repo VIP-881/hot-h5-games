@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>⚡ Netlify Build Battle</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0f0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(15,15,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(139,92,246,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#a78bfa;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(139,92,246,.1);transition:.3s}
+nav a:hover{background:rgba(139,92,246,.2)}
+header{text-align:center;padding:20px}
+header h1{font-size:1.6em;background:linear-gradient(135deg,#06b6d4,#22c55e,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.battle-area{max-width:650px;margin:16px auto;padding:0 16px}
+.pipeline{background:rgba(20,20,35,.9);border-radius:16px;padding:20px;border:1px solid rgba(255,255,255,.08);margin-bottom:16px;position:relative}
+.pipeline h3{font-size:13px;color:#888;margin-bottom:12px;text-align:center}
+.stages{display:flex;align-items:center;gap:4px;justify-content:center;flex-wrap:wrap}
+.stage{width:70px;height:70px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:24px;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.08);transition:all .4s;position:relative}
+.stage.active{border-color:#06b6d4;box-shadow:0 0 20px rgba(6,182,212,.3);animation:pulse 1.5s infinite}
+.stage.success{border-color:#4ade80;box-shadow:0 0 15px rgba(34,197,94,.3)}
+.stage.fail{border-color:#ef4444}
+.stage .label{font-size:9px;color:#888;margin-top:2px}
+.arrow{color:#333;font-size:18px}
+@keyframes pulse{0%,100%{box-shadow:0 0 15px rgba(6,182,212,.2)}50%{box-shadow:0 0 30px rgba(6,182,212,.5)}}
+.timer{text-align:center;font-size:36px;font-weight:700;margin:16px 0;background:linear-gradient(135deg,#06b6d4,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.build-log{background:rgba(0,0,0,.3);border-radius:10px;padding:12px;max-height:150px;overflow-y:auto;font-family:monospace;font-size:11px}
+.build-log .line{margin:2px 0;color:#888}
+.build-log .line.green{color:#4ade80}
+.build-log .line.yellow{color:#fbbf24}
+.build-log .line.red{color:#f87171}
+.build-log .line.blue{color:#06b6d4}
+.stats{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin:16px 0}
+.controls{text-align:center;margin:16px}
+.controls button{padding:12px 28px;border:none;border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;transition:.3s;margin:4px}
+.btn-build{background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff}
+.btn-build:hover{box-shadow:0 4px 20px rgba(6,182,212,.5)}
+footer{text-align:center;padding:16px;color:#555;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>⚡ Build Battle</span></nav>
+<header><h1>⚡ Netlify Build Battle</h1><p>竞速构建 · 更快更稳得分更高</p></header>
+<div class="battle-area">
+  <div class="pipeline">
+    <h3>🔧 构建流水线</h3>
+    <div class="stages" id="stages">
+      <div class="stage" id="s0">📦<span class="label">Installing</span></div><div class="arrow">→</div>
+      <div class="stage" id="s1">🔨<span class="label">Building</span></div><div class="arrow">→</div>
+      <div class="stage" id="s2">✅<span class="label">Testing</span></div><div class="arrow">→</div>
+      <div class="stage" id="s3">📐<span class="label">Lint</span></div><div class="arrow">→</div>
+      <div class="stage" id="s4">🚀<span class="label">Deploy</span></div>
+    </div>
+  </div>
+  <div class="timer" id="timer">0.00s</div>
+  <div class="stats" id="statsBar"></div>
+  <div class="controls">
+    <button class="btn-build" onclick="startBuild()">⚡ 开始构建</button>
+    <button class="btn-build" style="background:rgba(139,92,246,.15);color:#a78bfa" onclick="resetGame()">🔄 重置记录</button>
+  </div>
+  <div class="build-log" id="log"><div class="line">等待构建...</div></div>
+</div>
+<footer>Powered by Maton.ai · Netlify · 🦊 灵犀出品</footer>
+<script>
+let buildTimer=null,startTime=0,elapsed=0,currentStage=0,building=false;
+let records=JSON.parse(localStorage.getItem('build_records')||'[]');
+let bestTime=parseFloat(localStorage.getItem('build_best')||'0');
+
+function updateStats(){
+  document.getElementById('statsBar').innerHTML=`
+    <div style="text-align:center"><div style="font-size:18px;font-weight:700;color:#fbbf24">${records.length}</div><div style="font-size:10px;color:#888">🏗️ 构建次数</div></div>
+    <div style="text-align:center"><div style="font-size:18px;font-weight:700;color:#4ade80">${bestTime||'--'}</div><div style="font-size:10px;color:#888">⚡ 最佳时间</div></div>
+    <div style="text-align:center"><div style="font-size:18px;font-weight:700;color:#06b6d4">${(records.reduce((s,r)=>s+r.score,0)||0)}</div><div style="font-size:10px;color:#888">🏆 总分</div></div>
+  `;
+}
+updateStats();
+
+function resetGame(){records=[];bestTime=0;localStorage.removeItem('build_records');localStorage.removeItem('build_best');updateStats()}
+
+function addLine(msg,cls){const l=document.getElementById('log');l.innerHTML='<div class="line '+cls+'">'+msg+'</div>'+l.innerHTML;if(l.children.length>30)l.removeChild(l.lastChild)}
+
+function startBuild(){
+  if(building) return; building=true; currentStage=0; elapsed=0;
+  document.querySelectorAll('.stage').forEach(s=>{s.className='stage'});
+  document.getElementById('s0').classList.add('active');
+  document.getElementById('timer').textContent='0.00s';
+  document.getElementById('log').innerHTML='';
+  addLine('⚡ 开始构建...','blue');
+
+  startTime=performance.now();
+  const stages=['Installing dependencies...','Building assets...','Running tests...','Linting code...','Deploying to CDN...'];
+  const cls=['blue','yellow','green','yellow','blue'];
+  let si=0;
+
+  buildTimer=setInterval(()=>{
+    elapsed=performance.now()-startTime;
+    document.getElementById('timer').textContent=(elapsed/1000).toFixed(2)+'s';
+
+    if(elapsed>=(si+1)*800+Math.random()*400&&si<5){
+      const prev=document.getElementById('s'+(si-1));
+      if(prev){prev.classList.remove('active');prev.classList.add(Math.random()>.1?'success':'success')}
+      const s=document.getElementById('s'+si);
+      if(s){s.classList.add('active');addLine((si+1)+'/5 '+stages[si],cls[si])}
+      si++;
+
+      if(si>5){
+        clearInterval(buildTimer);building=false;
+        const time=(elapsed/1000).toFixed(2);
+        document.getElementById('s4').classList.remove('active');
+        document.getElementById('s4').classList.add('success');
+        document.getElementById('timer').style.background='linear-gradient(135deg,#4ade80,#22c55e)';
+        document.getElementById('timer').style.webkitBackgroundClip='text';
+        document.getElementById('timer').style.webkitTextFillColor='transparent';
+        addLine('🚀 部署成功！构建时间: '+time+'s','green');
+        const score=Math.max(0,Math.floor(500-time*20));
+        addLine('🏆 得分: +'+score,'yellow');
+        records.push({time:parseFloat(time),score,ts:Date.now()});
+        if(!bestTime||parseFloat(time)<bestTime){bestTime=parseFloat(time);localStorage.setItem('build_best',bestTime)}
+        records=records.slice(-20);
+        localStorage.setItem('build_records',JSON.stringify(records));
+        updateStats();
+        setTimeout(()=>{document.getElementById('timer').style.background='';document.getElementById('timer').style.webkitBackgroundClip='';document.getElementById('timer').style.webkitTextFillColor='';document.querySelectorAll('.stage').forEach(s=>{s.className='stage';s.classList.add('success')})},2000);
+      }
+    }
+
+    // Random failure
+    if(Math.random()<.002&&elapsed>1000&&si<5){
+      clearInterval(buildTimer);building=false;
+      document.getElementById('s'+(si-1)).classList.add('fail');
+      document.getElementById('timer').style.color='#ef4444';
+      addLine('❌ 构建失败！检查错误日志','red');
+      setTimeout(()=>document.getElementById('timer').style.color='',2000);
+    }
+  },100);
+}
+</script>
+</body>
+</html>

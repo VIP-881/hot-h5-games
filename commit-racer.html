@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🔥 GitHub 提交竞速</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0f0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(15,15,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(139,92,246,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#a78bfa;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(139,92,246,.1);transition:.3s}
+nav a:hover{background:rgba(139,92,246,.2)}
+header{text-align:center;padding:20px;background:linear-gradient(180deg,rgba(34,197,94,.06),transparent)}
+header h1{font-size:1.6em;background:linear-gradient(135deg,#4ade80,#22c55e,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header p{font-size:12px;color:#888;margin-top:4px}
+.race-track{max-width:700px;margin:16px auto;padding:0 16px}
+.track{background:linear-gradient(180deg,rgba(30,35,30,.8),rgba(20,25,20,.8));border:2px solid rgba(34,197,94,.15);border-radius:20px;padding:20px;position:relative;min-height:300px;overflow:hidden}
+.track-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.track-header h2{font-size:16px;color:#4ade80}
+.stats-mini{display:flex;gap:12px;flex-wrap:wrap}
+.stats-mini span{font-size:11px;padding:4px 10px;border-radius:8px;background:rgba(34,197,94,.1);color:#4ade80}
+.lane{height:48px;margin:6px 0;background:rgba(255,255,255,.03);border-radius:10px;position:relative;overflow:hidden;display:flex;align-items:center}
+.lane-label{position:absolute;left:8px;font-size:10px;color:#666;z-index:2;min-width:80px}
+.lane-track{position:absolute;left:90px;right:40px;height:2px;background:rgba(255,255,255,.05)}
+.lane-car{position:absolute;left:90px;font-size:22px;transition:left .8s cubic-bezier(.4,0,.2,1);z-index:3;filter:drop-shadow(0 0 8px currentColor)}
+.lane-progress{position:absolute;left:90px;height:48px;background:rgba(34,197,94,.06);border-radius:0 10px 10px 0;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.lane-score{position:absolute;right:12px;font-size:11px;font-weight:600;color:#4ade80;z-index:2}
+.finish-line{position:absolute;right:30px;top:20px;bottom:20px;width:3px;background:repeating-linear-gradient(0deg,#fbbf24,#fbbf24 8px,transparent 8px,transparent 16px);z-index:1}
+.controls{text-align:center;margin:16px 0}
+.controls button{padding:12px 28px;border:none;border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;transition:.3s;margin:4px}
+.btn-race{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.btn-race:hover{box-shadow:0 4px 20px rgba(34,197,94,.5);transform:translateY(-1px)}
+.btn-sync{background:rgba(139,92,246,.15);color:#a78bfa}
+.winner-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;padding:24px 40px;border-radius:16px;font-size:20px;font-weight:700;z-index:200;animation:pop .5s;text-align:center}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.commit-log{max-width:700px;margin:16px auto;padding:0 16px}
+.commit-log h3{font-size:13px;color:#888;margin-bottom:8px}
+.commit-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(20,20,35,.9);border-radius:8px;margin:4px 0;font-size:12px;border-left:3px solid #4ade80}
+.commit-item .msg{flex:1;color:#ccc}
+.commit-item .time{color:#666;font-size:10px;white-space:nowrap}
+footer{text-align:center;padding:16px;color:#555;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>🔥 GitHub 竞速</span></nav>
+<header><h1>🔥 GitHub 提交竞速</h1><p>每个 commit = 一脚油门 · 仓库间的 F1 方程式</p></header>
+<div class="race-track">
+  <div class="track">
+    <div class="track-header">
+      <h2>🏁 赛季赛道</h2>
+      <div class="stats-mini">
+        <span id="totalC">⬆️ 0 commits</span>
+        <span id="totalR">📦 0 repos</span>
+      </div>
+    </div>
+    <div id="lanes"></div>
+    <div class="finish-line"></div>
+  </div>
+  <div class="controls">
+    <button class="btn-race" onclick="startRace()">🏎️ 开跑！</button>
+    <button class="btn-sync" onclick="init()">🔄 同步 GitHub</button>
+  </div>
+</div>
+<div class="commit-log">
+  <h3>📜 最新提交</h3>
+  <div id="commitLog"><div style="color:#666;font-size:12px;padding:12px">同步中...</div></div>
+</div>
+<footer>Powered by Maton.ai · GitHub VIP-881 · 🦊 灵犀出品</footer>
+<script>
+const AK='v2.xOedfPfv9hou9ht8BXTbk7OKPlRUUvh5WuyJNC8Q3mLrU5dQVGL5rARouO2DNnC-IKG0UGeYm79Cfw1aIjsOw48Fram7uaVouZHiYKGTZzMBg4SuQLJLz4gY';
+let repos=[], repoStats={};
+
+async function gh(url){const r=await fetch('https://gateway.maton.ai'+url,{headers:{'Authorization':'Bearer '+AK}});return r.json()}
+
+async function init(){
+  try{
+    const user=await gh('/github/user');
+    const allRepos=await gh('/github/user/repos?per_page=30&sort=pushed');
+    repos=allRepos.filter(r=>r.pushed_at).slice(0,10);
+    repoStats={};
+    for(const r of repos){
+      try{
+        const cs=await gh('/github/repos/'+r.full_name+'/commits?per_page=50');
+        repoStats[r.full_name]={count:cs.length,recent:cs.slice(0,5),pushed:r.pushed_at,stars:r.stargazers_count};
+      }catch(e){repoStats[r.full_name]={count:0,recent:[],pushed:r.pushed_at,stars:r.stargazers_count}}
+    }
+    const total=Object.values(repoStats).reduce((s,r)=>s+r.count,0);
+    document.getElementById('totalC').textContent='⬆️ '+total+' commits';
+    document.getElementById('totalR').textContent='📦 '+repos.length+' repos';
+    renderLanes(0);
+    renderCommits();
+  }catch(e){document.getElementById('commitLog').innerHTML='<div style="color:#f87171">❌ 同步失败: '+e.message+'</div>'}
+}
+
+function renderLanes(progress){
+  const maxC=Math.max(1,...Object.values(repoStats).map(r=>r.count));
+  const icons=['🚗','🏎️','🚙','🚕','🚓','🏍️','🚌','🚐','🚛','🚜'];
+  let html='';
+  let i=0;
+  for(const r of repos){
+    const stats=repoStats[r.full_name]||{count:0,stars:0};
+    const pct=Math.min(progress*stats.count/maxC*100,100);
+    const carPos=90+(progress*stats.count/maxC)*(window.innerWidth>600?520:250);
+    html+='<div class="lane"><div class="lane-label">'+r.name.substring(0,12)+'</div><div class="lane-progress" style="width:'+pct+'%"></div><div class="lane-car" style="left:'+carPos+'px">'+icons[i%10]+'</div><div class="lane-score">'+stats.count+' commits</div></div>';
+    i++;
+  }
+  document.getElementById('lanes').innerHTML=html;
+}
+
+function startRace(){
+  const maxC=Math.max(1,...Object.values(repoStats).map(r=>r.count));
+  let t=0;
+  const interval=setInterval(()=>{
+    t+=Math.random()*8+4;
+    const pct=Math.min(t/100,1);
+    renderLanes(pct);
+    if(pct>=1){clearInterval(interval);declareWinner()}
+  },100);
+}
+
+function declareWinner(){
+  const entries=repos.map(r=>({name:r.name,count:(repoStats[r.full_name]||{count:0}).count}));
+  const winner=entries.reduce((a,b)=>a.count>b.count?a:b,entries[0]);
+  const t=document.createElement('div');t.className='winner-toast';
+  t.innerHTML='🏆 冠军！<br>'+winner.name+'<br><small>'+winner.count+' commits</small>';
+  document.body.appendChild(t);setTimeout(()=>t.remove(),3000);
+}
+
+function renderCommits(){
+  const all=[];
+  for(const r of repos)(repoStats[r.full_name]||{recent:[]}).recent.forEach(c=>{all.push({repo:r.name,msg:c.commit.message.split('\n')[0],date:c.commit.author.date,sha:c.sha.substring(0,7)})});
+  all.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  document.getElementById('commitLog').innerHTML=all.slice(0,20).map(c=>'<div class="commit-item"><span style="color:#4ade80;font-weight:600">'+c.sha+'</span><span class="msg">'+c.msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').substring(0,50)+'</span><span class="time">'+c.date.split('T')[0]+'</span></div>').join('')||'<div style="color:#666;padding:12px">暂无提交</div>';
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🕵️ Debug Detective — 代码调试解谜游戏 | Maton H5 Games</title>
+<meta name="description" content="代码调试侦探游戏：在限时内找到 JavaScript、Python、React 代码中的 bug。训练你的调试和代码审查能力。10道递增难度的真实 bug 场景。">
+<meta name="keywords" content="代码调试,debug游戏,找bug,代码审查,JavaScript调试,Python调试,编程学习,debugging game,程序员游戏,Maton">
+<meta property="og:title" content="Debug Detective — 代码调试解谜游戏">
+<meta property="og:description" content="限时找到代码中的bug。10道真实场景，训练调试和代码审查能力。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://hot-h5-games.netlify.app/debug-detective.html">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://hot-h5-games.netlify.app/debug-detective.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"Debug Detective","description":"代码调试侦探游戏，限时在JS/Python/React代码中找到bug。训练调试和代码审查能力。","applicationCategory":"Game","operatingSystem":"Web","author":{"@type":"Organization","name":"Maton AI Games"},"genre":["Educational","Puzzle"]}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Fira Code',monospace;background:#0a0a14;color:#e0e0e0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(10,10,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(239,68,68,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#f87171;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(239,68,68,.1);transition:.3s}
+nav a:hover{background:rgba(239,68,68,.2)}
+header{text-align:center;padding:20px;background:linear-gradient(180deg,rgba(239,68,68,.05),transparent)}
+header h1{font-size:1.6em;background:linear-gradient(135deg,#ef4444,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.container{max-width:750px;margin:16px auto;padding:0 16px}
+.hud{display:flex;justify-content:center;gap:20px;padding:10px;flex-wrap:wrap}
+.hud-item{text-align:center}.hud-item .val{font-size:20px;font-weight:700}.hud-item .lbl{font-size:9px;color:#666}
+.case-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.2);border-radius:12px 12px 0 0;flex-wrap:wrap;gap:8px}
+.case-tag{font-size:11px;padding:3px 10px;border-radius:8px}
+.tag-js{background:rgba(251,191,36,.15);color:#fbbf24}
+.tag-py{background:rgba(59,130,246,.15);color:#60a5fa}
+.tag-react{background:rgba(6,182,212,.15);color:#06b6d4}
+.tag-css{background:rgba(139,92,246,.15);color:#a78bfa}
+.code-block{background:#0d1117;border:1px solid rgba(255,255,255,.08);border-radius:0 0 12px 12px;padding:16px;font-size:13px;line-height:1.6;overflow-x:auto;white-space:pre;position:relative}
+.code-block .line-num{color:#444;user-select:none;margin-right:12px;display:inline-block;width:24px;text-align:right}
+.code-block .line{transition:.3s}
+.code-block .line:hover{background:rgba(255,255,255,.03)}
+.code-block .line.selected{background:rgba(239,68,68,.15);border-left:3px solid #ef4444}
+.code-block .line.correct-bug{background:rgba(34,197,94,.15);border-left:3px solid #4ade80;animation:revealBug .6s}
+@keyframes revealBug{0%{background:rgba(239,68,68,.3)}100%{background:rgba(34,197,94,.15)}}
+.hint-box{background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.15);border-radius:10px;padding:12px;margin:12px 0;font-size:13px;color:#fbbf24}
+.hint-box .error-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px}
+.timer-bar{height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;margin:8px 0}
+.timer-bar div{height:100%;background:linear-gradient(90deg,#4ade80,#fbbf24,#ef4444);border-radius:2px;transition:width .1s linear}
+.controls{text-align:center;margin:12px 0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.controls button{padding:10px 24px;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:.3s}
+.btn-reveal{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+.btn-reveal:hover{box-shadow:0 4px 15px rgba(239,68,68,.4)}
+.btn-skip{background:rgba(255,255,255,.06);color:#888}
+.result-overlay{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#1a1a2e,#2a1a3e);border:2px solid rgba(139,92,246,.3);border-radius:20px;padding:32px;text-align:center;z-index:200;display:none}
+.result-overlay h2{font-size:28px;margin-bottom:12px}
+.result-overlay button{margin-top:16px;padding:12px 28px;border:none;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:16px;cursor:pointer}
+footer{text-align:center;padding:16px;color:#444;font-size:11px}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 大厅</a><span>🕵️ Debug Detective</span></nav>
+<header><h1>🕵️ Debug Detective</h1><p>找到代码中的 bug · 训练你的调试直觉</p></header>
+<div class="container">
+  <div class="hud">
+    <div class="hud-item"><div class="val" id="hScore" style="color:#fbbf24">0</div><div class="lbl">⭐ 分</div></div>
+    <div class="hud-item"><div class="val" id="hCase" style="color:#06b6d4">1/10</div><div class="lbl">🔍 案件</div></div>
+    <div class="hud-item"><div class="val" id="hCombo" style="color:#4ade80">x1</div><div class="lbl">🔥 连击</div></div>
+  </div>
+  <div class="timer-bar"><div id="timerBar" style="width:100%"></div></div>
+  <div class="case-header">
+    <span class="case-tag tag-js" id="langTag">JS</span>
+    <span style="font-size:12px;color:#888" id="caseTitle"></span>
+    <span style="font-size:11px;color:#ef4444" id="attempts">剩余: 2次</span>
+  </div>
+  <div class="code-block" id="codeBlock"></div>
+  <div class="hint-box"><div class="error-label">📋 错误信息</div><div id="errorMsg" style="margin-top:4px"></div></div>
+  <div class="controls">
+    <button class="btn-reveal" id="revealBtn" onclick="revealBug()">🔍 揭晓答案</button>
+    <button class="btn-skip" onclick="nextCase()">⏭ 跳过 (-10)</button>
+  </div>
+</div>
+<div class="result-overlay" id="overlay"><h2 id="oTitle"></h2><p id="oDesc" style="color:#888;margin:8px 0"></p><button id="oBtn">🔄 重新开始</button></div>
+<footer>Powered by Maton.ai · Bug 狩猎训练 · 🦊 灵犀出品</footer>
+<script>
+const CASES=[
+  {lang:'JS',title:'异步陷阱',code:
+`async function fetchUser(id) {
+  const response = await fetch('/api/users/' + id);
+  const user = response.json();
+  return user.name;
+}`,bugLine:3,error:'TypeError: Cannot read property of undefined',explanation:'response.json() 返回 Promise，需要 await。正确写法: const user = await response.json();'},
+  {lang:'JS',title:'闭包陷阱',code:
+`for (var i = 0; i < 5; i++) {
+  setTimeout(() => console.log(i), 1000);
+}`,bugLine:1,error:'打印 5 次 5',explanation:'var 没有块级作用域，改用 let i = 0'},
+  {lang:'JS',title:'引用比较',code:
+`const a = [1, 2, 3];
+const b = [1, 2, 3];
+if (a === b) {
+  console.log("equal");
+}`,bugLine:3,error:'永远不会打印 "equal"',explanation:'数组是引用类型，=== 比较的是引用地址。用 JSON.stringify(a) === JSON.stringify(b) 或 lodash isEqual'},
+  {lang:'PY',title:'默认参数陷阱',code:
+`def add_item(item, items=[]):
+    items.append(item)
+    return items
+
+print(add_item(1))  # [1]
+print(add_item(2))  # [1, 2] ???`,bugLine:1,error:'第二次调用共享了同一个列表',explanation:'Python 默认参数在函数定义时求值一次。正确: def add_item(item, items=None): items = items or []'},
+  {lang:'JS',title:'this 指向',code:
+`const obj = {
+  name: "Alice",
+  greet: () => {
+    console.log("Hello " + this.name);
+  }
+};
+obj.greet();`,bugLine:3,error:'打印 "Hello undefined"',explanation:'箭头函数不绑定自己的 this，改用 function() {} 或方法简写 greet() {}'},
+  {lang:'PY',title:'迭代修改',code:
+`nums = [1, 2, 3, 4, 5]
+for n in nums:
+    if n % 2 == 0:
+        nums.remove(n)
+print(nums)  # [1, 3, 5] ???`,bugLine:3,error:'结果可能是 [1, 3, 5] 但原因不对',explanation:'迭代中修改列表会跳过元素。用列表推导: nums = [n for n in nums if n % 2 != 0]'},
+  {lang:'React',title:'状态更新',code:
+`function Counter() {
+  const [count, setCount] = useState(0);
+  const increment = () => {
+    setCount(count + 1);
+    setCount(count + 1);
+    setCount(count + 1);
+  };
+  return <button onClick={increment}>{count}</button>;
+}`,bugLine:5,error:'点击一次 count 只 +1',explanation:'setState 在同一个事件循环中会批量处理。用 setCount(c => c + 1) 函数式更新'},
+  {lang:'JS',title:'sort 陷阱',code:
+`const nums = [10, 2, 5, 1];
+nums.sort();
+console.log(nums);`,bugLine:2,error:'打印 [1, 10, 2, 5]',explanation:'默认 sort 按字符串排序。正确: nums.sort((a, b) => a - b)'},
+  {lang:'PY',title:'作用域',code:
+`x = 10
+def outer():
+    x = 20
+    def inner():
+        x += 1
+        return x
+    return inner()
+print(outer())`,bugLine:5,error:'UnboundLocalError',explanation:'inner 中 x+=1 需要先声明 nonlocal x'},
+  {lang:'CSS',title:'优先级',code:
+`.btn { color: blue; }
+#submit { color: red; }
+<button id="submit" class="btn" style="color: green">
+  Submit
+</button>`,bugLine:'inline',error:'按钮是绿色的，但你想知道为什么不是红色',explanation:'内联 style 优先级最高。去掉 style="color:green" 按钮就变红色。优先级: !important > inline > #id > .class'},
+];
+let score=0,combo=0,idx=0,attempts=2,selectedLine=null,timer=null,timeLeft=20;
+
+function renderCase(){
+  if(idx>=CASES.length){endGame();return}
+  const c=CASES[idx];attempts=2;selectedLine=null;timeLeft=20;
+  document.getElementById('hCase').textContent=(idx+1)+'/'+CASES.length;
+  document.getElementById('attempts').textContent='剩余: '+attempts+'次';
+  document.getElementById('caseTitle').textContent=c.title;
+  document.getElementById('langTag').textContent=c.lang;
+  document.getElementById('langTag').className='case-tag tag-'+(c.lang==='JS'?'js':c.lang==='PY'?'py':c.lang==='React'?'react':'css');
+  document.getElementById('errorMsg').textContent=c.error;
+  document.getElementById('revealBtn').textContent='🔍 揭晓答案';
+  document.getElementById('revealBtn').disabled=false;
+  updateTimer();
+  clearInterval(timer);timer=setInterval(()=>{timeLeft-=0.1;updateTimer();if(timeLeft<=0){clearInterval(timer);timeout()}},100);
+
+  const lines=c.code.split('\n');
+  let html='';
+  lines.forEach((l,i)=>{
+    const ln=i+1;
+    const bugLine=typeof c.bugLine==='number'?c.bugLine:-1;
+    html+='<div class="line" onclick="selectLine('+ln+',this)" id="line-'+ln+'"><span class="line-num">'+ln+'</span>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>';
+  });
+  document.getElementById('codeBlock').innerHTML=html;
+}
+
+function selectLine(ln,el){
+  if(attempts<=0) return;
+  document.querySelectorAll('.line').forEach(l=>l.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedLine=ln;
+  const c=CASES[idx];
+  if(ln===c.bugLine){
+    clearInterval(timer);
+    el.classList.add('correct-bug');
+    const bonus=Math.floor(timeLeft)*5;
+    combo++;score+=100+bonus;
+    document.getElementById('revealBtn').disabled=true;
+    document.getElementById('errorMsg').textContent='✅ '+c.explanation;
+    document.getElementById('errorMsg').style.color='#4ade80';
+    document.getElementById('attempts').textContent='🎯 找到了！';
+    updateHUD();
+    setTimeout(nextCase,1500);
+  }else{
+    attempts--;
+    document.getElementById('attempts').textContent='剩余: '+attempts+'次';
+    if(attempts<=0){
+      clearInterval(timer);
+      document.getElementById('errorMsg').textContent='❌ 不是这一行。次数用完！';
+      document.getElementById('errorMsg').style.color='#f87171';
+      combo=0;updateHUD();
+      setTimeout(nextCase,1200);
+    }
+  }
+}
+
+function revealBug(){
+  clearInterval(timer);combo=0;score=Math.max(0,score-20);
+  const c=CASES[idx];
+  const bl=typeof c.bugLine==='number'?c.bugLine:-1;
+  if(bl>0) document.getElementById('line-'+bl).classList.add('correct-bug');
+  document.getElementById('errorMsg').textContent='💡 '+c.explanation;
+  document.getElementById('errorMsg').style.color='#fbbf24';
+  document.getElementById('revealBtn').disabled=true;
+  updateHUD();
+  setTimeout(nextCase,1500);
+}
+
+function timeout(){combo=0;document.getElementById('errorMsg').textContent='⏰ 超时！';document.getElementById('errorMsg').style.color='#f87171';updateHUD();setTimeout(nextCase,1000)}
+
+function nextCase(){document.getElementById('errorMsg').style.color='#fbbf24';idx++;renderCase()}
+function updateTimer(){document.getElementById('timerBar').style.width=Math.max(0,timeLeft/20*100)+'%'}
+function updateHUD(){document.getElementById('hScore').textContent=score;document.getElementById('hCombo').textContent='x'+(combo+1)}
+
+function endGame(){
+  clearInterval(timer);
+  const o=document.getElementById('overlay');o.style.display='block';
+  document.getElementById('oTitle').textContent='🕵️ '+score+' 分';
+  document.getElementById('oTitle').style.color='#fbbf24';
+  document.getElementById('oDesc').textContent=CASES.length+' 个案件已侦破 · 最大连击 x'+(Math.max(1,combo+1));
+  document.getElementById('oBtn').onclick=()=>{o.style.display='none';score=0;combo=0;idx=0;renderCase()}
+}
+
+renderCase();
+</script>
+</body>
+</html>
