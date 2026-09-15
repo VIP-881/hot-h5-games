@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>💡 开关灯 - 热门H5游戏</title>
+<meta name="description" content="开关灯逻辑谜题游戏，点击格子翻转十字范围的颜色，目标把所有灯都关掉免费在线">
+<meta property="og:title" content="💡 开关灯 - 热门H5游戏"><meta property="og:description" content="点击翻转十字灯，把灯全关掉"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"开关灯","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}.grid{display:grid;grid-template-columns:repeat(5,56px);grid-template-rows:repeat(5,56px);gap:4px}.cell{width:56px;height:56px;border-radius:8px;cursor:pointer;transition:all 0.2s;border:2px solid rgba(255,255,255,0.2)}.cell.on{background:#f1c40f;box-shadow:0 0 16px rgba(241,196,15,0.4)}.cell.off{background:#2c3e50}.btn{background:rgba(100,150,255,0.2);color:#8cf;border:1px solid #8cf;padding:8px 20px;border-radius:20px;font-size:0.85em;cursor:pointer;margin:8px}</style>
+</head>
+<body>
+<h1>💡 开关灯</h1>
+<div class="stats"><span>👆 <b id="moves">0</b></span><span>🎯 <b id="goal">全灭</b></span></div>
+<div class="grid" id="grid"></div>
+<button class="btn" onclick="newGame()">🔄 新游戏</button>
+<script>
+const N=5;let lights=[],moves=0;
+function newGame(){
+  lights=Array(N).fill().map(()=>Array(N).fill(false));moves=0;
+  for(let i=0;i<8;i++)tap(Math.floor(Math.random()*N),Math.floor(Math.random()*N),true);
+  moves=0;document.getElementById('moves').textContent='0';render();
+}
+function tap(r,c,silent){
+  if(!silent)moves++;document.getElementById('moves').textContent=moves;
+  lights[r][c]=!lights[r][c];
+  for(const[dr,dc]of[[-1,0],[1,0],[0,-1],[0,1]]){const nr=r+dr,nc=c+dc;if(nr>=0&&nr<N&&nc>=0&&nc<N)lights[nr][nc]=!lights[nr][nc]}
+  render();
+  if(!silent&&lights.every(row=>row.every(l=>!l))){setTimeout(()=>alert('🎉 全部关灯!'),100)}
+}
+function render(){
+  document.getElementById('grid').innerHTML=lights.map((row,r)=>row.map((l,c)=>`<div class="cell ${l?'on':'off'}" onclick="tap(${r},${c})"></div>`).join('')).join('');
+}
+newGame();
+</script>
+</body>
+</html>
