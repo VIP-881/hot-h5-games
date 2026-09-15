@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎹 别踩白块</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
+h1{font-size:1.6em;margin-bottom:4px}
+.stats{display:flex;gap:16px;margin:6px 0 10px}
+.stats span{background:rgba(255,255,255,0.12);padding:5px 14px;border-radius:20px;font-size:0.95em}
+canvas{display:block;border-radius:8px;max-width:96vw;box-shadow:0 4px 24px rgba(255,255,255,0.1)}
+</style>
+</head>
+<body>
+<h1>🎹 别踩白块</h1>
+<div class="stats"><span>⭐ <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="560"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=360,H=560,COLS=4,SIZE=W/COLS,ROWS=8;
+let tiles=[],score=0,best=0,speed=4,started=false,gameover=false;
+try{best=parseInt(localStorage.getItem('piano_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function init(){
+  tiles=[];
+  for(let r=0;r<ROWS;r++){
+    const blackCol=Math.floor(Math.random()*COLS);
+    for(let c=0;c<COLS;c++){
+      tiles.push({row:r,col:c,black:c===blackCol,y:r*(H/ROWS),clicked:false});
+    }
+  }
+  score=0;speed=4;started=false;gameover=false;
+  document.getElementById('score').textContent='0';
+}
+function update(){
+  if(!started||gameover)return;
+  for(let i=tiles.length-1;i>=0;i--){
+    tiles[i].y+=speed;
+    if(tiles[i].y>H&&tiles[i].black&&!tiles[i].clicked){gameover=true;endGame();return}
+    if(tiles[i].y>H){tiles.splice(i,1)}
+  }
+  const topTile=tiles[0];
+  if(!topTile||topTile.y>=0){
+    const blackCol=Math.floor(Math.random()*COLS);
+    for(let c=0;c<COLS;c++){
+      tiles.unshift({row:0,col:c,black:c===blackCol,y:0,clicked:false});
+    }
+  }
+  if(score%30===0&&score>0)speed+=0.3;
+}
+function endGame(){
+  gameover=true;
+  if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('piano_best',best)}catch(e){}}
+  ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.font='bold 28px sans-serif';ctx.textAlign='center';
+  ctx.fillText('踩到白块了!',W/2,H/2-15);
+  ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  点击重新开始`,W/2,H/2+20);
+}
+function draw(){
+  ctx.fillStyle='#111';ctx.fillRect(0,0,W,H);
+  for(const t of tiles){
+    if(t.y+SIZE<0||t.y>H)continue;
+    ctx.fillStyle=t.black?'#1a1a1a':'#fff';
+    ctx.fillRect(t.col*SIZE,t.y,SIZE-2,SIZE-2);
+    if(t.black&&t.clicked){ctx.fillStyle='#666';ctx.fillRect(t.col*SIZE,t.y,SIZE-2,SIZE-2)}
+  }
+}
+c.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  if(gameover){init();return}
+  if(!started){started=true;return}
+  const rect=c.getBoundingClientRect();
+  const x=e.touches[0].clientX-rect.left,y=e.touches[0].clientY-rect.top;
+  const col=Math.floor(x/SIZE);
+  const hit=tiles.find(t=>t.col===col&&t.black&&!t.clicked&&y>=t.y&&y<=t.y+SIZE);
+  if(hit){hit.clicked=true;score++;document.getElementById('score').textContent=score}
+  else{gameover=true;endGame()}
+});
+c.addEventListener('mousedown',e=>{
+  if(gameover){init();return}
+  if(!started){started=true;return}
+  const rect=c.getBoundingClientRect();
+  const x=e.clientX-rect.left,y=e.clientY-rect.top;
+  const col=Math.floor(x/SIZE);
+  const hit=tiles.find(t=>t.col===col&&t.black&&!t.clicked&&y>=t.y&&y<=t.y+SIZE);
+  if(hit){hit.clicked=true;score++;document.getElementById('score').textContent=score}
+  else{gameover=true;endGame()}
+});
+function loop(){update();draw();requestAnimationFrame(loop)}
+init();loop();
+</script>
+</body>
+</html>
