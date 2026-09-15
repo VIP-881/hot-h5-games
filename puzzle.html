@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🧩 滑动拼图</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+h1{font-size:1.6em;margin:6px 0}
+.stats{display:flex;gap:16px;margin:4px 0 10px}
+.stats span{background:rgba(255,255,255,0.12);padding:5px 14px;border-radius:20px;font-size:0.95em}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(100,100,200,0.15)}
+.btn{background:rgba(100,100,255,0.2);color:#88f;border:1px solid #88f;padding:8px 24px;border-radius:20px;font-size:0.9em;cursor:pointer;margin-top:8px;transition:all 0.2s}
+.btn:hover{background:rgba(100,100,255,0.3)}
+</style>
+</head>
+<body>
+<h1>🧩 滑动拼图</h1>
+<div class="stats"><span>🔢 <b id="moves">0</b></span><span>⏱ <b id="timer">0</b>s</span><span>🏆 <b id="best">--</b></span></div>
+<canvas id="c" width="360" height="360"></canvas>
+<button class="btn" onclick="restart()">🔄 打乱</button>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const N=4,SIZE=80,GAP=4,OFF=(360-N*SIZE-(N-1)*GAP)/2;
+const COLORS=['#ff4757','#ffa502','#ffdd59','#2ed573','#1e90ff','#a55eea','#ff6b81','#7bed9f','#eccc68','#ff7f50','#70a1ff','#5352ed','#ff6348','#ecf0f1','#dfe6e9','#b2bec3'];
+let board=[],emptyRow=3,emptyCol=3,moves=0,started=false,startTime=0,timerInterval,elapsed=0,best;
+try{best=parseInt(localStorage.getItem('puzzle_best'))||0;document.getElementById('best').textContent=best?`${best}s/${best}m`:'--'}catch(e){}
+
+function init(){
+  board=Array(N).fill().map((_,i)=>Array(N).fill().map((_,j)=>i*N+j));
+  board[N-1][N-1]=-1;emptyRow=N-1;emptyCol=N-1;moves=0;elapsed=0;started=false;
+  document.getElementById('moves').textContent='0';document.getElementById('timer').textContent='0';
+  clearInterval(timerInterval);
+}
+function shuffle(){
+  init();
+  let lastDir=null;
+  for(let i=0;i<200;i++){
+    const dirs=[[-1,0],[1,0],[0,-1],[0,1]];
+    const filtered=dirs.filter(([dr,dc])=>{
+      const nr=emptyRow+dr,nc=emptyCol+dc;
+      if(nr<0||nr>=N||nc<0||nc>=N)return false;
+      if(lastDir&&dr===-lastDir[0]&&dc===-lastDir[1])return false;
+      return true;
+    });
+    const[dr,dc]=filtered[Math.floor(Math.random()*filtered.length)];
+    [board[emptyRow][emptyCol],board[emptyRow+dr][emptyCol+dc]]=[board[emptyRow+dr][emptyCol+dc],board[emptyRow][emptyCol]];
+    emptyRow+=dr;emptyCol+=dc;lastDir=[dr,dc];
+  }
+  draw();
+}
+function move(r,c){
+  if(isSolved())return;
+  if(!started){started=true;startTime=Date.now();timerInterval=setInterval(()=>{elapsed=Math.floor((Date.now()-startTime)/1000);document.getElementById('timer').textContent=elapsed},200)}
+  const dr=Math.abs(r-emptyRow),dc=Math.abs(c-emptyCol);
+  if((dr===1&&dc===0)||(dr===0&&dc===1)){
+    [board[emptyRow][emptyCol],board[r][c]]=[board[r][c],board[emptyRow][emptyCol]];
+    emptyRow=r;emptyCol=c;moves++;
+    document.getElementById('moves').textContent=moves;
+    draw();
+    if(isSolved())solved();
+  }
+}
+function isSolved(){
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(board[r][c]!==r*N+c&&!(r===N-1&&c===N-1))return false;
+  return true;
+}
+function solved(){
+  clearInterval(timerInterval);
+  const total=Math.floor((Date.now()-startTime)/1000);
+  if(!best||moves<best||(moves===best&&total<best)){best=moves;try{localStorage.setItem('puzzle_best',moves)}catch(e){}}
+  document.getElementById('best').textContent=(best?`${best}步`:'--');
+  ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,360,360);
+  ctx.fillStyle='#fff';ctx.font='bold 24px sans-serif';ctx.textAlign='center';
+  ctx.fillText('🎉 拼好了!',180,160);
+  ctx.font='16px sans-serif';ctx.fillText(`${moves} 步 · ${total}s`,180,190);
+}
+function draw(){
+  ctx.fillStyle='rgba(255,255,255,0.05)';ctx.fillRect(0,0,360,360);
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    if(board[r][c]===-1)continue;
+    const x=OFF+c*(SIZE+GAP),y=OFF+r*(SIZE+GAP);
+    ctx.fillStyle=COLORS[board[r][c]%COLORS.length];
+    ctx.beginPath();ctx.roundRect(x,y,SIZE,SIZE,8);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 24px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(board[r][c]+1,x+SIZE/2,y+SIZE/2);
+  }
+}
+c.addEventListener('click',e=>{
+  const rect=c.getBoundingClientRect();
+  const x=e.clientX-rect.left-OFF,y=e.clientY-rect.top-OFF;
+  const col=Math.floor(x/(SIZE+GAP)),row=Math.floor(y/(SIZE+GAP));
+  if(row<0||row>=N||col<0||col>=N)return;
+  move(row,col);
+});
+function restart(){init();shuffle()}
+init();shuffle();
+</script>
+</body>
+</html>
