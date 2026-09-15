@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>⚡ 反应速度测试</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+h1{font-size:1.6em;margin:4px 0}
+.stats{display:flex;gap:16px;margin:4px 0 8px}
+.stats span{background:rgba(255,255,255,0.12);padding:5px 14px;border-radius:20px;font-size:0.95em}
+.screen{width:360px;max-width:96vw;height:420px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:background 0.1s;position:relative;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.3)}
+.screen.waiting{background:#c0392b}
+.screen.ready{background:#c0392b}
+.screen.go{background:#2ecc71}
+.screen.early{background:#e67e22}
+.big-text{font-size:3em;font-weight:bold;text-align:center}
+.sub-text{font-size:1em;color:rgba(255,255,255,0.7);margin-top:8px}
+.result-box{text-align:center}
+.result-box .time{font-size:3.5em;font-weight:bold;background:linear-gradient(135deg,#f093fb,#f5576c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.result-box .unit{font-size:0.4em}
+.history{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px;max-width:360px}
+.history span{padding:4px 10px;border-radius:12px;font-size:0.8em;background:rgba(255,255,255,0.1)}
+.history span.fast{background:rgba(46,213,115,0.2);color:#2ed573}
+.history span.avg{background:rgba(255,165,2,0.2);color:#ffa502}
+.history span.slow{background:rgba(255,71,87,0.2);color:#ff4757}
+</style>
+</head>
+<body>
+<h1>⚡ 反应速度测试</h1>
+<div class="stats"><span>🎯 <b id="avg">--</b>ms</span><span>🏆 <b id="best">--</b>ms</span><span>📊 <b id="count">0</b>/5</span></div>
+<div class="screen waiting" id="screen" onclick="handleClick()">
+  <div class="big-text" id="display">🔴</div>
+  <div class="sub-text" id="sub">点击开始测试</div>
+</div>
+<div class="history" id="history"></div>
+<script>
+const screen=document.getElementById('screen');
+let state='idle',waitStart=0,timeoutId=null,reactionTimes=[],total=0,count=0,testRunning=false,pendingStart=false,best;
+try{best=parseInt(localStorage.getItem('react_best'))||0;document.getElementById('best').textContent=best?`${best}ms`:'--ms'}catch(e){}
+
+function startTest(){
+  testRunning=true;pendingStart=true;count=0;total=0;reactionTimes=[];
+  document.getElementById('count').textContent='0/5';
+  document.getElementById('history').innerHTML='';
+  nextRound();
+}
+function nextRound(){
+  if(count>=5){finishTest();return}
+  pendingStart=true;state='ready';
+  screen.className='screen ready';
+  document.getElementById('display').textContent='🔴';
+  document.getElementById('sub').textContent='等待绿色...';
+  const delay=1500+Math.random()*3500;
+  timeoutId=setTimeout(()=>{
+    state='go';screen.className='screen go';
+    document.getElementById('display').textContent='🟢';
+    document.getElementById('sub').textContent='快点击!';
+    waitStart=Date.now();
+  },delay);
+}
+function handleClick(){
+  if(!testRunning&&state==='idle'){startTest();return}
+  if(!pendingStart)return;
+  pendingStart=false;
+  if(state==='ready'){
+    clearTimeout(timeoutId);state='early';
+    screen.className='screen early';
+    document.getElementById('display').textContent='⚠️';
+    document.getElementById('sub').textContent='太早了! 等待绿色再点击';
+    setTimeout(nextRound,1000);
+    return;
+  }
+  if(state==='go'){
+    const rt=Date.now()-waitStart;count++;total+=rt;reactionTimes.push(rt);
+    document.getElementById('count').textContent=`${count}/5`;
+    document.getElementById('avg').textContent=`${Math.round(total/count)}ms`;
+    if(!best||rt<best){best=rt;document.getElementById('best').textContent=`${best}ms`;try{localStorage.setItem('react_best',best)}catch(e){}}
+    screen.className='screen go';
+    document.getElementById('display').textContent=`${rt}`;
+    document.getElementById('sub').textContent='毫秒';
+    updateHistory();
+    setTimeout(nextRound,800);
+  }
+}
+function updateHistory(){
+  const h=document.getElementById('history');h.innerHTML='';
+  reactionTimes.forEach((t,i)=>{
+    const cls=t<250?'fast':t<350?'avg':'slow';
+    const s=document.createElement('span');s.className=cls;s.textContent=`#${i+1} ${t}ms`;h.appendChild(s);
+  });
+}
+function finishTest(){
+  testRunning=false;pendingStart=false;state='idle';
+  screen.className='screen waiting';
+  document.getElementById('display').textContent='🏁';
+  document.getElementById('sub').textContent=`平均 ${Math.round(total/count)}ms · 点击重新测试`;
+}
+screen.addEventListener('touchstart',e=>{e.preventDefault();handleClick()});
+</script>
+</body>
+</html>
