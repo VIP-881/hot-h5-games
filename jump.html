@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🏃 跳一跳</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(180deg, #1a1a2e, #16213e); display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; color:#fff; overflow:hidden; user-select:none; -webkit-user-select:none; touch-action:none; }
+.header { text-align:center; margin-bottom:6px; z-index:10; }
+.header h1 { font-size:1.8em; }
+.stats { display:flex; gap:16px; margin:6px 0; z-index:10; }
+.stats span { background:rgba(255,255,255,0.12); padding:5px 14px; border-radius:20px; font-size:0.95em; }
+canvas { display:block; border-radius:8px; max-width:98vw; box-shadow:0 4px 20px rgba(0,0,0,0.3); }
+.hint { color:#aaa; font-size:0.85em; margin-top:8px; z-index:10; }
+</style>
+</head>
+<body>
+<div class="header"><h1>🏃 跳一跳</h1></div>
+<div class="stats">
+  <span>🎯 <b id="score">0</b></span>
+  <span>🏆 <b id="best">0</b></span>
+</div>
+<canvas id="c" width="360" height="600"></canvas>
+<div class="hint" id="hint">⬇️ 按住屏幕蓄力，松开跳跃</div>
+<script>
+const canvas=document.getElementById('c'), ctx=canvas.getContext('2d');
+const W=360, H=600;
+let platforms=[], player={x:0,y:0,w:30,h:30}, score=0, best=0, chargeStart=0, charging=false, t=0, state='waiting', falling=false, fallVy=0;
+try{best=parseInt(localStorage.getItem('jump_best'))||0;document.getElementById('best').textContent=best;}catch(e){}
+
+function init() {
+  platforms=[{x:W/2-40,y:H-80,w:80,h:15,type:'normal'}];
+  player={x:W/2-15,y:H-95,w:30,h:30}; score=0; state='waiting'; falling=false; fallVy=0;
+  document.getElementById('score').textContent='0';
+  document.getElementById('hint').textContent='⬇️ 按住屏幕蓄力，松开跳跃';
+  for(let i=0;i<3;i++) addPlatform();
+}
+
+function addPlatform() {
+  const last=platforms[platforms.length-1];
+  const types=['normal','normal','normal','small','wide'];
+  const type=types[Math.floor(Math.random()*types.length)];
+  const w=type==='small'?45:type==='wide'?110:70;
+  const minX=Math.max(10,last.x-120), maxX=Math.min(W-w-10,last.x+120);
+  const x=minX+Math.random()*(maxX-minX);
+  const y=last.y-90-Math.random()*40;
+  platforms.push({x,y,w,h:15,type});
+}
+
+function endGame() {
+  state='gameover';
+  if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('jump_best',best)}catch(e){}}
+  document.getElementById('hint').textContent='💀 点击重新开始';
+  ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff'; ctx.font='bold 26px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('GAME OVER',W/2,H/2-20);
+  ctx.font='16px sans-serif'; ctx.fillText(`跳了 ${score} 步`,W/2,H/2+15);
+}
+
+function drawPlayer() {
+  const p=player;
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(p.x+p.w/2,p.y-p.h*0.3,p.w*0.45,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#e0e0e0';
+  ctx.fillRect(p.x+p.w*0.2,p.y-p.h*0.3,p.w*0.6,p.h*0.7);
+  ctx.fillStyle='#333';
+  ctx.fillRect(p.x+p.w*0.35,p.y-p.h*0.1,p.w*0.08,p.h*0.08);
+  ctx.fillRect(p.x+p.w*0.55,p.y-p.h*0.1,p.w*0.08,p.h*0.08);
+  ctx.fillStyle='#ff6347';
+  ctx.fillRect(p.x+p.w*0.2,p.y-p.h*1.05,p.w*0.6,p.h*0.7);
+}
+
+function drawPlatform(p) {
+  const gradient=ctx.createLinearGradient(p.x,p.y,p.x,p.y+p.h);
+  const color=p.type==='small'?'#ff6347':p.type==='wide'?'#1e90ff':'#2ed573';
+  gradient.addColorStop(0,color); gradient.addColorStop(1,'#333');
+  ctx.fillStyle=gradient;
+  ctx.beginPath(); ctx.roundRect(p.x,p.y,p.w,p.h,4); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.2)';
+  ctx.fillRect(p.x+2,p.y+1,p.w-4,3);
+}
+
+function draw() {
+  ctx.fillStyle='#16213e'; ctx.fillRect(0,0,W,H);
+  for(let i=0;i<20;i++) {
+    ctx.fillStyle=`rgba(255,255,255,${0.05+Math.random()*0.08})`;
+    ctx.fillRect(Math.random()*W,Math.random()*H,1.5,1.5);
+  }
+  for(const p of platforms) drawPlatform(p);
+  if(state!=='gameover'||!falling) drawPlayer();
+  if(charging) {
+    const elapsed=(Date.now()-chargeStart)/1000;
+    const power=Math.min(elapsed*150,80);
+    const px=player.x+player.w/2, py=player.y;
+    ctx.fillStyle=`rgba(255,215,0,${0.4+power/200})`;
+    ctx.beginPath(); ctx.arc(px,py-power,8+power*0.2,0,Math.PI*2); ctx.fill();
+  }
+}
+
+function update() {
+  if(state!=='playing'&&state!=='jumping'&&!falling) return;
+  t+=0.016;
+
+  if(state==='jumping') {
+    player.x+=player.vx*0.016; player.y+=player.vy*0.016; player.vy+=600*0.016;
+    for(const p of platforms) {
+      if(player.vy>0&&player.x+player.w>p.x&&player.x<p.x+p.w&&player.y+player.h>p.y&&player.y+player.h<p.y+p.h+5) {
+        player.y=p.y-player.h; state='waiting'; score++;
+        document.getElementById('score').textContent=score;
+        if(platforms.indexOf(p)>platforms.length-3) addPlatform();
+        const dy=platforms[platforms.length-1].y-player.y;
+        if(dy>H*0.4) for(const pp of platforms) pp.y-=dy-H*0.4;
+        break;
+      }
+    }
+    if(player.y>H+100) { endGame(); }
+  }
+
+  if(falling) {
+    player.y+=fallVy*0.016; fallVy+=600*0.016;
+    if(player.y>H+100) { falling=false; }
+  }
+}
+
+function jump(power) {
+  if(state!=='waiting') return;
+  state='jumping';
+  const next=platforms[platforms.indexOf(platforms.find(p=>player.x+player.w>p.x&&player.x<p.x+p.w&&Math.abs((player.y+player.h)-p.y)<2))+1];
+  if(!next) return;
+  const dx=next.x+next.w/2-(player.x+player.w/2);
+  const dy=next.y-(player.y+player.h);
+  const dist=Math.sqrt(dx*dx+dy*dy);
+  const speed=power;
+  player.vx=dx/(dist/speed);
+  player.vy=-speed*0.7;
+  document.getElementById('hint').textContent='⬇️ 按住屏幕蓄力，松开跳跃';
+}
+
+function gameLoop() {
+  update(); draw();
+  if(falling) { setTimeout(()=>requestAnimationFrame(gameLoop),30); return; }
+  requestAnimationFrame(gameLoop);
+}
+
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  if(state==='gameover'){ init(); return; }
+  if(state==='waiting'){ charging=true; chargeStart=Date.now(); document.getElementById('hint').textContent='⬆️ 蓄力中... 松手跳跃!'; }
+});
+canvas.addEventListener('touchend',e=>{
+  e.preventDefault();
+  if(!charging) return;
+  const elapsed=(Date.now()-chargeStart)/1000;
+  const power=Math.min(elapsed*150,80)+15;
+  charging=false; jump(power);
+});
+canvas.addEventListener('mousedown',e=>{
+  if(state==='gameover'){ init(); return; }
+  if(state==='waiting'){ charging=true; chargeStart=Date.now(); document.getElementById('hint').textContent='⬆️ 蓄力中... 松手跳跃!'; }
+});
+canvas.addEventListener('mouseup',e=>{
+  if(!charging) return;
+  const elapsed=(Date.now()-chargeStart)/1000;
+  const power=Math.min(elapsed*150,80)+15;
+  charging=false; jump(power);
+});
+canvas.addEventListener('click',e=>{ if(state==='gameover') init(); });
+
+init(); gameLoop();
+</script>
+</body>
+</html>
