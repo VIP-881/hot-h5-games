@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🧩 数字配对 - 热门H5游戏</title>
+<meta name="description" content="数字配对脑力游戏，两数之和为目标数字即消除配对，锻炼心算能力免费在线益智游戏">
+<meta property="og:title" content="🧩 数字配对 - 热门H5游戏"><meta property="og:description" content="找两数之和等于目标，消除配对"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"数字配对","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}.target-num{font-size:2.5em;font-weight:bold;color:#ffd700;margin:10px 0}.grid{display:grid;grid-template-columns:repeat(5,60px);grid-template-rows:repeat(4,60px);gap:6px}.cell{background:rgba(100,150,255,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2em;font-weight:bold;cursor:pointer;transition:all 0.15s;border:2px solid rgba(100,150,255,0.3)}.cell:hover{background:rgba(100,150,255,0.4)}.cell.selected{border-color:#ffd700;background:rgba(255,215,0,0.2)}.cell.matched{opacity:0.2;pointer-events:none}</style>
+</head>
+<body>
+<h1>🧩 数字配对</h1>
+<div class="stats"><span>🎯 <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<div class="target-num" id="target">10</div>
+<div class="grid" id="grid"></div>
+<script>
+let nums=[],target=10,selected=null,score=0,best=0,matched=new Set();
+try{best=parseInt(localStorage.getItem('numpair_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function gen(){matched=new Set();selected=null;nums=[];const pairs=10;target=8+Math.floor(Math.random()*8);
+  for(let i=0;i<pairs;i++){const a=Math.floor(Math.random()*(target-1))+1;const b=target-a;nums.push(a,b)}
+  while(nums.length<20)nums.push(Math.floor(Math.random()*target)+1);
+  for(let i=nums.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[nums[i],nums[j]]=[nums[j],nums[i]]}
+  document.getElementById('target').textContent=target;render();
+}
+function render(){
+  document.getElementById('grid').innerHTML=nums.map((n,i)=>`<div class="cell${selected===i?' selected':''}${matched.has(i)?' matched':''}" onclick="tap(${i})">${n}</div>`).join('');
+}
+function tap(i){
+  if(matched.has(i))return;
+  if(selected===null){selected=i}else if(selected===i){selected=null}else{
+    const a=nums[selected],b=nums[i];
+    if(a+b===target&&!matched.has(selected)&&!matched.has(i)){matched.add(selected);matched.add(i);score+=target;document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('numpair_best',best)}catch(e)}if(matched.size>=nums.length)gen()}selected=null;
+  }render();
+}
+gen();
+</script>
+</body>
+</html>
