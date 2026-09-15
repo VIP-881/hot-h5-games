@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🕹️ 弹珠台 - 热门H5游戏</title>
+<meta name="description" content="经典弹珠台Pinball游戏，控制左右挡板反弹弹珠击中目标得分，免费在线H5街机游戏">
+<meta property="og:title" content="🕹️ 弹珠台 - 热门H5游戏">
+<meta property="og:description" content="经典弹珠台，控制挡板击打弹珠">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"弹珠台","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#1a1a2e,#0a0a1a);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
+h1{font-size:1.8em;margin:4px 0;color:#ff0}
+.stats{display:flex;gap:12px;margin:6px 0 8px}
+.stats span{background:rgba(255,255,255,0.12);padding:5px 14px;border-radius:20px;font-size:0.95em}
+canvas{display:block;border-radius:8px;max-width:96vw;box-shadow:0 4px 24px rgba(255,255,0,0.1)}
+</style>
+</head>
+<body>
+<h1>🕹️ 弹珠台</h1>
+<div class="stats"><span>⭐ <b id="score">0</b></span><span>🎱 <b id="balls">3</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="300" height="500"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=300,H=500,BR=7;
+let ball={x:W/2,y:380,vx:2,vy:-4,r:BR},ballCount=3,score=0,best=0;
+let flipperL={angle:-0.3,target:-0.3},flipperR={angle:0.3,target:0.3},flipperOn=false;
+let bumpers=[],walls=[],gameover=false;
+try{best=parseInt(localStorage.getItem('pinball_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function initBumpers(){
+  bumpers=[];
+  for(let i=0;i<5;i++){const x=W/2-40+i*20,y=80+i*25;bumpers.push({x,y,r:14,pts:10+i*10,hit:false})}
+  bumpers.push({x:W/2, y:50, r:18, pts:50, hit:false});
+  for(let i=0;i<3;i++){bumpers.push({x:60+i*30,y:60,r:12,pts:20})}
+  for(let i=0;i<3;i++){bumpers.push({x:160+i*30,y:60,r:12,pts:20})}
+}
+function resetBall(){ball={x:W/2,y:380,vx:(Math.random()-0.5)*6,vy:-4-Math.random()*3,r:BR};ballCount--;document.getElementById('balls').textContent=ballCount;if(ballCount<0)endGame()}
+function update(){
+  if(gameover)return;
+  ball.x+=ball.vx*0.08;ball.y+=ball.vy*0.08;ball.vy+=0.02;
+  if(ball.x-BR<10){ball.vx*=-0.8;ball.x=10+BR}
+  if(ball.x+BR>W-10){ball.vx*=-0.8;ball.x=W-10-BR}
+  if(ball.y-BR<10){ball.vy*=-0.8;ball.y=10+BR}
+  if(ball.y+BR>H){resetBall();if(ballCount<0)endGame();return}
+
+  const FL_Y=H-40,FL_W=60,FL_H=12,FL_X_L=30,FL_X_R=W-30-FL_W;
+  flipperL.angle+=(flipperL.target-flipperL.angle)*0.3;
+  flipperR.angle+=(flipperR.target-flipperR.angle)*0.3;
+  
+  [flipperL, flipperR].forEach((fl, i) => {
+    const fx = i === 0 ? FL_X_L : FL_X_R;
+    const ex = fx + Math.cos(fl.angle) * FL_W;
+    const ey = FL_Y + Math.sin(fl.angle) * FL_W;
+    const dx=ball.x-(fx+ex)/2,dy=ball.y-(FL_Y+ey)/2;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<BR+FL_W/2+4){
+      const nx=dx/dist,ny=dy/dist;
+      const rel=ball.vx*nx+ball.vy*ny;
+      if(rel<0||flipperOn){ball.vx-=2*rel*nx;ball.vy-=2*rel*ny;ball.vy-=3}
+    }
+  });
+
+  for(const b of bumpers){
+    const dx=ball.x-b.x,dy=ball.y-b.y,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<BR+b.r){const nx=dx/(dist||1),ny=dy/(dist||1);ball.vx+=nx*4;ball.vy+=ny*4;score+=b.pts;document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('pinball_best',best)}catch(e){}}}
+  }
+}
+function draw(){
+  ctx.fillStyle='#0a0a1a';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#f0f';ctx.lineWidth=2;ctx.strokeRect(8,8,W-16,H-16);
+  ctx.setLineDash([2,6]);ctx.strokeStyle='rgba(255,0,255,0.3)';ctx.beginPath();ctx.moveTo(W/2,40);ctx.lineTo(W/2,H-80);ctx.stroke();ctx.setLineDash([]);
+  bumpers.forEach(b=>{ctx.fillStyle=`hsl(${b.pts*2},80%,60%)`;ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=8;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(b.x-3,b.y-3,b.r*0.3,0,Math.PI*2);ctx.fill()});
+  const FL_Y=H-40,FL_W=60;
+  [{fx:30,fl:flipperL},{fx:W-90,fl:flipperR}].forEach(({fx,fl})=>{
+    ctx.fillStyle='#f0f';ctx.beginPath();ctx.roundRect(fx,FL_Y,10,8,3);ctx.fill();
+    const ex=fx+Math.cos(fl.angle)*FL_W,ey=FL_Y+Math.sin(fl.angle)*FL_W;
+    ctx.strokeStyle='#0ff';ctx.lineWidth=6;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(fx+10,FL_Y+4);ctx.lineTo(ex,ey);ctx.stroke();
+  });
+  ctx.fillStyle='#fff';ctx.shadowColor='#fff';ctx.shadowBlur=10;ctx.beginPath();ctx.arc(ball.x,ball.y,BR,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+}
+document.addEventListener('keydown',e=>{flipperOn=true;flipperL.target=-0.8;flipperR.target=0.8});
+document.addEventListener('keyup',e=>{flipperOn=false;flipperL.target=-0.3;flipperR.target=0.3});
+c.addEventListener('touchstart',e=>{e.preventDefault();flipperOn=true;const r=c.getBoundingClientRect(),x=e.touches[0].clientX-r.left;if(x<W/2){flipperL.target=-0.8}else{flipperR.target=0.8}});
+c.addEventListener('touchend',()=>{flipperOn=false;flipperL.target=-0.3;flipperR.target=0.3});
+c.addEventListener('mousedown',e=>{const r=c.getBoundingClientRect(),x=e.clientX-r.left;flipperOn=true;if(x<W/2)flipperL.target=-0.8;else flipperR.target=0.8});
+c.addEventListener('mouseup',()=>{flipperOn=false;flipperL.target=-0.3;flipperR.target=0.3});
+c.addEventListener('click',()=>{if(gameover)restart()});
+function endGame(){gameover=true;ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  点击重新开始`,W/2,H/2+20)}
+function restart(){score=0;ballCount=3;gameover=false;resetBall();ballCount=3;document.getElementById('score').textContent='0';document.getElementById('balls').textContent='3';initBumpers()}
+function loop(){update();if(!gameover)draw();requestAnimationFrame(loop)}
+initBumpers();loop();
+</script>
+</body>
+</html>
