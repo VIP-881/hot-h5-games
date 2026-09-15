@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>💎 消消乐</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a40, #2d2d6b); display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; color:#fff; user-select:none; -webkit-user-select:none; touch-action:none; }
+.header { text-align:center; margin-bottom:8px; }
+.header h1 { font-size:2em; }
+.stats { display:flex; gap:16px; margin:10px 0; }
+.stats span { background:rgba(255,255,255,0.12); padding:6px 14px; border-radius:20px; font-size:1em; }
+canvas { border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.4); display:block; max-width:95vw; }
+.btn { background:rgba(255,215,0,0.2); color:#FFD700; border:1px solid #FFD700; padding:10px 28px; border-radius:24px; font-size:1em; cursor:pointer; margin-top:12px; transition:all 0.2s; }
+.btn:hover { background:rgba(255,215,0,0.3); }
+</style>
+</head>
+<body>
+<div class="header"><h1>💎 消消乐</h1></div>
+<div class="stats">
+  <span>⭐ <b id="score">0</b></span>
+  <span>🏆 <b id="best">0</b></span>
+  <span>⏱ <b id="moves">30</b></span>
+</div>
+<canvas id="c" width="360" height="360"></canvas>
+<button class="btn" onclick="restart()">🔄 新游戏</button>
+<script>
+const canvas=document.getElementById('c'), ctx=canvas.getContext('2d');
+const COLS=7, ROWS=7, SIZE=48, GAP=4, PAD=12;
+const COLORS=['#ff4757','#ff6b81','#ffa502','#ffdd59','#2ed573','#1e90ff','#a55eea'];
+const ICONS=['❤️','🌸','🍊','⭐','🍀','💎','🦄'];
+let board=[], score=0, best=0, moves=30, selected=null, animating=false;
+try{best=parseInt(localStorage.getItem('match3_best'))||0;document.getElementById('best').textContent=best;}catch(e){}
+
+function init() {
+  board=Array(ROWS).fill().map(()=>Array(COLS).fill().map(()=>Math.floor(Math.random()*ICONS.length)));
+  while(findMatches().length) {
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) board[r][c]=Math.floor(Math.random()*ICONS.length);
+  }
+  score=0; moves=30; selected=null; animating=false;
+  document.getElementById('score').textContent='0';
+  document.getElementById('moves').textContent='30';
+}
+
+function findMatches() {
+  const matches=new Set();
+  for(let r=0;r<ROWS;r++) {
+    for(let c=0;c<COLS-2;c++) {
+      if(board[r][c]===board[r][c+1]&&board[r][c]===board[r][c+2]) { matches.add(`${r},${c}`); matches.add(`${r},${c+1}`); matches.add(`${r},${c+2}`); }
+    }
+  }
+  for(let c=0;c<COLS;c++) {
+    for(let r=0;r<ROWS-2;r++) {
+      if(board[r][c]===board[r+1][c]&&board[r][c]===board[r+2][c]) { matches.add(`${r},${c}`); matches.add(`${r+1},${c}`); matches.add(`${r+2},${c}`); }
+    }
+  }
+  return [...matches].map(s=>s.split(',').map(Number));
+}
+
+function clearMatches(matches) {
+  if(!matches.length) return 0;
+  for(const [r,c] of matches) board[r][c]=-1;
+  score+=matches.length*10;
+  document.getElementById('score').textContent=score;
+  if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('match3_best',best)}catch(e){}}
+  for(let c=0;c<COLS;c++) {
+    let idx=ROWS-1;
+    for(let r=ROWS-1;r>=0;r--) if(board[r][c]!==-1) board[idx--][c]=board[r][c];
+    while(idx>=0) board[idx--][c]=Math.floor(Math.random()*ICONS.length);
+  }
+  return matches.length;
+}
+
+function processMatches() {
+  let matches=findMatches(), total=0;
+  while(matches.length) { total+=clearMatches(matches); matches=findMatches(); }
+  return total;
+}
+
+function swap(r1,c1,r2,c2) {
+  if(animating||moves<=0) return;
+  if(Math.abs(r1-r2)+Math.abs(c1-c2)!==1) { selected=null; draw(); return; }
+  animating=true;
+  [board[r1][c1],board[r2][c2]]=[board[r2][c2],board[r1][c1]];
+  if(!processMatches()) { [board[r1][c1],board[r2][c2]]=[board[r2][c2],board[r1][c1]]; }
+  else { moves--; document.getElementById('moves').textContent=moves; }
+  selected=null; animating=false;
+  draw();
+  if(moves<=0) endGame();
+}
+
+function endGame() {
+  ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,0,360,360);
+  ctx.fillStyle='#FFD700'; ctx.font='bold 28px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('游戏结束!',180,160);
+  ctx.fillStyle='#fff'; ctx.font='16px sans-serif';
+  ctx.fillText(`得分: ${score}`,180,200);
+}
+
+function draw() {
+  ctx.clearRect(0,0,360,360);
+  ctx.fillStyle='rgba(255,255,255,0.05)'; ctx.fillRect(0,0,360,360);
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) {
+    const x=PAD+c*(SIZE+GAP), y=PAD+r*(SIZE+GAP);
+    ctx.fillStyle=COLORS[board[r][c]%COLORS.length];
+    ctx.beginPath(); ctx.roundRect(x,y,SIZE,SIZE,8); ctx.fill();
+    ctx.font='24px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(ICONS[board[r][c]%ICONS.length],x+SIZE/2,y+SIZE/2);
+  }
+  if(selected) {
+    const [sr,sc]=selected;
+    ctx.strokeStyle='#FFD700'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.roundRect(PAD+sc*(SIZE+GAP)-2,PAD+sr*(SIZE+GAP)-2,SIZE+4,SIZE+4,10); ctx.stroke();
+  }
+}
+
+canvas.addEventListener('touchstart',e=>{
+  if(animating||moves<=0) return;
+  const rect=canvas.getBoundingClientRect();
+  const x=e.touches[0].clientX-rect.left, y=e.touches[0].clientY-rect.top;
+  const c=Math.floor((x-PAD)/(SIZE+GAP)), r=Math.floor((y-PAD)/(SIZE+GAP));
+  if(r<0||r>=ROWS||c<0||c>=COLS) return;
+  if(selected) { swap(selected[0],selected[1],r,c); }
+  else { selected=[r,c]; draw(); }
+});
+
+canvas.addEventListener('click',e=>{
+  if(animating||moves<=0) return;
+  const rect=canvas.getBoundingClientRect();
+  const x=e.clientX-rect.left, y=e.clientY-rect.top;
+  const c=Math.floor((x-PAD)/(SIZE+GAP)), r=Math.floor((y-PAD)/(SIZE+GAP));
+  if(r<0||r>=ROWS||c<0||c>=COLS) return;
+  if(selected) { swap(selected[0],selected[1],r,c); }
+  else { selected=[r,c]; draw(); }
+});
+
+function restart() { init(); draw(); }
+init(); draw();
+</script>
+</body>
+</html>
