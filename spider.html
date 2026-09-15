@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🕷️ 蜘蛛纸牌 - 热门H5游戏</title>
+<meta name="description" content="蜘蛛纸牌经典单人接龙游戏，按K到A顺序排列消除所有牌列，免费在线Windows经典纸牌游戏">
+<meta property="og:title" content="🕷️ 蜘蛛纸牌 - 热门H5游戏"><meta property="og:description" content="经典蜘蛛纸牌，K到A消除"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"蜘蛛纸牌","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#0d4a2a,#0a3320);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}h1{font-size:1.6em;margin:4px 0;color:#ffd700}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}.board{display:flex;gap:4px;padding:10px;min-height:300px;max-width:720px;width:98vw;overflow-x:auto}.col{display:flex;flex-direction:column;min-width:60px;min-height:60px;position:relative}.card-el{width:56px;height:24px;border-radius:4px;font-size:0.75em;font-weight:bold;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;margin-top:-16px;border:1px solid #999;position:relative}.card-el:first-child{margin-top:0}.card-el.faceup{background:#fff;color:#000}.card-el.facedown{background:linear-gradient(135deg,#1a3a6a,#2a4a8a);color:transparent}.card-el.selected{border:2px solid #ffd700;transform:translateY(-4px)}.card-el.red{color:#c0392b}.stock{margin-left:8px;display:flex;gap:2px}.stock-btn{width:40px;height:56px;background:linear-gradient(135deg,#1a3a6a,#2a4a8a);border:1px solid #555;border-radius:4px;cursor:pointer;color:#fff;font-size:0.7em}.btn{background:rgba(255,215,0,0.2);color:#ffd700;border:1px solid #ffd700;padding:6px 16px;border-radius:20px;font-size:0.85em;cursor:pointer;margin:4px}</style>
+</head>
+<body>
+<h1>🕷️ 蜘蛛纸牌</h1>
+<div class="stats"><span>🃏 <b id="moves">0</b></span><span>⏱ <b id="timer">0</b>s</span></div>
+<div class="board" id="board"></div>
+<div style="display:flex;gap:8px;align-items:center"><button class="btn" onclick="dealStock()">📦 发牌</button><button class="btn" onclick="newGame()">🔄 新游戏</button></div>
+<script>
+const SUITS=['♠','♥','♦','♣'];let cols=[],stock=[],completed=0,moves=0,selected=null,timer=0,timerInterval,started=false;
+function createDeck(){let d=[];for(let s=0;s<4;s++)for(let r=0;r<13;r++)d.push({suit:s,rank:r,faceUp:false});for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]]}return d}
+function newGame(){
+  const deck=createDeck();cols=Array(10).fill().map(()=>[]);stock=[];completed=0;moves=0;selected=null;timer=0;clearInterval(timerInterval);started=false;document.getElementById('moves').textContent='0';document.getElementById('timer').textContent='0';
+  for(let i=0;i<10;i++){for(let j=0;j<(i<4?6:5);j++){const c=deck.pop();c.faceUp=j===(i<4?5:4);cols[i].push(c)}}
+  stock=deck;render();
+}
+function render(){
+  const b=document.getElementById('board');b.innerHTML='';
+  cols.forEach((col,i)=>{
+    const cd=document.createElement('div');cd.className='col';
+    col.forEach((c,j)=>{
+      const el=document.createElement('div');el.className=`card-el ${c.faceUp?'faceup':'facedown'}${c.suit===1||c.suit===2?' red':''}`;
+      if(c.faceUp){const ranks=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];el.textContent=ranks[c.rank]+SUITS[c.suit]}
+      if(selected&&selected.col===i&&selected.idx===j)el.classList.add('selected');
+      el.addEventListener('click',()=>clickCard(i,j));
+      cd.appendChild(el);
+    });
+    b.appendChild(cd);
+  });
+  // Stock
+  if(stock.length>0){const sb=document.createElement('div');sb.className='stock';sb.innerHTML=`<button class="stock-btn" onclick="dealStock()">📦${stock.length}</button>`;b.appendChild(sb)}
+  // Complete decks
+  document.getElementById('moves').textContent=moves;
+}
+function clickCard(ci,cj){
+  if(!started){started=true;timerInterval=setInterval(()=>{timer++;document.getElementById('timer').textContent=timer},1000)}
+  const col=cols[ci];
+  if(!col[cj]?.faceUp)return;
+  if(selected===null){selected={col:ci,idx:cj};render();return}
+  const sc=cols[selected.col];
+  // Try to move
+  if(ci!==selected.col){
+    const dest=cols[ci];const moving=sc.slice(selected.idx);
+    if(isValidSequence(moving)&&(dest.length===0||(dest[dest.length-1].faceUp&&dest[dest.length-1].rank===moving[0].rank+1))){
+      cols[ci].push(...sc.splice(selected.idx));moves++;
+      if(sc.length>0&&!sc[sc.length-1].faceUp){sc[sc.length-1].faceUp=true}
+      selected=null;
+      checkComplete(cols[ci]);
+    }else{selected=null}
+  }else{selected=null}
+  render();
+}
+function isValidSequence(cards){for(let i=1;i<cards.length;i++){if(!cards[i].faceUp||cards[i].rank!==cards[i-1].rank-1||cards[i].suit!==cards[i-1].suit)return false}return true}
+function checkComplete(col){if(col.length>=13){const top=col.slice(-13);if(top[0].rank===12&&isValidSequence(top)){col.splice(-13);completed++;if(col.length>0&&!col[col.length-1].faceUp)col[col.length-1].faceUp=true}}}
+function dealStock(){if(stock.length===0)return;for(let i=0;i<10&&stock.length>0;i++){const c=stock.pop();c.faceUp=true;cols[i].push(c)}moves++;render()}
+newGame();
+</script>
+</body>
+</html>
