@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎣 钓鱼达人 - 热门H5游戏</title>
+<meta name="description" content="钓鱼达人H5小游戏，看准时机点击收杆钓大鱼，多种鱼类不同分值，免费在线休闲游戏">
+<meta property="og:title" content="🎣 钓鱼达人 - 热门H5游戏">
+<meta property="og:description" content="看准时机收杆，钓到各种大鱼">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"钓鱼达人","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#0077b6,#023e8a);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
+h1{font-size:1.8em;margin:4px 0;text-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.stats{display:flex;gap:12px;margin:6px 0 8px}
+.stats span{background:rgba(255,255,255,0.18);padding:5px 14px;border-radius:20px;font-size:0.95em;font-weight:600}
+canvas{display:block;border-radius:12px;max-width:96vw;box-shadow:0 4px 24px rgba(0,0,0,0.3);cursor:pointer}
+</style>
+</head>
+<body>
+<h1>🎣 钓鱼达人</h1>
+<div class="stats"><span>🐟 <b id="score">0</b></span><span>🎣 <b id="casts">10</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="380" height="460"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=380,H=460;
+let fish=[],bobber={x:W/2-100,y:H-30,active:false,vy:0,lineLen:60,targetLen:200,reeling:false},score=0,casts=10,best=0,state='idle';
+try{best=parseInt(localStorage.getItem('angling_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+const FISH=[{emoji:'🐟',size:20,speed:0.6,pts:10,name:'小鱼'},{emoji:'🐠',size:26,speed:0.8,pts:20,name:'热带鱼'},{emoji:'🐡',size:32,speed:0.4,pts:30,name:'河豚'},{emoji:'🐙',size:36,speed:0.5,pts:40,name:'章鱼'},{emoji:'🦈',size:50,speed:1.2,pts:100,name:'鲨鱼',rare:true},{emoji:'🐳',size:65,speed:0.3,pts:200,name:'鲸鱼',rare:true}];
+function spawnFish(){const f=FISH[Math.random()<0.08?Math.floor(Math.random()*2)+4:Math.floor(Math.random()*4)];fish.push({x:30+Math.random()*(W-60),y:80+Math.random()*(H-200),size:f.size,emoji:f.emoji,pts:f.pts,speed:f.speed,dir:(Math.random()>.5?1:-1)*f.speed,wiggle:0,rare:f.rare,caught:false})}
+function cast(){if(casts<=0||state!=='idle')return;bobber={x:W/2-60+Math.random()*120,y:H-20,active:true,vy:-8,lineLen:60,targetLen:60+Math.random()*180,reeling:false,hooked:null};state='sinking';casts--;document.getElementById('casts').textContent=casts}
+function reel(){if(!bobber.active||bobber.reeling)return;bobber.reeling=true;bobber.vy=-5;
+  for(const f of fish){if(!f.caught&&Math.abs(bobber.x-f.x)<f.size*0.8&&Math.abs(bobber.y-f.y)<f.size*0.8){bobber.hooked=f;break}}
+  setTimeout(()=>{
+    if(bobber.hooked){score+=bobber.hooked.pts;document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('angling_best',best)}catch(e){}};const idx=fish.indexOf(bobber.hooked);if(idx>-1)fish.splice(idx,1)}
+    bobber.active=false;bobber.reeling=false;state='idle';
+    if(casts<=0&&fish.length===0)endGame();
+    else if(Math.random()<0.4)spawnFish();
+  },600);
+}
+function update(){
+  if(bobber.active){bobber.y+=bobber.vy;bobber.vy+=0.15;
+    if(bobber.y>=bobber.targetLen&&!bobber.reeling){bobber.y=bobber.targetLen;bobber.vy=0}
+    if(bobber.y<20){bobber.active=false;state='idle';if(casts<=0)endGame()}
+  }
+  fish.forEach(f=>{f.x+=f.dir;f.wiggle+=0.03;if(f.x<f.size||f.x>W-f.size)f.dir*=-1;f.y+=Math.sin(f.wiggle)*0.8;f.y=Math.max(60,Math.min(H-40,f.y))})
+  if(fish.length<4&&Math.random()<0.008&&state==='idle')spawnFish();
+}
+function endGame(){
+  state='over';ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#ffd700';ctx.font='bold 26px sans-serif';ctx.textAlign='center';
+  ctx.fillText('🎣 收工!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`总分: ${score}  点击重新开始`,W/2,H/2+20);
+}
+function draw(){
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0077b6');g.addColorStop(0.5,'#006994');g.addColorStop(1,'#003d5c');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,0.04)';for(let y=0;y<H;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+  ctx.fillStyle='#8B4513';ctx.fillRect(0,H-20,W,20);ctx.fillStyle='#654321';ctx.fillRect(0,H-22,W,3);
+  fish.forEach(f=>{ctx.font=`${f.size*1.4}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.emoji,f.x,f.y);if(f.rare){ctx.strokeStyle='#ffd700';ctx.lineWidth=2;ctx.setLineDash([3,3]);ctx.beginPath();ctx.roundRect(f.x-f.size,f.y-f.size*0.7,f.size*2,f.size*1.4,8);ctx.stroke();ctx.setLineDash([])};ctx.font='9px sans-serif';ctx.fillStyle='#fff';ctx.fillText(f.pts,f.x,f.y+f.size*0.6)});
+  if(bobber.active){ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(bobber.x,bobber.y);ctx.stroke();ctx.fillStyle='#ff0';ctx.beginPath();ctx.arc(bobber.x,bobber.y,8,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f00';ctx.beginPath();ctx.arc(bobber.x,bobber.y,3,0,Math.PI*2);ctx.fill()}
+  ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(0,0,W,30);ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText(`🎣 点击水面下杆 · 再点击收杆 #${10-casts+1}/10`,W/2,18);
+}
+c.addEventListener('click',()=>{
+  if(state==='over'){restart();return}
+  if(state==='idle')cast();else if(bobber.active)reel();
+});
+function restart(){fish=[];score=0;casts=10;state='idle';bobber.active=false;document.getElementById('score').textContent='0';document.getElementById('casts').textContent='10';for(let i=0;i<5;i++)spawnFish()}
+function loop(){update();if(state!=='over')draw();requestAnimationFrame(loop)}
+for(let i=0;i<5;i++)spawnFish();loop();
+</script>
+</body>
+</html>
