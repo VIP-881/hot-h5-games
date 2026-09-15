@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>✈️ 飞机大战</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
+h1{font-size:1.6em;margin-bottom:2px;color:#0ff;text-shadow:0 0 10px #0ff}
+.stats{display:flex;gap:16px;margin:4px 0}
+.stats span{background:rgba(0,255,255,0.15);padding:4px 12px;border-radius:20px;font-size:0.9em}
+canvas{border-radius:6px;display:block;max-width:96vw;border:1px solid rgba(0,255,255,0.2)}
+</style>
+</head>
+<body>
+<h1>✈️ 飞机大战</h1>
+<div class="stats"><span>⭐ <b id="score">0</b></span><span>❤️ <b id="lives">3</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="600"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=360,H=600;
+let player={x:W/2-15,y:H-80,w:30,h:40},bullets=[],enemies=[],score=0,lives=3,best=0,frame=0,running=true,invincible=0;
+try{best=parseInt(localStorage.getItem('shmup_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function spawnEnemy(){
+  const w=25+Math.random()*20,h=w*1.2;
+  enemies.push({x:Math.random()*(W-w),y:-h,w,h,speed:1.5+Math.random()*2.5,hp:1,type:'normal'});
+}
+function spawnBoss(){
+  enemies.push({x:W/2-40,y:-60,w:80,h:50,speed:1,hp:15,type:'boss'});
+}
+function fire(){
+  bullets.push({x:player.x+player.w/2-2,y:player.y,w:4,h:12,speed:-8});
+  bullets.push({x:player.x+6,y:player.y+10,w:4,h:8,speed:-8});
+  bullets.push({x:player.x+player.w-10,y:player.y+10,w:4,h:8,speed:-8});
+}
+function update(){
+  if(!running)return;
+  frame++;
+  if(frame%30===0)spawnEnemy();
+  if(frame%600===0)spawnBoss();
+  invincible=Math.max(0,invincible-1);
+  for(let i=bullets.length-1;i>=0;i--){
+    bullets[i].y+=bullets[i].speed;
+    if(bullets[i].y<0||bullets[i].y>H)bullets.splice(i,1);
+  }
+  for(let i=enemies.length-1;i>=0;i--){
+    enemies[i].y+=enemies[i].speed;
+    if(enemies[i].y>H){enemies.splice(i,1);if(enemies[i]&&enemies[i].type==='boss')lives--;}
+  }
+  for(let i=bullets.length-1;i>=0;i--){
+    for(let j=enemies.length-1;j>=0;j--){
+      const b=bullets[i],e=enemies[j];
+      if(!b||!e)continue;
+      if(b.x<e.x+e.w&&b.x+b.w>e.x&&b.y<e.y+e.h&&b.y+b.h>e.y){
+        bullets.splice(i,1);e.hp--;
+        if(e.hp<=0){
+          score+=(e.type==='boss'?200:10);
+          document.getElementById('score').textContent=score;
+          if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('shmup_best',best)}catch(e){}}
+          enemies.splice(j,1);
+        }
+        break;
+      }
+    }
+  }
+  for(let i=enemies.length-1;i>=0;i--){
+    const e=enemies[i];
+    if(!invincible&&e.x<player.x+player.w&&e.x+e.w>player.x&&e.y<player.y+player.h&&e.y+e.h>player.y){
+      lives--;document.getElementById('lives').textContent=lives;invincible=60;
+      enemies.splice(i,1);
+      if(lives<=0)endGame();
+    }
+  }
+}
+function endGame(){
+  running=false;
+  ctx.fillStyle='rgba(0,0,0,0.8)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#0ff';ctx.font='bold 28px sans-serif';ctx.textAlign='center';
+  ctx.fillText('GAME OVER',W/2,H/2-20);
+  ctx.fillStyle='#fff';ctx.font='16px sans-serif';
+  ctx.fillText(`得分: ${score}  点击重新开始`,W/2,H/2+15);
+}
+function draw(){
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<30;i++){ctx.fillStyle=`rgba(255,255,255,${0.3+Math.random()*0.4})`;ctx.fillRect(Math.random()*W,(frame+i*7)%H,1.5,3)}
+  bullets.forEach(b=>{ctx.fillStyle='#0ff';ctx.shadowColor='#0ff';ctx.shadowBlur=8;ctx.fillRect(b.x,b.y,b.w,b.h);ctx.shadowBlur=0});
+  enemies.forEach(e=>{
+    ctx.fillStyle=e.type==='boss'?'#ff4757':'#ffa502';
+    ctx.beginPath();ctx.arc(e.x+e.w/2,e.y+e.h/3,e.w/2,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#333';ctx.fillRect(e.x+4,e.y+e.h/3,e.w-8,e.h*2/3);
+    if(e.type==='boss'){
+      ctx.fillStyle='#fff';ctx.font='10px sans-serif';ctx.textAlign='center';
+      ctx.fillText(`BOSS ${e.hp}`,e.x+e.w/2,e.y-5);
+    }
+  });
+  if(invincible%4<2){
+    ctx.fillStyle='#0ff';ctx.shadowColor='#0ff';ctx.shadowBlur=15;
+    ctx.beginPath();ctx.moveTo(player.x+player.w/2,player.y);
+    ctx.lineTo(player.x,player.y+player.h);ctx.lineTo(player.x+player.w/2,player.y+player.h*0.75);
+    ctx.lineTo(player.x+player.w,player.y+player.h);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(player.x+player.w/2,player.y+player.h*0.3,6,0,Math.PI*2);ctx.fill();
+    ctx.shadowBlur=0;
+  }
+}
+c.addEventListener('mousemove',e=>{
+  const x=e.clientX-c.getBoundingClientRect().left;
+  player.x=Math.max(0,Math.min(W-player.w,x-player.w/2));
+});
+c.addEventListener('touchmove',e=>{e.preventDefault();
+  const x=e.touches[0].clientX-c.getBoundingClientRect().left;
+  player.x=Math.max(0,Math.min(W-player.w,x-player.w/2));
+},{passive:false});
+c.addEventListener('click',()=>{if(!running){reset()}else fire()});
+function reset(){
+  player.x=W/2-15;bullets=[];enemies=[];score=0;lives=3;frame=0;running=true;invincible=0;
+  document.getElementById('score').textContent='0';document.getElementById('lives').textContent='3';
+}
+function loop(){update();draw();requestAnimationFrame(loop)}
+reset();loop();
+</script>
+</body>
+</html>
