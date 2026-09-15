@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎲 骰子大对决 - 热门H5游戏</title>
+<meta name="description" content="快艇骰子Yacht游戏，掷五个骰子组合得分，考验策略与运气，免费在线H5小游戏">
+<meta property="og:title" content="🎲 骰子大对决 - 热门H5游戏">
+<meta property="og:description" content="快艇骰子策略游戏，投掷组合挑战高分">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"骰子大对决","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a0a2e,#2d1b4e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none}
+h1{font-size:1.8em;margin:4px 0;color:#ffd700}
+.board{background:rgba(0,0,0,0.3);border-radius:14px;padding:16px;max-width:400px;width:95vw;border:2px solid rgba(255,215,0,0.2)}
+.dice-row{display:flex;gap:10px;justify-content:center;margin:12px 0;min-height:70px}
+.die{width:60px;height:60px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:2em;cursor:pointer;transition:all 0.2s;box-shadow:0 3px 10px rgba(0,0,0,0.3);position:relative;color:#000}
+.die.held{border:3px solid #ffd700;transform:translateY(-5px);box-shadow:0 6px 16px rgba(255,215,0,0.3)}
+.die:active{transform:scale(0.95)}
+.rolls{text-align:center;margin:8px 0;color:#ffd700;font-size:1.1em}
+.score-grid{display:grid;grid-template-columns:1fr auto;gap:4px 16px;margin:10px 0;max-height:260px;overflow-y:auto}
+.score-item{display:contents}
+.score-item .label{color:#aaa;font-size:0.85em;padding:6px 0;cursor:pointer;transition:color 0.2s}
+.score-item .label.available{color:#fff}
+.score-item .label.available:hover{color:#ffd700}
+.score-item .label.used{color:#555;cursor:default}
+.score-item .val{color:#ffd700;font-weight:bold;text-align:right;font-size:0.9em;padding:6px 0}
+.score-item .val.pending{color:#6cf}
+.total{text-align:right;font-size:1.3em;font-weight:bold;color:#ffd700;padding-top:6px;border-top:1px solid rgba(255,255,255,0.1);margin-top:4px}
+.btn{width:100%;padding:12px;border-radius:10px;font-size:1.1em;font-weight:bold;cursor:pointer;border:none;background:linear-gradient(180deg,#ffd700,#b8860b);color:#1a0a2e;margin-top:10px;transition:all 0.2s}
+.btn:hover{transform:scale(1.02)}
+.btn:disabled{opacity:0.4;pointer-events:none}
+</style>
+</head>
+<body>
+<h1>🎲 骰子大对决</h1>
+<div class="board">
+  <div class="dice-row" id="dice"></div>
+  <div class="rolls"><b id="rollsLeft">3</b> 次投掷机会</div>
+  <div class="score-grid" id="scoreGrid"></div>
+  <div class="total">总分: <b id="total">0</b> | 🏆 <b id="best">0</b></div>
+  <button class="btn" id="btnRoll" onclick="rollDice()">🎲 掷骰子!</button>
+</div>
+<script>
+let dice=[1,1,1,1,1],held=[false,false,false,false,false],rolls=0,maxRolls=3,scores={},gameOver=false;
+const CATEGORIES={
+  ones:{name:'一点',calc:d=>d.filter(v=>v===1).reduce((a,v)=>a+v,0)},
+  twos:{name:'两点',calc:d=>d.filter(v=>v===2).reduce((a,v)=>a+v,0)},
+  threes:{name:'三点',calc:d=>d.filter(v=>v===3).reduce((a,v)=>a+v,0)},
+  fours:{name:'四点',calc:d=>d.filter(v=>v===4).reduce((a,v)=>a+v,0)},
+  fives:{name:'五点',calc:d=>d.filter(v=>v===5).reduce((a,v)=>a+v,0)},
+  sixes:{name:'六点',calc:d=>d.filter(v=>v===6).reduce((a,v)=>a+v,0)},
+  threeOfKind:{name:'三条',calc:d=>{const c=counts(d);return Object.values(c).some(v=>v>=3)?d.reduce((a,b)=>a+b,0):0}},
+  fourOfKind:{name:'四条',calc:d=>{const c=counts(d);return Object.values(c).some(v=>v>=4)?d.reduce((a,b)=>a+b,0):0}},
+  fullHouse:{name:'葫芦',calc:d=>{const c=counts(d),v=Object.values(c);return v.includes(3)&&v.includes(2)?25:0}},
+  smStr:{name:'小顺',calc:d=>{const s=[...new Set(d)].sort();for(let i=0;i<=s.length-4;i++)if(s[i+3]-s[i]===3)return 30;return 0}},
+  lgStr:{name:'大顺',calc:d=>{const s=[...new Set(d)].sort();return s.length===5&&(s[4]-s[0]===4)?40:0}},
+  yacht:{name:'快艇',calc:d=>new Set(d).size===1?50:0},
+  chance:{name:'机会',calc:d=>d.reduce((a,b)=>a+b,0)},
+};
+function counts(d){const c={};d.forEach(v=>c[v]=(c[v]||0)+1);return c}
+function rollDice(){
+  if(gameOver)return;
+  if(rolls>=maxRolls){return}
+  for(let i=0;i<5;i++)if(!held[i])dice[i]=Math.floor(Math.random()*6)+1;
+  rolls++;document.getElementById('rollsLeft').textContent=maxRolls-rolls;
+  if(rolls>=maxRolls)document.getElementById('btnRoll').disabled=true;
+  renderDice();renderScores();
+}
+function toggleHold(i){
+  if(rolls===0||gameOver||Object.keys(scores).length>=13)return;
+  held[i]=!held[i];renderDice();
+}
+function selectCategory(key){
+  if(gameOver||key in scores||rolls===0)return;
+  scores[key]=CATEGORIES[key].calc(dice);
+  rolls=0;held=[false,false,false,false,false];document.getElementById('rollsLeft').textContent=maxRolls;
+  document.getElementById('btnRoll').disabled=false;
+  renderDice();renderScores();
+  if(Object.keys(scores).length>=13)endGame();
+}
+function endGame(){
+  gameOver=true;document.getElementById('btnRoll').disabled=true;
+  const total=Object.values(scores).reduce((a,b)=>a+b,0);
+  const bonus=Object.entries(scores).filter(([k])=>['ones','twos','threes','fours','fives','sixes'].includes(k)).reduce((a,[,v])=>a+v,0)>=63?35:0;
+  const bestKey='dice_best';const b=parseInt(localStorage.getItem(bestKey)||'0');
+  if(total+bonus>b){try{localStorage.setItem(bestKey,total+bonus)}catch(e){};document.getElementById('best').textContent=total+bonus}
+  setTimeout(()=>alert(`🎉 总分: ${total} + 奖励: ${bonus} = ${total+bonus}`),100);
+}
+function renderDice(){
+  const dots={1:[[1,1]],2:[[0,0],[2,2]],3:[[0,0],[1,1],[2,2]],4:[[0,0],[0,2],[2,0],[2,2]],5:[[0,0],[0,2],[1,1],[2,0],[2,2]],6:[[0,0],[0,2],[1,0],[1,2],[2,0],[2,2]]};
+  document.getElementById('dice').innerHTML=dice.map((v,i)=>`<div class="die${held[i]?' held':''}" onclick="toggleHold(${i})" style="display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:8px">${Array(9).fill().map((_,j)=>{const r=Math.floor(j/3),c=j%3;return dots[v].some(([dr,dc])=>dr===r&&dc===c)?'<span style="width:8px;height:8px;background:#000;border-radius:50%;margin:auto"></span>':'<span></span>'}).join('')}</div>`).join('');
+}
+function renderScores(){
+  const total=Object.values(scores).reduce((a,b)=>a+b,0);
+  const bonus=Object.entries(scores).filter(([k])=>['ones','twos','threes','fours','fives','sixes'].includes(k)).reduce((a,[,v])=>a+v,0)>=63?35:0;
+  document.getElementById('total').textContent=total+bonus;
+  document.getElementById('best').textContent=parseInt(localStorage.getItem('dice_best')||'0');
+  let html='';
+  Object.entries(CATEGORIES).forEach(([key,cat])=>{
+    const used=key in scores;
+    const val=rolls>0&&!used?CATEGORIES[key].calc(dice):(scores[key]??'');
+    html+=`<div class="score-item"><div class="label${used?' used':rolls>0?' available':''}" onclick="selectCategory('${key}')">${cat.name}</div><div class="val${!used&&rolls>0?' pending':''}">${used?val:rolls>0?`(${val})`:''}</div></div>`;
+  });
+  html+=`<div class="score-item"><div class="label" style="color:#6cf">奖励 (≥63)</div><div class="val">${bonus}</div></div>`;
+  document.getElementById('scoreGrid').innerHTML=html;
+}
+renderDice();renderScores();
+</script>
+</body>
+</html>
