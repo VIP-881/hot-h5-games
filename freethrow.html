@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🏀 罚球挑战 - 热门H5游戏</title>
+<meta name="description" content="罚球挑战投篮游戏，控制角度和力度进行罚球投篮，模拟篮球比赛罚球体验免费在线体育游戏">
+<meta property="og:title" content="🏀 罚球挑战 - 热门H5游戏"><meta property="og:description" content="控制角度力度，精准罚球投篮"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"罚球挑战","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#2c3e50,#1a252f);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:8px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🏀 罚球挑战</h1>
+<div class="stats"><span>🎯 <b id="score">0</b>/10</span><span>🔥 <b id="streak">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="460"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=460;
+let ball={x:W/2,y:H-80,r:16},state='aim',power=0,angle=0,score=0,shots=10,streak=0,best=0,powerDir=1,dragging=false;
+try{best=parseInt(localStorage.getItem('freethrow_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function shoot(){if(state!=='aim'||shots<=0)return;state='flying';ball.vx=Math.cos(-Math.PI/2+angle*0.3)*power*0.15;ball.vy=-power*0.2;shots--;document.getElementById('score').textContent=`${score}/${10-shots}`}
+function update(){
+  if(state==='aim'){power+=0.8*powerDir;if(power>80||power<0)powerDir*=-1;power=Math.max(0,Math.min(80,power))}
+  else if(state==='flying'){ball.x+=ball.vx;ball.y+=ball.vy;ball.vy+=0.25;
+    // Hoop: centered at W/2, y=120
+    const hx=W/2,hy=120,hr=30;
+    if(ball.y+ball.r>hy-5&&ball.y-ball.r<hy+10&&Math.abs(ball.x-hx)<hr-ball.r*0.5&&ball.vy>0){
+      score++;streak++;document.getElementById('streak').textContent=streak;
+      setTimeout(()=>{if(shots<=0)endGame();else{state='aim';power=0;ball={x:W/2,y:H-80,r:16}}},600);
+      if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('freethrow_best',best)}catch(e){}}
+    }
+    if(ball.y>H+30){streak=0;document.getElementById('streak').textContent='0';setTimeout(()=>{if(shots<=0)endGame();else{state='aim';power=0;ball={x:W/2,y:H-80,r:16}}},400)}
+  }
+}
+function endGame(){state='over';ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('比赛结束!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`${score}/${10-score}  点击重来`,W/2,H/2+20)}
+function draw(){
+  ctx.fillStyle='#2c3e50';ctx.fillRect(0,0,W,H);
+  // Court
+  ctx.fillStyle='#8B4513';ctx.fillRect(0,H-80,W,80);
+  ctx.fillStyle='#A0522D';ctx.fillRect(0,H-82,W,5);
+  // Hoop
+  const hx=W/2,hy=120,hr=30;
+  ctx.fillStyle='#fff';ctx.fillRect(hx-4,hy+10,8,20);
+  ctx.strokeStyle='#ff6347';ctx.lineWidth=3;ctx.beginPath();ctx.arc(hx,hy,hr,Math.PI,0);ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.setLineDash([6,8]);
+  for(let i=0;i<6;i++){ctx.beginPath();ctx.arc(hx,hy,hr+i*8,Math.PI,0);ctx.stroke()}ctx.setLineDash([]);
+  // Backboard
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(hx-hr-20,hy-hr-20,hr*2+40,15);
+  // Ball
+  ctx.fillStyle='#e67e22';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();
+  ctx.strokeStyle='#000';ctx.beginPath();ctx.arc(ball.x,ball.y-2,ball.r*0.5,0,Math.PI);ctx.stroke();ctx.beginPath();ctx.moveTo(ball.x,ball.y-2);ctx.lineTo(ball.x,ball.y+2);ctx.stroke();
+  // Power/angle indicator
+  if(state==='aim'){
+    ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(W/2-60,H-50,120,20);
+    ctx.fillStyle='#2ecc71';ctx.fillRect(W/2-58,H-48,power*1.4,16);
+    ctx.fillStyle='#fff';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText(`力度 ${Math.round(power)} · ${shots}球`,W/2,H-35);
+  }
+}
+c.addEventListener('click',()=>{if(state==='over'){restart();return}shoot()});
+c.addEventListener('touchstart',e=>{e.preventDefault();if(state==='over'){restart();return}shoot()});
+function restart(){score=0;shots=10;streak=0;state='aim';power=0;angle=(Math.random()-0.5)*1.5;ball={x:W/2,y:H-80,r:16};document.getElementById('streak').textContent='0';document.getElementById('score').textContent='0/10'}
+function loop(){update();if(state!=='over')draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
