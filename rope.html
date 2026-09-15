@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🔥 烧绳子 - 热门H5游戏</title>
+<meta name="description" content="烧绳子Cut the Rope风格物理游戏，点击切断绳子让糖果落入目标，考验物理直觉免费在线">
+<meta property="og:title" content="🔥 烧绳子 - 热门H5游戏"><meta property="og:description" content="切断绳子让糖果落入目标"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"烧绳子","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#2c3e50,#1a252f);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🔥 烧绳子</h1>
+<div class="stats"><span>🍬 <b id="score">0</b></span><span>🎯 <b id="level">1</b>/6</span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="460"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=460,G=0.25;
+let ropes=[],candy={x:0,y:0,r:14,vx:0,vy:0},goal={x:0,y:0,r:24},level=1,score=0,best=0,swinging=true,frame=0,state='playing';
+try{best=parseInt(localStorage.getItem('rope_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+const LEVELS=[
+  {anchor:{x:W/2,y:60},candy:{x:W/2,y:200},goal:{x:W/2,y:380},ropes:[{a:W/2,b:60}]},
+  {anchor:{x:W/4,y:80},candy:{x:W/4,y:200},goal:{x:W*3/4,y:380},ropes:[{a:W/4,b:80}]},
+  {anchor:{x:W/2,y:70},candy:{x:W/2,y:180},goal:{x:W/2,y:370},ropes:[{a:W/2,b:70},{a:W/2-50,b:120}]},
+  {anchor:{x:W/4,y:100},candy:{x:W/4,y:220},goal:{x:W*3/4,y:370},ropes:[{a:W/4,b:100},{a:W/2,b:80}]},
+  {anchor:{x:W/2,y:60},candy:{x:W/2,y:160},goal:{x:W/2,y:390},ropes:[{a:W/2,b:60},{a:W/3,b:70},{a:W*2/3,b:70}]},
+  {anchor:{x:W/3,y:80},candy:{x:W/3,y:200},goal:{x:W*2/3,y:380},ropes:[{a:W/3,b:80},{a:W/2,b:60}]},
+];
+function loadLevel(l){
+  const lv=LEVELS[l-1];ropes=lv.ropes.map(r=>({anchor:{x:r.a,y:r.b},active:true}));
+  candy={x:lv.candy.x,y:lv.candy.y,r:14,vx:0,vy:0};goal={x:lv.goal.x,y:lv.goal.y,r:24};swinging=true;state='playing';
+  document.getElementById('level').textContent=`${l}/6`;
+}
+function update(){
+  if(state!=='playing')return;frame++;
+  if(swinging){
+    const activeRopes=ropes.filter(r=>r.active);
+    if(activeRopes.length===0){swinging=false;candy.vx=0;candy.vy=2;return}
+    // Simple pendulum
+    let cx=0,cy=0;activeRopes.forEach(r=>{cx+=r.anchor.x;cy+=r.anchor.y});cx/=activeRopes.length;cy/=activeRopes.length;
+    // Apply gravity and constraint
+    candy.vy+=G;
+    candy.x+=candy.vx*0.3;candy.y+=candy.vy*0.3;
+    // Constrain to average anchor distance
+    const dx=candy.x-cx,dy=candy.y-cy,dist=Math.sqrt(dx*dx+dy*dy);
+    const maxDist=100;
+    if(dist>maxDist){candy.x=cx+dx/dist*maxDist;candy.y=cy+dy/dist*maxDist;candy.vx-=(dx/dist)*(dist-maxDist)*0.1;candy.vy-=(dy/dist)*(dist-maxDist)*0.1}
+    // Swing force
+    const sx=Math.sin(frame*0.03)*2;candy.vx+=sx;
+  }else{
+    candy.vy+=G;candy.x+=candy.vx;candy.y+=candy.vy;
+  }
+  const dx=candy.x-goal.x,dy=candy.y-goal.y;
+  if(Math.sqrt(dx*dx+dy*dy)<candy.r+goal.r){score+=100;document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('rope_best',best)}catch(e)}if(level<6){level++;loadLevel(level)}else{state='win';ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#ffd700';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('🏆 全部通关!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  点击重来`,W/2,H/2+20)}}
+  if(candy.y>H+50&&!swinging){if(level<6){level++;loadLevel(level)}else endLose()}
+}
+function endLose(){state='over';ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('💧 掉落了',W/2,H/2-10);ctx.font='14px sans-serif';ctx.fillText('点击重来',W/2,H/2+20)}
+function draw(){
+  ctx.fillStyle='#2c3e50';ctx.fillRect(0,0,W,H);
+  ropes.forEach(r=>{if(r.active){ctx.strokeStyle='#DEB887';ctx.lineWidth=3;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(r.anchor.x,r.anchor.y);ctx.lineTo(candy.x,candy.y);ctx.stroke()}});
+  ctx.fillStyle='#0f0';ctx.shadowColor='#0f0';ctx.shadowBlur=15;ctx.beginPath();ctx.arc(goal.x,goal.y,goal.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+  ctx.fillStyle='#f00';ctx.beginPath();ctx.arc(candy.x,candy.y,candy.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();ctx.arc(candy.x-4,candy.y-4,4,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText('点击绳子切断',W/2,H-20);
+}
+c.addEventListener('click',e=>{
+  if(state==='over'||state==='win'){restart();return}
+  const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+  for(const rope of ropes){
+    if(!rope.active)continue;
+    const dx=x-rope.anchor.x,dy=y-rope.anchor.y,cdx=candy.x-rope.anchor.x,cdy=candy.y-rope.anchor.y;
+    const d=Math.abs(dx*cdy-dy*cdx)/Math.sqrt(cdx*cdx+cdy*cdy);
+    if(d<12&&x>Math.min(rope.anchor.x,candy.x)-10&&x<Math.max(rope.anchor.x,candy.x)+10){rope.active=false;return}
+  }
+});
+function restart(){level=1;score=0;document.getElementById('score').textContent='0';loadLevel(1)}
+function loop(){update();if(state==='playing')draw();requestAnimationFrame(loop)}loadLevel(1);loop();
+</script>
+</body>
+</html>
