@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🧊 冰块消消乐 - 热门H5游戏</title>
+<meta name="description" content="冰块消消乐物理消除游戏，点击相同颜色冰块连通消除，冰块受重力下落，免费在线休闲益智">
+<meta property="og:title" content="🧊 冰块消消乐 - 热门H5游戏"><meta property="og:description" content="点击同色冰块连通消除"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"冰块消消乐","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#74b9ff,#0984e3);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:20px;font-size:0.9em;font-weight:600}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🧊 冰块消消乐</h1>
+<div class="stats"><span>💎 <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="340" height="400"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=340,H=400,COLS=8,ROWS=8,S=38,GAP=4,OFF=14;
+const COLORS=['#74b9ff','#fd79a8','#55efc4','#ffeaa7','#a29bfe','#ff7675','#00cec9','#e17055'];
+let board=[],score=0,best=0;
+try{best=parseInt(localStorage.getItem('ice_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function init(){
+  board=Array(ROWS).fill().map(()=>Array(COLS).fill().map(()=>Math.floor(Math.random()*COLORS.length)));
+  score=0;document.getElementById('score').textContent='0';
+  while(findGroups().some(g=>g.length>=3)){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)board[r][c]=Math.floor(Math.random()*COLORS.length)}
+}
+function findGroups(){
+  const visited=Array(ROWS).fill().map(()=>Array(COLS).fill(false));const groups=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(visited[r][c])continue;
+    const color=board[r][c];const group=[];
+    const stack=[[r,c]];visited[r][c]=true;
+    while(stack.length){const[cr,cc]=stack.pop();group.push([cr,cc]);
+      for(const[dr,dc]of[[-1,0],[1,0],[0,-1],[0,1]]){
+        const nr=cr+dr,nc=cc+dc;if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&!visited[nr][nc]&&board[nr][nc]===color){visited[nr][nc]=true;stack.push([nr,nc])}
+      }}if(group.length>=3)groups.push(group)}return groups;
+}
+function removeGroup(group){
+  group.forEach(([r,c])=>board[r][c]=-1);
+  for(let col=0;col<COLS;col++){
+    let idx=ROWS-1;
+    for(let row=ROWS-1;row>=0;row--)if(board[row][col]!==-1)board[idx--][col]=board[row][col];
+    while(idx>=0)board[idx--][col]=Math.floor(Math.random()*COLORS.length);
+  }
+}
+function draw(){
+  ctx.fillStyle='#74b9ff';ctx.fillRect(0,0,W,H);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const x=OFF+c*(S+GAP),y=OFF+r*(S+GAP);
+    ctx.fillStyle=COLORS[board[r][c]];ctx.globalAlpha=0.85;
+    ctx.beginPath();ctx.roundRect(x,y,S,S,6);ctx.fill();
+    ctx.globalAlpha=1;
+    ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(x+2,y+2,S-4,4);
+  }
+}
+c.addEventListener('click',e=>{
+  const r=c.getBoundingClientRect(),x=e.clientX-r.left-OFF,y=e.clientY-r.top-OFF;
+  const col=Math.floor(x/(S+GAP)),row=Math.floor(y/(S+GAP));
+  if(row<0||row>=ROWS||col<0||col>=COLS)return;
+  const groups=findGroups();
+  const hit=groups.find(g=>g.some(([gr,gc])=>gr===row&&gc===col));
+  if(hit){score+=hit.length*10;document.getElementById('score').textContent=score;removeGroup(hit);if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('ice_best',best)}catch(e){}};draw();
+    setTimeout(()=>{const g2=findGroups();g2.forEach(g=>{score+=g.length*10;document.getElementById('score').textContent=score;removeGroup(g)});draw()},200)}
+});
+c.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0];c.dispatchEvent(new MouseEvent('click',{clientX:t.clientX,clientY:t.clientY}))});
+init();draw();
+</script>
+</body>
+</html>
