@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🌀 抽陀螺 - 热门H5游戏</title>
+<meta name="description" content="抽陀螺传统玩具游戏，快速滑动让陀螺保持旋转不倒，重温童年经典记忆免费在线">
+<meta property="og:title" content="🌀 抽陀螺 - 热门H5游戏"><meta property="og:description" content="快速滑动保持陀螺旋转"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"抽陀螺"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🌀 抽陀螺</h1>
+<div class="stats"><span>🌀 <b id="speed">0</b></span><span>⏱ <b id="timer">0</b>s</span><span>🏆 <b id="best">--</b></span></div>
+<canvas id="c" width="340" height="340"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=340,H=340,CX=W/2,CY=H/2;
+let rotSpeed=15,angle=0,timer=0,best,timerInterval,swiping=false,swipeV=0,lastX=0,lastT=0,gameover=false;
+try{best=parseInt(localStorage.getItem('top_best'))||0;document.getElementById('best').textContent=best?`${best}s`:'--'}catch(e){}
+function update(){
+  if(gameover)return;rotSpeed-=0.03;angle+=rotSpeed*0.03;rotSpeed=Math.max(0,rotSpeed);
+  document.getElementById('speed').textContent=Math.round(rotSpeed*10);
+  if(rotSpeed<=0.5){gameover=true;clearInterval(timerInterval);ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 24px sans-serif';ctx.textAlign='center';ctx.fillText('陀螺停了!',W/2,H/2-10);ctx.font='14px sans-serif';ctx.fillText(`${timer}s  滑动重来`,W/2,H/2+20)}
+}
+function draw(){
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.translate(CX,CY);ctx.rotate(angle);
+  ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.arc(0,0,70,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#f39c12';ctx.beginPath();ctx.arc(0,0,50,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,30,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);ctx.fill();
+  for(let i=0;i<4;i++){const a=i*Math.PI/2;ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(a)*70,Math.sin(a)*70);ctx.stroke()}
+  ctx.restore();
+  if(rotSpeed>1)ctx.fillStyle='#fff',ctx.font='14px sans-serif',ctx.textAlign='center',ctx.fillText('👆 快速滑动抽陀螺',W/2,H-20);
+}
+c.addEventListener('touchstart',e=>{e.preventDefault();if(gameover){restart();return}swiping=true;lastX=e.touches[0].clientX;lastT=Date.now()});
+c.addEventListener('touchmove',e=>{e.preventDefault();if(!swiping)return;const x=e.touches[0].clientX;swipeV=Math.abs(x-lastX)/(Math.max(1,Date.now()-lastT))*10;lastX=x;lastT=Date.now();if(swipeV>10){rotSpeed=Math.min(30,rotSpeed+swipeV*0.3);if(!timerInterval){timerInterval=setInterval(()=>{timer++;document.getElementById('timer').textContent=timer},1000)}}});
+c.addEventListener('touchend',()=>{swiping=false});
+c.addEventListener('mousedown',()=>{if(gameover){restart();return}swiping=true;lastX=event.clientX;lastT=Date.now()});
+c.addEventListener('mousemove',()=>{if(!swiping)return;const x=event.clientX;swipeV=Math.abs(x-lastX)/(Math.max(1,Date.now()-lastT))*10;lastX=x;lastT=Date.now();if(swipeV>10){rotSpeed=Math.min(30,rotSpeed+swipeV*0.3);if(!timerInterval){timerInterval=setInterval(()=>{timer++;document.getElementById('timer').textContent=timer},1000)}}});
+c.addEventListener('mouseup',()=>swiping=false);
+function restart(){rotSpeed=15;angle=0;timer=0;gameover=false;clearInterval(timerInterval);timerInterval=null;document.getElementById('speed').textContent='150';document.getElementById('timer').textContent='0'}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
