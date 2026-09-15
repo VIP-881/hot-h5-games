@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🔗 连连看</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+h1{font-size:1.8em;margin-bottom:4px}
+.stats{display:flex;gap:16px;margin:6px 0}
+.stats span{background:rgba(255,255,255,0.12);padding:5px 14px;border-radius:20px;font-size:0.95em}
+canvas{border-radius:10px;display:block;max-width:96vw;box-shadow:0 4px 24px rgba(100,100,200,0.15)}
+.btn{background:rgba(100,100,255,0.2);color:#88f;border:1px solid #88f;padding:8px 24px;border-radius:20px;font-size:0.9em;cursor:pointer;margin-top:8px;transition:all 0.2s}
+.btn:hover{background:rgba(100,100,255,0.3)}
+</style>
+</head>
+<body>
+<h1>🔗 连连看</h1>
+<div class="stats"><span>🎯 <b id="pairs">0</b>/48</span><span>⏱ <b id="timer">0</b>s</span><span>🏆 <b id="best">--</b>s</span></div>
+<canvas id="c" width="360" height="360"></canvas>
+<button class="btn" onclick="restart()">🔄 洗牌</button>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const COLS=12,ROWS=8,SIZE=28,PAD=2,OFFX=14,OFFY=14;
+const ICONS=['🍎','🍊','🍋','🍉','🍇','🍑','🍒','🥝','🍓','🍌','🥭','🫐','🌽','🥕','🍄','🌸','⭐','💎','🎈','🎯','🍕','🍔','🍩','🧁'];
+let board=[],selected=null,matched=0,total=48,startTime,best,elapsed=0,timerInterval;
+try{best=parseInt(localStorage.getItem('link_best'))||0;document.getElementById('best').textContent=best?`${best}s`:'--s'}catch(e){}
+
+function init(){
+  let tiles=[];
+  for(let i=0;i<total;i++)tiles.push(i%24);
+  for(let i=tiles.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[tiles[i],tiles[j]]=[tiles[j],tiles[i]]}
+  board=Array(ROWS).fill().map(()=>Array(COLS).fill(-1));
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)board[r][c]=tiles.shift();
+  selected=null;matched=0;elapsed=0;
+  document.getElementById('pairs').textContent='0';
+  document.getElementById('timer').textContent='0';
+  clearInterval(timerInterval);
+  startTime=Date.now();
+  timerInterval=setInterval(()=>{elapsed=Math.floor((Date.now()-startTime)/1000);document.getElementById('timer').textContent=elapsed},200);
+}
+function canConnect(r1,c1,r2,c2){
+  if(board[r1][c1]!==board[r2][c2])return false;
+  if(r1===r2){
+    const minC=Math.min(c1,c2),maxC=Math.max(c1,c2);
+    let ok=true;
+    for(let c=minC+1;c<maxC;c++)if(board[r1][c]!==-1){ok=false;break}
+    if(ok)return true;
+  }
+  if(c1===c2){
+    const minR=Math.min(r1,r2),maxR=Math.max(r1,r2);
+    let ok=true;
+    for(let r=minR+1;r<maxR;r++)if(board[r][c1]!==-1){ok=false;break}
+    if(ok)return true;
+  }
+  for(let mr=-1;mr<=ROWS;mr++){
+    let ok=true;
+    for(let r=Math.min(r1,mr);r<=Math.max(r1,mr);r++)if(r>=0&&r<ROWS&&r!==r1&&board[r][c1]!==-1){ok=false;break}
+    for(let r=Math.min(r2,mr);r<=Math.max(r2,mr);r++)if(r>=0&&r<ROWS&&r!==r2&&board[r][c2]!==-1){ok=false;break}
+    const minC=Math.min(c1,c2),maxC=Math.max(c1,c2);
+    for(let c=minC;c<=maxC;c++)if(c!==c1&&c!==c2&&mr>=0&&mr<ROWS&&board[mr][c]!==-1){ok=false;break}
+    if(ok)return true;
+  }
+  for(let mc=-1;mc<=COLS;mc++){
+    let ok=true;
+    for(let c=Math.min(c1,mc);c<=Math.max(c1,mc);c++)if(c>=0&&c<COLS&&c!==c1&&board[r1][c]!==-1){ok=false;break}
+    for(let c=Math.min(c2,mc);c<=Math.max(c2,mc);c++)if(c>=0&&c<COLS&&c!==c2&&board[r2][c]!==-1){ok=false;break}
+    const minR=Math.min(r1,r2),maxR=Math.max(r1,r2);
+    for(let r=minR;r<=maxR;r++)if(r!==r1&&r!==r2&&mc>=0&&mc<COLS&&board[r][mc]!==-1){ok=false;break}
+    if(ok)return true;
+  }
+  return false;
+}
+function draw(){
+  ctx.fillStyle='rgba(255,255,255,0.04)';ctx.fillRect(0,0,360,360);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    if(board[r][c]===-1)continue;
+    const x=OFFX+c*(SIZE+PAD),y=OFFY+r*(SIZE+PAD);
+    ctx.fillStyle=selected&&selected[0]===r&&selected[1]===c?'#ffdd59':'rgba(255,255,255,0.08)';
+    ctx.beginPath();ctx.roundRect(x,y,SIZE,SIZE,5);ctx.fill();
+    ctx.font='16px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(ICONS[board[r][c]%ICONS.length],x+SIZE/2,y+SIZE/2);
+  }
+}
+c.addEventListener('click',e=>{
+  const rect=c.getBoundingClientRect();
+  const x=e.clientX-rect.left-OFFX,y=e.clientY-rect.top-OFFY;
+  const col=Math.floor(x/(SIZE+PAD)),row=Math.floor(y/(SIZE+PAD));
+  if(row<0||row>=ROWS||col<0||col>=COLS||board[row][col]===-1)return;
+  if(selected){
+    const[sr,sc]=selected;
+    if(sr===row&&sc===col){selected=null;draw();return}
+    if(canConnect(sr,sc,row,col)){
+      board[sr][sc]=board[row][col]=-1;matched++;
+      document.getElementById('pairs').textContent=matched;
+      if(matched>=total){clearInterval(timerInterval);
+        const t=Math.floor((Date.now()-startTime)/1000);
+        if(!best||t<best){best=t;document.getElementById('best').textContent=`${best}s`;try{localStorage.setItem('link_best',best)}catch(e){}}
+        ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,360,360);
+        ctx.fillStyle='#fff';ctx.font='bold 24px sans-serif';ctx.textAlign='center';
+        ctx.fillText('🎉 全部消除!',180,160);
+        ctx.font='16px sans-serif';ctx.fillText(`用时 ${t}s`,180,190);
+      }
+    }
+    selected=null;
+  }else{selected=[row,col]}
+  draw();
+});
+function restart(){init();draw()}
+init();draw();
+</script>
+</body>
+</html>
