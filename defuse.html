@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>💣 拆弹专家 - 热门H5游戏</title>
+<meta name="description" content="拆弹专家H5解谜游戏，正确剪断引线拆除炸弹，选错立即爆炸，考验逻辑推理和运气，免费在线益智游戏">
+<meta property="og:title" content="💣 拆弹专家 - 热门H5游戏">
+<meta property="og:description" content="剪对线拆除炸弹，选错就爆炸">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"拆弹专家","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#1a1a1a,#0a0a0a);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none}
+h1{font-size:1.8em;margin:4px 0;color:#ff4757}
+.stats{display:flex;gap:12px;margin:6px 0 10px}
+.stats span{background:rgba(255,255,255,0.1);padding:5px 14px;border-radius:20px;font-size:0.95em}
+.bomb{position:relative;width:200px;height:200px;margin:10px 0}
+.bomb-body{width:160px;height:170px;background:radial-gradient(circle at 40% 40%,#555,#222);border-radius:50%;position:absolute;bottom:0;left:20px;box-shadow:0 0 30px rgba(255,0,0,0.2)}
+.timer-display{position:absolute;top:40px;left:50%;transform:translateX(-50%);background:#111;color:#ff0;font-family:monospace;font-size:2em;padding:6px 14px;border-radius:8px;border:1px solid #333;z-index:2}
+.wires{position:absolute;top:-20px;display:flex;gap:20px;left:50%;transform:translateX(-50%)}
+.wire{width:6px;height:90px;border-radius:3px;cursor:pointer;transition:all 0.2s;position:relative}
+.wire:hover{transform:scaleX(1.5);filter:brightness(1.3)}
+.wire.cut{opacity:0.2;pointer-events:none;transform:scaleX(0.5)}
+.wire-label{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:0.7em;font-weight:bold;white-space:nowrap}
+.timer-bar{width:260px;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;margin:10px 0;overflow:hidden}
+.timer-fill{height:100%;background:linear-gradient(90deg,#2ed573,#ffa502,#ff4757);border-radius:3px;transition:width 0.1s linear}
+</style>
+</head>
+<body>
+<h1>💣 拆弹专家</h1>
+<div class="stats"><span>💣 <b id="defused">0</b></span><span>💥 <b id="blown">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<div class="bomb">
+  <div class="wires" id="wires"></div>
+  <div class="timer-display" id="bombTimer">30</div>
+  <div class="bomb-body"></div>
+</div>
+<div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+<div id="status" style="color:#ffa502;min-height:24px;margin:4px 0"></div>
+<script>
+const WIRE_COLORS=['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6'];
+let safeWire=0,bombTimer=30,defused=0,blown=0,best=0,timerInterval,active=true;
+try{best=parseInt(localStorage.getItem('defuse_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function newBomb(){
+  const numWires=3+Math.floor(Math.random()*3);
+  safeWire=Math.floor(Math.random()*numWires);
+  bombTimer=20+Math.floor(Math.random()*15);
+  document.getElementById('bombTimer').textContent=bombTimer;
+  document.getElementById('timerFill').style.width='100%';
+  document.getElementById('status').textContent='选择一根线剪断...';
+  active=true;
+  const w=document.getElementById('wires');
+  w.innerHTML='';
+  for(let i=0;i<numWires;i++){
+    const wire=document.createElement('div');wire.className='wire';
+    wire.style.background=WIRE_COLORS[i%5];
+    const label=document.createElement('div');label.className='wire-label';label.textContent=i+1;wire.appendChild(label);
+    wire.addEventListener('click',()=>cutWire(i,wire));
+    w.appendChild(wire);
+  }
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{bombTimer--;document.getElementById('bombTimer').textContent=bombTimer;document.getElementById('timerFill').style.width=`${bombTimer/30*100}%`;if(bombTimer<=0){explode()}},1000);
+}
+function cutWire(i,wire){
+  if(!active)return;clearInterval(timerInterval);active=false;
+  wire.classList.add('cut');
+  if(i===safeWire){
+    defused++;document.getElementById('defused').textContent=defused;
+    document.getElementById('status').textContent='✅ 安全! 炸弹已拆除';
+    if(defused>best){best=defused;document.getElementById('best').textContent=best;try{localStorage.setItem('defuse_best',best)}catch(e){}}
+    setTimeout(newBomb,1000);
+  }else{
+    blown++;document.getElementById('blown').textContent=blown;
+    document.getElementById('status').textContent='💥 BOOM! 剪错了!';
+    document.querySelectorAll('.wire').forEach(w=>w.classList.add('cut'));
+    document.getElementById('bombTimer').textContent='💥';
+    document.getElementById('timerFill').style.width='0%';
+    setTimeout(newBomb,1200);
+  }
+}
+function explode(){active=false;blown++;document.getElementById('blown').textContent=blown;document.getElementById('status').textContent='💥 时间到! 炸弹爆炸了!';document.getElementById('bombTimer').textContent='💥';document.getElementById('timerFill').style.width='0%';setTimeout(newBomb,1200)}
+newBomb();
+</script>
+</body>
+</html>
