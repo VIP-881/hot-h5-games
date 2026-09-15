@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎳 滚球得分 - 热门H5游戏</title>
+<meta name="description" content="滚球得分物理游戏，拖动瞄准发射弹球击中目标区域得分，多种障碍和跳板免费在线">
+<meta property="og:title" content="🎳 滚球得分 - 热门H5游戏"><meta property="og:description" content="拖动弹球瞄准击入得分区"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"滚球得分","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.12);padding:4px 12px;border-radius:20px;font-size:0.9em}canvas{display:block;border-radius:10px;max-width:96vw}</style>
+</head>
+<body>
+<h1>🎳 滚球得分</h1>
+<div class="stats"><span>🎱 <b id="balls">10</b></span><span>⭐ <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="480"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=360,H=480,G=0.3;
+let balls=[],zones=[],obstacles=[],score=0,ballCount=10,best=0,aimAngle=-Math.PI/2,power=0,aiming=false;
+try{best=parseInt(localStorage.getItem('roll_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+function init(){
+  zones=[{x:W/2-50,y:60,w:100,h:20,pts:100,color:'#ffd700'},{x:W/2-35,y:100,w:70,h:18,pts:50,color:'#f39c12'},{x:W/2-20,y:140,w:40,h:15,pts:25,color:'#e67e22'}];
+  obstacles=[{x:W/2-80,y:95,r:12},{x:W/2+80,y:95,r:12},{x:W/2-45,y:135,r:10},{x:W/2+45,y:135,r:10},{x:W/4,y:70,r:14},{x:W*3/4,y:70,r:14}];
+}
+function fire(p,angle){
+  if(ballCount<=0)return;ballCount--;document.getElementById('balls').textContent=ballCount;
+  balls.push({x:W/2,y:H-40,vx:Math.cos(angle)*p*0.13,vy:Math.sin(angle)*p*0.13,r:8,bounces:0});
+}
+function update(){
+  for(let i=balls.length-1;i>=0;i--){
+    const b=balls[i];b.x+=b.vx;b.y+=b.vy;b.vy+=G;b.vx*=0.999;
+    if(b.x-b.r<5||b.x+b.r>W-5)b.vx*=-0.6;
+    if(b.y-b.r<5)b.vy*=-0.5;
+    if(b.y>H+20){balls.splice(i,1);continue}
+    for(const o of obstacles){const dx=b.x-o.x,dy=b.y-o.y;if(Math.sqrt(dx*dx+dy*dy)<b.r+o.r){const nx=dx/(dist||1),ny=dy/(dist||1);const dist=Math.sqrt(dx*dx+dy*dy);b.vx+=nx*3;b.vy+=ny*3;b.x+=nx*(b.r+o.r-dist)}}
+    for(const z of zones){if(b.x+b.r>z.x&&b.x-b.r<z.x+z.w&&b.y+b.r>z.y&&b.y-b.r<z.y+z.h&&b.vy>0){score+=z.pts;document.getElementById('score').textContent=score;balls.splice(i,1);if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('roll_best',best)}catch(e){}}break}}
+  }
+  if(ballCount<=0&&balls.length===0)endGame();
+}
+function endGame(){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillText('游戏结束!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  点击重来`,W/2,H/2+20);ballCount=-1}
+function draw(){
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  zones.forEach(z=>{ctx.fillStyle=z.color;ctx.fillRect(z.x,z.y,z.w,z.h);ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(z.x+2,z.y+2,z.w-4,3);ctx.fillStyle='#fff';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText(z.pts,z.x+z.w/2,z.y+z.h/2+4)});
+  obstacles.forEach(o=>{ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.arc(o.x,o.y,o.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();ctx.arc(o.x-2,o.y-2,o.r*0.3,0,Math.PI*2);ctx.fill()});
+  balls.forEach(b=>{ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#ccc';ctx.lineWidth=1;ctx.stroke()});
+  if(ballCount>0&&!aiming){ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.setLineDash([3,5]);ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(W/2,H-40);ctx.lineTo(W/2+Math.cos(aimAngle)*40,H-40+Math.sin(aimAngle)*40);ctx.stroke();ctx.setLineDash([])}
+}
+c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();aimAngle=Math.atan2(-100,e.clientX-r.left-W/2)});
+c.addEventListener('touchmove',e=>{e.preventDefault();const r=c.getBoundingClientRect();aimAngle=Math.atan2(-100,e.touches[0].clientX-r.left-W/2)},{passive:false});
+c.addEventListener('click',()=>{if(ballCount<0){restart()}fire(40+Math.random()*15,aimAngle)});
+function restart(){score=0;ballCount=10;balls=[];document.getElementById('score').textContent='0';document.getElementById('balls').textContent='10';init()}
+function loop(){update();draw();requestAnimationFrame(loop)}init();loop();
+</script>
+</body>
+</html>
