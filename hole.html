@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🕳️ 黑洞吞噬 - 热门H5游戏</title>
+<meta name="description" content="黑洞吞噬H5游戏，控制黑洞移动吞噬掉落物不断变大，免费在线休闲游戏">
+<meta property="og:title" content="🕳️ 黑洞吞噬 - 热门H5游戏"><meta property="og:description" content="控制黑洞吞噬一切，越变越大"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"黑洞吞噬","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.8em;margin:4px 0;color:#8e44ad}.stats{display:flex;gap:12px;margin:6px 0 8px}.stats span{background:rgba(255,255,255,0.1);padding:5px 14px;border-radius:20px;font-size:0.95em}canvas{display:block;max-width:96vw;touch-action:none}</style>
+</head>
+<body>
+<h1>🕳️ 黑洞吞噬</h1>
+<div class="stats"><span>⚫ <b id="size">1</b></span><span>⭐ <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="380" height="520"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=380,H=520;
+let hole={x:W/2,y:H/2,r:30},items=[],score=0,best=0,size=1,frame=0;
+try{best=parseInt(localStorage.getItem('hole_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+const ICONS=['🏠','🚗','🌲','👤','🪑','📦','⚽','🐕','🍕','🚲','📺','🎸'];
+function spawn(){const i=ICONS[Math.floor(Math.random()*ICONS.length)];items.push({x:Math.random()*W,y:Math.random()*H,icon:i,size:14+Math.random()*20,speed:0.3+Math.random()})}
+function update(){frame++;
+  if(frame%20===0&&items.length<15)spawn();
+  items.forEach(it=>{const dx=hole.x-it.x,dy=hole.y-it.y,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<hole.r+150){const force=(hole.r+150-dist)/(hole.r+150);it.x+=dx/dist*force*4;it.y+=dy/dist*force*4}
+    if(dist<hole.r){score+=Math.floor(it.size);document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('hole_best',best)}catch(e)}items.splice(items.indexOf(it),1);hole.r+=it.size*0.08;size=Math.floor(hole.r/30);document.getElementById('size').textContent=size}
+  });
+}
+function draw(){
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<40;i++){ctx.fillStyle=`rgba(255,255,255,${Math.random()*0.3})`;ctx.fillRect(Math.random()*W,Math.random()*H,2,2)}
+  items.forEach(it=>{ctx.font=`${it.size}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=it.dist<hole.r?'#fff':'#999';ctx.fillText(it.icon,it.x,it.y)});
+  const g=ctx.createRadialGradient(hole.x,hole.y,hole.r*0.3,hole.x,hole.y,hole.r);
+  g.addColorStop(0,'#000');g.addColorStop(0.6,'#1a0020');g.addColorStop(0.9,'#4a0070');g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(hole.x,hole.y,hole.r+20,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#000';ctx.beginPath();ctx.arc(hole.x,hole.y,hole.r,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#8e44ad';ctx.lineWidth=3;ctx.shadowColor='#8e44ad';ctx.shadowBlur=15;ctx.beginPath();ctx.arc(hole.x,hole.y,hole.r,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;
+}
+c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();hole.x=e.clientX-r.left;hole.y=e.clientY-r.top});
+c.addEventListener('touchmove',e=>{e.preventDefault();const r=c.getBoundingClientRect();hole.x=e.touches[0].clientX-r.left;hole.y=e.touches[0].clientY-r.top},{passive:false});
+for(let i=0;i<12;i++)spawn();
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
