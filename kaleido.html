@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎨 万花筒 - 热门H5游戏</title>
+<meta name="description" content="万花筒绘画创意工具，手指绘画自动镜像对称生成绚丽万花筒图案，免费在线创意绘画游戏">
+<meta property="og:title" content="🎨 万花筒 - 热门H5游戏"><meta property="og:description" content="对称绘画，生成绚丽万花筒图案"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"万花筒","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}h1{font-size:1.6em;margin:4px 0}.toolbar{display:flex;gap:8px;margin:4px 0;flex-wrap:wrap;justify-content:center}.color-btn{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);cursor:pointer;transition:all 0.2s}.color-btn:hover{transform:scale(1.2)}.color-btn.active{border-color:#fff;box-shadow:0 0 10px currentColor}.btn{padding:6px 14px;border-radius:16px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);color:#fff;cursor:pointer;font-size:0.8em}canvas{display:block;border-radius:12px;max-width:96vw;background:#0a0a0a}</style>
+</head>
+<body>
+<h1>🎨 万花筒</h1>
+<div class="toolbar" id="toolbar"></div>
+<div><button class="btn" onclick="clearCanvas()">🗑️ 清空</button><button class="btn" onclick="saveImg()">💾 保存</button><button class="btn" onclick="changeMirrors()">🪞 镜数</button></div>
+<canvas id="c" width="400" height="400"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),W=400,H=400,CX=W/2,CY=H/2;
+let mirrorCount=6,brushColor='#f093fb',brushSize=3,drawing=false,mirrors=6;
+const colors=['#f093fb','#f5576c','#fda085','#ffd700','#2ed573','#1e90ff','#a55eea','#fff','#00ffff','#ff00ff','#00ff00','#ff4500'];
+colors.forEach(cl=>{const b=document.createElement('div');b.className='color-btn'+(cl===brushColor?' active':'');b.style.background=cl;b.style.color=cl;b.addEventListener('click',()=>{brushColor=cl;document.querySelectorAll('.color-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active')});document.getElementById('toolbar').appendChild(b)});
+function drawMirrored(x,y,px,py){
+  for(let i=0;i<mirrors;i++){
+    const angle=i*Math.PI*2/mirrors;
+    ctx.save();ctx.translate(CX,CY);ctx.rotate(angle);
+    const mx=x-CX,my=y-CY,pmx=px-CX,pmy=py-CY;
+    ctx.strokeStyle=brushColor;ctx.lineWidth=brushSize;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(pmx,pmy);ctx.lineTo(mx,my);ctx.stroke();
+    // Mirror reflection
+    ctx.strokeStyle=brushColor;ctx.globalAlpha=0.5;ctx.beginPath();ctx.moveTo(pmx,-pmy);ctx.lineTo(mx,-my);ctx.stroke();ctx.globalAlpha=1;
+    ctx.restore();
+  }
+}
+let lastX,lastY;
+c.addEventListener('mousedown',e=>{drawing=true;const r=c.getBoundingClientRect();lastX=e.clientX-r.left;lastY=e.clientY-r.top});
+c.addEventListener('mousemove',e=>{if(!drawing)return;const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;drawMirrored(x,y,lastX,lastY);lastX=x;lastY=y});
+c.addEventListener('mouseup',()=>{drawing=false});
+c.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;const r=c.getBoundingClientRect();lastX=e.touches[0].clientX-r.left;lastY=e.touches[0].clientY-r.top});
+c.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const r=c.getBoundingClientRect(),x=e.touches[0].clientX-r.left,y=e.touches[0].clientY-r.top;drawMirrored(x,y,lastX,lastY);lastX=x;lastY=y});
+c.addEventListener('touchend',()=>{drawing=false});
+function clearCanvas(){ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(255,255,255,0.1)';ctx.beginPath();ctx.arc(CX,CY,5,0,Math.PI*2);ctx.fill()}
+function changeMirrors(){mirrors=mirrors%8+3;document.querySelector('.btn:last-child').textContent=`🪞 ${mirrors}镜`}
+function saveImg(){const link=document.createElement('a');link.download='kaleidoscope.png';link.href=c.toDataURL();link.click()}
+clearCanvas();
+</script>
+</body>
+</html>
