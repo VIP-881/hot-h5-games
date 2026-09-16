@@ -64,6 +64,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .gdf{background:linear-gradient(135deg,#1e293b,#475569,#94a3b8)}
 .gh,.gv{background:linear-gradient(135deg,#450a0a,#dc2626,#fb7185)}
 .gh,.gv{background:linear-gradient(135deg,#450a0a,#dc2626,#fb7185)}
+.gh,.gv{background:linear-gradient(135deg,#450a0a,#dc2626,#fb7185)}
 .tp{background:rgba(96,165,250,.2);color:#60a5fa}
 .ta{background:rgba(251,191,36,.2);color:#fbbf24}
 .td{background:rgba(74,222,128,.2);color:#4ade80}
@@ -159,7 +160,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div id="rk"></div>
 <div id="v">
   <div class="vh"><button class="bk" onclick="closeGame()">←</button><span class="vt">🎮</span><span class="tm">🕒</span><span class="sh" id="vFavBtn" onclick="toFav(gameData[curIdx-1]?.id)">☆</span><span class="sh" onclick="shareWB()">🔁</span></div>
-  <div class="vb"><div class="ld"><div class="sp"></div></div><iframe id="gameFrame" onload="onFrameLoad()"></iframe></div>
+  <div class="vb"><div class="ld"><div class="sp"></div></div><iframe id="gameFrame" onload="onFrameLoad()" onerror="onFrameLoad()"></iframe></div>
 </div>
 <script>
 
