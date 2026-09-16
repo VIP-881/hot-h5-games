@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🚢 海战棋 - 热门H5游戏</title>
+<meta name="description" content="经典海战棋游戏Battleship，在网格中布阵并轰炸敌方舰队，最先击沉全部船只获胜免费在线">
+<meta property="og:title" content="🚢 海战棋 - 热门H5游戏"><meta property="og:description" content="经典海战棋Battleship"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"海战棋"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0a1628;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#8af;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.3em;margin:2px 0}.stats{display:flex;gap:12px;font-size:0.8em;margin:2px 0}.grids{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin:2px}.grid-label{text-align:center;font-size:0.75em;margin:2px 0}table{border-collapse:collapse;cursor:pointer}td{width:22px;height:22px;border:1px solid #1a3a5a;text-align:center;font-size:11px;background:#0d1f3a}td.enemy:hover{background:#1a3a5a}td.water{background:#0d1f3a}td.ship{background:#4a8}td.hit{background:#f44}td.miss{background:#335}td.sunk{background:#844}.btn{margin:6px 2px;padding:4px 12px;border:1px solid #446;border-radius:4px;background:#162a4a;color:#8af;cursor:pointer;font-size:11px}.phase{color:#ff0;font-size:0.8em;margin:2px}</style>
+</head>
+<body>
+<h1>🚢 海战棋</h1>
+<div class="stats"><span>🟢 <b id="bs-player-ships">5</b></span><span>🔴 <b id="bs-enemy-ships">5</b></span><span>🏆 <b id="bs-best">-</b></span></div>
+<div class="phase" id="bs-phase">📌 布置舰队（点击格子旋转）</div>
+<div class="grids">
+<div><div class="grid-label">🎯 你的海域</div><table id="player-grid"></table></div>
+<div><div class="grid-label">🎯 敌方海域</div><table id="enemy-grid"></table></div>
+</div>
+<div><button class="btn" onclick="startBattle()">⚔️ 开战</button><button class="btn" onclick="newGame()">🔄 重来</button></div>
+<script>
+const S=10,SHIPS=[{n:'航母',l:5},{n:'战列舰',l:4},{n:'巡洋舰',l:3},{n:'潜艇',l:3},{n:'驱逐舰',l:2}];
+let pGrid=[],eGrid=[],pShips=[],eShips=[],phase='place',shipIdx=0,pShots=[],eShots=[],gameover=false,turn='player',moves=0;
+let best=99;try{const v=parseInt(localStorage.getItem('battleship_best'));if(v)best=v}catch(e){}
+document.getElementById('bs-best').textContent=best<99?best:'-';
+
+function newGrid(){return Array.from({length:S},()=>Array(S).fill(0))}
+function canPlace(grid,l,x,y,dir){if(dir===0){if(x+l>S)return false;for(let i=0;i<l;i++)if(grid[y][x+i])return false;return true}
+  if(y+l>S)return false;for(let i=0;i<l;i++)if(grid[y+i][x])return false;return true}
+function placeShip(grid,l,x,y,dir){for(let i=0;i<l;i++){if(dir===0)grid[y][x+i]=1;else grid[y+i][x]=1}return grid}
+
+function initPlayerShips(){let placed=false;while(!placed){const g=newGrid();const ships=[];let ok=true;for(const s of SHIPS){const attempts=0;let found=false;for(let a=0;a<200;a++){const x=Math.floor(Math.random()*S),y=Math.floor(Math.random()*S),d=Math.random()<0.5?0:1;if(canPlace(g,s.l,x,y,d)){placeShip(g,s.l,x,y,d);ships.push({x,y,d,hp:s.l});found=true;break}}if(!found){ok=false;break}}if(ok){pGrid=g;pShips=ships;placed=true}}
+  document.getElementById('bs-player-ships').textContent=pShips.filter(s=>s.hp>0).length}
+
+function initEnemyShips(){const g=newGrid();const ships=[];for(const s of SHIPS){let found=false;for(let a=0;a<200;a++){const x=Math.floor(Math.random()*S),y=Math.floor(Math.random()*S),d=Math.random()<0.5?0:1;if(canPlace(g,s.l,x,y,d)){placeShip(g,s.l,x,y,d);ships.push({x,y,d,hp:s.l,name:s.n});found=true;break}}if(!found)break}eGrid=g;eShips=ships}
+
+function shoot(grid,x,y){if(grid[y][x]===1){grid[y][x]=2;return 'hit'}if(grid[y][x]===0){grid[y][x]=3;return 'miss'}return 'again'}
+function enemyTurn(){let x,y,attempt=0;do{x=Math.floor(Math.random()*S);y=Math.floor(Math.random()*S);attempt++}while(pGrid[y][x]>=2&&attempt<200);
+  const r=shoot(pGrid,x,y);if(r==='hit')for(const s of pShips)if(s.x<=x&&s.x+s.l*(s.d===0?1:0)>x&&s.y<=y&&s.y+s.l*(s.d===1?1:0)>y){s.hp--;if(s.hp<=0)eShots.push({x,y,m:true})}
+  eShots.push({x,y,r:r==='hit'});const dead=pShips.filter(s=>s.hp>0).length;document.getElementById('bs-player-ships').textContent=dead;if(dead===0){gameover=true;document.getElementById('bs-phase').textContent='😢 你输了！';render();return false}
+  render();return true}
+
+function handleEnemyClick(x,y){if(gameover||phase!=='battle'||turn!=='player')return;
+  if(eGrid[y][x]>=2){return}
+  const r=shoot(eGrid,x,y);moves++;
+  if(r==='hit'){for(const s of eShips)if(s.x<=x&&s.x+s.l*(s.d===0?1:0)>x&&s.y<=y&&s.y+s.l*(s.d===1?1:0)>y){s.hp--;if(s.hp<=0)pShots.push({x,y,sunk:true})}
+    pShots.push({x,y,hit:true})}else pShots.push({x,y,hit:false});
+  const alive=eShips.filter(s=>s.hp>0).length;document.getElementById('bs-enemy-ships').textContent=alive;
+  if(alive===0){gameover=true;document.getElementById('bs-phase').textContent='🎉 你赢了！';if(moves<best){best=moves;document.getElementById('bs-best').textContent=moves;try{localStorage.setItem('battleship_best',moves)}catch(e)}render();return}
+  turn='enemy';document.getElementById('bs-phase').textContent='🤖 敌方回合...';render();setTimeout(()=>{if(enemyTurn()){turn='player';document.getElementById('bs-phase').textContent='🎯 你的回合！'}},600)}
+
+function startBattle(){if(phase==='place'){initEnemyShips();phase='battle';turn='player';document.getElementById('bs-phase').textContent='🎯 你的回合！攻击敌方海域！';render()}}
+function newGame(){pGrid=newGrid();eGrid=newGrid();pShips=[];eShips=[];pShots=[];eShots=[];phase='place';shipIdx=0;gameover=false;turn='player';moves=0;
+  document.getElementById('bs-phase').textContent='📌 布置舰队';document.getElementById('bs-player-ships').textContent='5';document.getElementById('bs-enemy-ships').textContent='5';initPlayerShips();render()}
+
+function render(){// Player grid
+  const pt=document.getElementById('player-grid');pt.innerHTML='';
+  for(let y=0;y<S;y++){const tr=document.createElement('tr');for(let x=0;x<S;x++){const td=document.createElement('td');
+      if(pGrid[y][x]===2)td.className='hit',td.textContent='✕';else if(pGrid[y][x]===3)td.className='miss',td.textContent='·';else if(pGrid[y][x]===1&&phase==='place')td.className='ship';else td.className='water';tr.appendChild(td)}pt.appendChild(tr)}
+  // Enemy grid
+  const et=document.getElementById('enemy-grid');et.innerHTML='';
+  for(let y=0;y<S;y++){const tr=document.createElement('tr');for(let x=0;x<S;x++){const td=document.createElement('td');td.className='enemy';
+      const shot=pShots.find(s=>s.x===x&&s.y===y);
+      if(shot){if(shot.sunk)td.className='sunk',td.textContent='💀';else if(shot.hit)td.className='hit',td.textContent='✕';else td.className='miss',td.textContent='·'}
+      if(phase==='battle'&&!gameover&&turn==='player')td.addEventListener('click',()=>handleEnemyClick(x,y));
+      tr.appendChild(td)}et.appendChild(tr)}}
+initPlayerShips();render();
+</script>
+</body>
+</html>
