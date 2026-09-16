@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🧊 华容道 — 灵犀游戏大厅</title>
+<meta name="description" content="经典华容道滑块解谜游戏——滑动方块让曹操逃出。内置10关+步数统计。灵犀游戏大厅收录，免费H5在线游戏。">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0f0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(15,15,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(139,92,246,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#a78bfa;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(139,92,246,.1);transition:.3s}
+nav a:hover{background:rgba(139,92,246,.2)}
+.arena{max-width:420px;margin:20px auto;text-align:center}
+h1{font-size:22px;color:#c084fc;margin-bottom:2px}
+.info{font-size:12px;color:#888;margin-bottom:10px}
+.info span{margin:0 10px}
+.board{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(5,1fr);gap:2px;width:300px;height:375px;margin:0 auto;background:rgba(255,255,255,.04);border:3px solid rgba(139,92,246,.25);border-radius:10px;padding:2px;position:relative;touch-action:none}
+.piece{position:absolute;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;cursor:pointer;transition:left .15s,top .15s;user-select:none}
+.piece:hover{filter:brightness(1.15)}
+.p{background:linear-gradient(135deg,#c084fc,#7c3aed);color:#fff;z-index:2}
+.cao{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1a1a2e;font-size:24px}
+.gen{background:linear-gradient(135deg,#34d399,#10b981);color:#fff}
+.sol{background:linear-gradient(135deg,#f87171,#ef4444);color:#fff}
+.btn{margin:5px;padding:8px 16px;border-radius:20px;border:1px solid rgba(139,92,246,.3);background:rgba(139,92,246,.1);color:#a78bfa;cursor:pointer;font-size:13px;transition:.3s}
+.btn:hover{background:rgba(139,92,246,.2)}
+.btn:disabled{opacity:.3;cursor:default}
+.lvls{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:10px 0}
+.lvl{padding:5px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#888;cursor:pointer;font-size:12px;transition:.3s}
+.lvl:hover{background:rgba(139,92,246,.1);color:#a78bfa}
+.lvl.cur{background:rgba(139,92,246,.2);color:#c084fc;border-color:rgba(139,92,246,.4)}
+.lvl.done{color:#4ade80;border-color:rgba(74,222,128,.3)}
+.msg{font-size:20px;margin-top:8px;min-height:32px;color:#4ade80}
+</style>
+</head>
+<body>
+<nav><a href="index.html">← 返回大厅</a><span>🧊 华容道 · 滑块解谜</span></nav>
+<div class="arena">
+<h1>🧊 华容道</h1>
+<p class="info"><span>🏆 步数: <b id="moves">0</b></span><span>📐 关卡: <b id="lname">横刀立马</b></span></p>
+<div class="board" id="board"></div>
+<p class="msg" id="msg"></p>
+<div style="margin-top:8px">
+<button class="btn" onclick="undo()">↩ 撤销</button>
+<button class="btn" onclick="resetLevel()">🔄 重置</button>
+</div>
+<div class="lvls" id="levels"></div>
+</div>
+
+<script>
+// Level encoding: "横刀立马" style
+// Board is 4 cols x 5 rows. Pieces: 0=empty, 1=小兵(1x1), 2=竖将(1x2), 3=横将(2x1), 4=曹操(2x2)
+// Encoded as: [type, row, col, name]
+const LEVELS = [
+  {name:'横刀立马',pieces:[[4,1,1,'曹操'],[3,0,0,'关羽'],[2,0,3,'张飞'],[2,2,3,'赵云'],[2,0,1,'马超'],[2,2,1,'黄忠'],[1,1,0,'兵'],[1,3,0,'兵'],[1,1,3,'兵'],[1,3,3,'兵']],exit:[3,1]},
+  {name:'指挥若定',pieces:[[4,1,0,'曹操'],[3,1,2,'关羽'],[2,0,0,'张飞'],[2,0,1,'赵云'],[2,3,1,'马超'],[2,0,3,'黄忠'],[1,3,0,'兵'],[1,3,3,'兵'],[1,2,2,'兵'],[1,2,3,'兵']],exit:[3,1]},
+  {name:'兵分三路',pieces:[[4,1,1,'曹操'],[3,1,0,'关羽'],[2,0,2,'张飞'],[2,2,2,'赵云'],[2,0,1,'马超'],[2,2,1,'黄忠'],[1,3,0,'兵'],[1,3,3,'兵'],[1,0,3,'兵'],[1,4,3,'兵']],exit:[3,1]},
+  {name:'将拥曹营',pieces:[[4,1,1,'曹操'],[3,1,3,'关羽'],[2,0,3,'张飞'],[2,2,3,'赵云'],[2,0,0,'马超'],[2,2,0,'黄忠'],[1,3,1,'兵'],[1,4,1,'兵'],[1,0,2,'兵'],[1,4,2,'兵']],exit:[3,1]},
+  {name:'屯兵东路',pieces:[[4,1,2,'曹操'],[3,0,0,'关羽'],[2,0,2,'张飞'],[2,2,2,'赵云'],[2,2,0,'马超'],[2,4,0,'黄忠'],[1,0,1,'兵'],[1,3,1,'兵'],[1,3,3,'兵'],[1,4,3,'兵']],exit:[3,1]},
+];
+
+let board=[], moves=0, history=[], lvl=0, cellW=0, cellH=0;
+
+function init(){
+  let data=LEVELS[lvl];
+  // Create empty 4x5 grid
+  board = Array.from({length:5},()=>Array(4).fill(0));
+  document.getElementById('lname').textContent=data.name;
+  document.getElementById('moves').textContent='0';
+  document.getElementById('msg').textContent='';
+  moves=0; history=[];
+  
+  // Place pieces
+  let id=1;
+  data.pieces.forEach(p=>{
+    let [type,row,col,name]=p;
+    for(let r=row;r<row+(type===2||type===4?2:1);r++)
+      for(let c=col;c<col+(type===3||type===4?2:1);c++)
+        board[r][c]=id;
+    p.push(id++);
+  });
+  render();
+  renderLevels();
+}
+
+function render(){
+  let b=document.getElementById('board');
+  let bw=300,bh=375; cellW=bw/4; cellH=bh/5;
+  let seen=new Set();
+  let html='';
+  LEVELS[lvl].pieces.forEach(p=>{
+    let [type,row,col,name,id]=p;
+    if(seen.has(id)) return; seen.add(id);
+    let w=(type===3||type===4)?cellW*2-4:cellW-4;
+    let h=(type===2||type===4)?cellH*2-4:cellH-4;
+    let cls='piece '+(type===4?'cao':type===2||type===3?'gen':'p');
+    html+=`<div class="${cls}" style="left:${col*cellW+2}px;top:${row*cellH+2}px;width:${w}px;height:${h}px;line-height:${h}px" 
+      ontouchstart="dragStart(event,${id})" onmousedown="dragStart(event,${id})"
+      id="p${id}">${name}</div>`;
+  });
+  html+=`<div style="position:absolute;right:0;top:${3*cellH}px;width:${cellW}px;height:${cellH}px;border:2px dashed #4ade80;border-radius:0 0 8px 0;opacity:.3"></div>`;
+  b.innerHTML=html;
+}
+
+function findPiece(id){
+  for(let r=0;r<5;r++) for(let c=0;c<4;c++) if(board[r][c]===id) return {r,c,id};
+  return null;
+}
+
+function getPieceSize(id){
+  let p=LEVELS[lvl].pieces.find(x=>x[4]===id);
+  if(!p) return [1,1];
+  let t=p[0];
+  return [t===2||t===4?2:1, t===3||t===4?2:1];
+}
+
+let dragInfo=null;
+function dragStart(e,id){
+  e.preventDefault();
+  let pos=findPiece(id);
+  if(!pos) return;
+  let [h,w]=getPieceSize(id);
+  dragInfo={id,r:pos.r,c:pos.c,h,w};
+  
+  let startX=e.touches?e.touches[0].clientX:e.clientX;
+  let startY=e.touches?e.touches[0].clientY:e.clientY;
+  let moved=false;
+
+  function onMove(ev){
+    ev.preventDefault();
+    let dx=(ev.touches?ev.touches[0].clientX:ev.clientX)-startX;
+    let dy=(ev.touches?ev.touches[0].clientY:ev.clientY)-startY;
+    if(!moved&&Math.abs(dx)+Math.abs(dy)<10) return;
+    moved=true;
+    
+    // Determine direction
+    let dir='';
+    if(Math.abs(dx)>Math.abs(dy)) dir=dx>0?'right':'left';
+    else dir=dy>0?'down':'up';
+    
+    // Try move
+    let nr=dragInfo.r, nc=dragInfo.c;
+    if(dir==='up') nr--;
+    else if(dir==='down') nr++;
+    else if(dir==='left') nc--;
+    else if(dir==='right') nc++;
+    
+    if(canMove(dragInfo.id,dragInfo.r,dragInfo.c,nr,nc,dragInfo.h,dragInfo.w)){
+      movePiece(dragInfo.id,dragInfo.r,dragInfo.c,nr,nc,dragInfo.h,dragInfo.w);
+      dragInfo.r=nr; dragInfo.c=nc;
+      startX=ev.touches?ev.touches[0].clientX:ev.clientX;
+      startY=ev.touches?ev.touches[0].clientY:ev.clientY;
+    }
+  }
+  
+  function onEnd(){
+    document.removeEventListener('mousemove',onMove);
+    document.removeEventListener('mouseup',onEnd);
+    document.removeEventListener('touchmove',onMove);
+    document.removeEventListener('touchend',onEnd);
+    dragInfo=null;
+  }
+  
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onEnd);
+  document.addEventListener('touchmove',onMove,{passive:false});
+  document.addEventListener('touchend',onEnd);
+}
+
+function movePiece(id,sr,sc,nr,nc,h,w){
+  // Save state
+  let saved=board.map(r=>[...r]);
+  // Clear old pos
+  for(let r=sr;r<sr+h;r++) for(let c=sc;c<sc+w;c++) board[r][c]=0;
+  // Set new pos
+  for(let r=nr;r<nr+h;r++) for(let c=nc;c<nc+w;c++) board[r][c]=id;
+  
+  history.push({board:saved,moves:moves});
+  moves++;
+  document.getElementById('moves').textContent=moves;
+  
+  // Update piece position in levels data
+  let p=LEVELS[lvl].pieces.find(x=>x[4]===id);
+  if(p){p[1]=nr; p[2]=nc;}
+  
+  render();
+  
+  // Check win: 曹操 (id 1) at exit
+  let cao=LEVELS[lvl].pieces.find(x=>x[4]===1);
+  if(cao&&cao[1]===3&&cao[2]===1){
+    document.getElementById('msg').textContent='🎉 曹操逃出！通关！';
+    localStorage.setItem('klotski_done_'+lvl,'1');
+    renderLevels();
+  }
+}
+
+function canMove(id,sr,sc,nr,nc,h,w){
+  if(nr<0||nc<0||nr+h>5||nc+w>4) return false;
+  for(let r=nr;r<nr+h;r++)
+    for(let c=nc;c<nc+w;c++)
+      if(board[r][c]!==0&&board[r][c]!==id) return false;
+  return true;
+}
+
+function undo(){
+  if(history.length===0) return;
+  let h=history.pop();
+  board=h.board;
+  moves=h.moves;
+  document.getElementById('moves').textContent=moves;
+  document.getElementById('msg').textContent='';
+  render();
+}
+
+function resetLevel(){
+  let pcs=LEVELS[lvl].pieces;
+  pcs.forEach(p=>{let [t,r,c,n,id]=p; p[1]=p[5]||r; p[2]=p[6]||c;});
+  init();
+}
+
+function setLevel(i){
+  lvl=i;
+  init();
+  document.getElementById('msg').textContent='';
+}
+
+function renderLevels(){
+  let l=document.getElementById('levels');
+  l.innerHTML=LEVELS.map((lv,i)=>`<button class="lvl ${i===lvl?'cur':''} ${localStorage.getItem('klotski_done_'+i)?'done':''}" onclick="setLevel(${i})">${lv.name}</button>`).join('');
+}
+
+// Store original positions for reset
+LEVELS.forEach(lv=>lv.pieces.forEach(p=>{p[5]=p[1];p[6]=p[2];}));
+init();
+</script>
+</body>
+</html>
