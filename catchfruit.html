@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🍎 接水果 - 热门H5游戏</title>
+<meta name="description" content="经典接水果Fruit Catch游戏，移动篮子接住掉落的水果，避开坏水果挑战最高分免费在线">
+<meta property="og:title" content="🍎 接水果 - 热门H5游戏"><meta property="og:description" content="经典接水果躲避炸弹"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"接水果"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0}canvas{display:block;border:1px solid #334;border-radius:6px;max-width:98vw;background:#1a1a2e}.btn{margin:4px;padding:4px 14px;border:1px solid #557;border-radius:4px;background:#2a2a4e;color:#8af;cursor:pointer}</style>
+</head>
+<body>
+<h1>🍎 接水果</h1>
+<div class="stats"><span>🍎 <b id="catch-score">0</b></span><span>💣 <b id="catch-lives">3</b></span><span>🏆 <b id="catch-best">0</b></span></div>
+<canvas id="c" width="300" height="480"></canvas>
+<div><button class="btn" onclick="resetCatch()">🔄 重来</button></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=300,H=480;
+const FRUITS=['🍎','🍊','🍋','🍇','🍓','🍑','🍒','🥝'];
+let basket={x:W/2-30,w:60,y:H-30},items=[],score=0,lives=3,best=0,gameover=false,left=false,right=false,touchX=0;
+try{best=parseInt(localStorage.getItem('catch_best'))||0;document.getElementById('catch-best').textContent=best}catch(e){}
+
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')left=true;if(e.key==='ArrowRight')right=true;if(e.key===' '&&gameover)resetCatch()});
+document.addEventListener('keyup',e=>{if(e.key==='ArrowLeft')left=false;if(e.key==='ArrowRight')right=false});
+cv.addEventListener('touchstart',e=>{e.preventDefault();touchX=e.touches[0].clientX});
+cv.addEventListener('touchmove',e=>{e.preventDefault();touchX=e.touches[0].clientX});
+cv.addEventListener('click',()=>{if(gameover)resetCatch()});
+cv.addEventListener('mousemove',e=>{if(gameover)return;const r=cv.getBoundingClientRect();basket.x=e.clientX-r.left-basket.w/2});
+
+function resetCatch(){items=[];score=0;lives=3;gameover=false;
+  document.getElementById('catch-score').textContent='0';document.getElementById('catch-lives').textContent='3'}
+
+function spawn(){const f=Math.floor(Math.random()*FRUITS.length);const isBomb=Math.random()<0.12;
+  items.push({x:20+Math.random()*(W-40),y:-20,type:isBomb?'💣':FRUITS[f],speed:1.5+Math.random()*2,isBomb,r:18,w:30,rot:Math.random()*6})}
+
+function update(){if(gameover)return;
+  // Basket movement
+  if(left)basket.x-=5;if(right)basket.x+=5;if(touchX>0){const r=cv.getBoundingClientRect();basket.x=touchX-r.left-basket.w/2}
+  basket.x=Math.max(0,Math.min(W-basket.w,basket.x));
+  // Spawn
+  if(Math.random()<0.03+score/2000)spawn();
+  // Update items
+  for(let i=items.length-1;i>=0;i--){const it=items[i];it.y+=it.speed;it.rot+=0.05;
+    // Catch check
+    if(it.y+it.r>basket.y&&it.y<basket.y+20&&it.x>basket.x&&it.x<basket.x+basket.w){
+      if(it.isBomb){lives--;document.getElementById('catch-lives').textContent=lives;
+        if(lives<=0){gameover=true;if(score>best){best=score;document.getElementById('catch-best').textContent=best;try{localStorage.setItem('catch_best',best)}catch(e)}}}
+      else{score+=10*items[i].speed;document.getElementById('catch-score').textContent=score}items.splice(i,1);continue}
+    if(it.y>H+30)items.splice(i,1)}}
+
+function render(){ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  // Basket
+  ctx.fillStyle='#8b5';ctx.beginPath();ctx.roundRect(basket.x,basket.y,basket.w,18,4);ctx.fill();
+  ctx.fillStyle='#7a4';ctx.fillRect(basket.x+4,basket.y+2,basket.w-8,5);
+  // Items
+  for(const it of items){ctx.save();ctx.translate(it.x,it.y);ctx.rotate(it.rot);
+    ctx.font='22px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(it.type,0,0);ctx.restore()}
+  // Lives
+  ctx.fillStyle='#f44';ctx.font='14px sans-serif';ctx.textAlign='left';let l='';for(let i=0;i<lives;i++)l+='❤️';ctx.fillText(l,8,20);
+  // Game over
+  if(gameover){ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#ff0';ctx.font='bold 22px monospace';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-5);ctx.fillStyle='#8af';ctx.font='12px monospace';ctx.fillText(`🍎 ${score}  点击重来`,W/2,H/2+20)}}
+resetCatch();function loop(){update();render();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
