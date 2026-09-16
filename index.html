@@ -142,9 +142,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <button class="act" id="favBtn" onclick="toggleFavFilter()">⭐ <b id="favCnt">0</b></button>
   <button class="act" onclick="showStore()">🛒</button>
   <button class="act" onclick="showLeaderboard()">🌐</button>
-  <button class="act" onclick="mpBtn()">👥</button>
+  <button class="act" onclick="mpBtn()">👥</button><button class="act" onclick="showStats()">📊</button><button class="act" onclick="showAchieves()">🏅</button>
   <button class="tbtn" onclick="toggleTheme()">🌓</button>
-  <span id="profile"></span>
+  <button class="tbtn" id="ciBtn" onclick="doCheckin()"></button><span id="profile"></span>
 </div>
 <div class="cats" id="catBar"></div>
 <div class="gr" id="grid"></div>
@@ -437,6 +437,93 @@ function shareWB(){
   var t=encodeURIComponent('\ud83c\udfae \u6211\u5728\u73a9\u300c'+g.emoji+' '+g.title+'\u300d- 165\u6b3e\u514d\u8d39H5\u6e38\u620f\uff01');
   window.open('https://service.weibo.com/share/share.php?title='+t+'&url='+u,'_blank','width=600,height=500');
 }
+
+
+// ===== STATS PANEL =====
+function showStats(){
+  var totalPlay=0,totalTime=0,topGames=[],fav={};
+  Object.keys(PLAYS).forEach(function(id){totalPlay+=PLAYS[id];fav[id]=PLAYS[id];});
+  Object.keys(TCNT).forEach(function(id){totalTime+=TCNT[id]*30;});
+  // Top 5 most played
+  var sorted=Object.keys(fav).sort(function(a,b){return fav[b]-fav[a]}).slice(0,5);
+  var h='<div class="rkbox"><h2>📊 游戏统计</h2>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:8px 0">';
+  h+='<div style="text-align:center;padding:6px;background:var(--bg2);border-radius:6px"><span style="font-size:1.2em">'+totalPlay+'</span><br><span style="font-size:.55em;color:var(--text2)">总游玩</span></div>';
+  var mins=Math.floor(totalTime/60);
+  h+='<div style="text-align:center;padding:6px;background:var(--bg2);border-radius:6px"><span style="font-size:1.2em">'+mins+'</span><br><span style="font-size:.55em;color:var(--text2)">总分钟</span></div>';
+  h+='<div style="text-align:center;padding:6px;background:var(--bg2);border-radius:6px"><span style="font-size:1.2em">'+COINS+'</span><br><span style="font-size:.55em;color:var(--text2)">金币</span></div></div>';
+  h+='<p style="font-size:.6em;color:var(--text2);margin-bottom:4px">最爱游戏 TOP5</p>';
+  sorted.forEach(function(id){
+    var g=gameData.find(function(x){return x.id===id});if(!g)return;
+    h+='<div class="ri"><span style="font-size:.9em">'+g.emoji+'</span><span class="ri2"><span class="rn2">'+g.title+'</span><span class="rc2">'+PLAYS[id]+'次</span></span></div>';
+  });
+  h+='<div style="text-align:center;margin-top:6px"><button class="act" onclick="closeStats()">✖</button></div></div>';
+  var el=document.getElementById('stats');
+  if(!el){el=document.createElement('div');el.id='stats';el.style.cssText='display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9994;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);justify-content:center;align-items:center';document.body.appendChild(el);}
+  el.style.display='flex';el.innerHTML=h;el.style.justifyContent='center';el.style.alignItems='center';
+}
+function closeStats(){var e=document.getElementById('stats');if(e)e.style.display='none';}
+
+// ===== DAILY CHECK-IN =====
+var CHECKIN=(function(){try{return JSON.parse(localStorage.getItem('ci'))||{}}catch(e){return {}}})();
+function doCheckin(){
+  var today=new Date().toDateString();
+  CHECKIN.last=today;
+  CHECKIN.streak=(CHECKIN.streak||0)+1;
+  if(CHECKIN.last!==today){CHECKIN.streak=1;}
+  var bonus=Math.min(10+CHECKIN.streak*2,50);
+  COINS+=bonus;saveCoins();
+  CHECKIN.last=today;localStorage.setItem('ci',JSON.stringify(CHECKIN));
+  alert('✅ 签到成功！已连续 '+CHECKIN.streak+' 天\n🪙 +'+bonus+' 金币');
+}
+function checkinBtn(){
+  var today=new Date().toDateString();
+  var done=CHECKIN.last===today;
+  var btnText=done?'✅ 已签到 ('+(CHECKIN.streak||0)+'天)':'🎁 签到 (+'+(Math.min(10+(CHECKIN.streak||0)*2,50))+'🪙)';
+  document.querySelector('#ciBtn')&&(document.querySelector('#ciBtn').textContent=btnText);
+}
+
+// ===== ACHIEVEMENTS =====
+var ACHIEVES=[
+  {id:'a1',name:'初次游玩',icon:'🎮',desc:'玩1次游戏',check:function(){return Object.keys(PLAYS).length>=1}},
+  {id:'a2',name:'游戏达人',icon:'🎯',desc:'玩10次游戏',check:function(){return Object.keys(PLAYS).length>=10}},
+  {id:'a3',name:'收藏大师',icon:'⭐',desc:'收藏5款游戏',check:function(){return Object.keys(FAVS).length>=5}},
+  {id:'a4',name:'小康之家',icon:'🪙',desc:'赚100金币',check:function(){return COINS>=100}},
+  {id:'a5',name:'暴发户',icon:'💰',desc:'赚500金币',check:function(){return COINS>=500}},
+  {id:'a6',name:'探索者',icon:'🔍',desc:'玩过20款不同游戏',check:function(){var s=new Set(Object.keys(PLAYS));return s.size>=20}},
+  {id:'a7',name:'老玩家',icon:'🏆',desc:'累计游玩50次',check:function(){var t=0;Object.keys(PLAYS).forEach(function(k){t+=PLAYS[k]});return t>=50}},
+  {id:'a8',name:'坚持不懈',icon:'🔥',desc:'连续签到3天',check:function(){return(CHECKIN.streak||0)>=3}},
+  {id:'a9',name:'购物狂',icon:'🛒',desc:'购买3件商品',check:function(){return Object.keys(PURCH).length>=3}},
+  {id:'a10',name:'神速手',icon:'⚡',desc:'任一游戏最快<30s',check:function(){for(var k in BEST){if(BEST[k]<30)return true}return false}},
+  {id:'a11',name:'社交达人',icon:'📣',desc:'分享游戏1次',check:function(){return localStorage.getItem('shared')==='1'}},
+  {id:'a12',name:'全品类',icon:'🌈',desc:'玩过6种品类',check:function(){var c={};Object.keys(PLAYS).forEach(function(id){var g=gameData.find(function(x){return x.id===id});if(g)c[g.cat]=1});return Object.keys(c).length>=6}},
+];
+var ACH_STAT=(function(){try{return JSON.parse(localStorage.getItem('ach'))||{};}catch(e){return {};}})();
+function checkAchieves(){
+  ACHIEVES.forEach(function(a){
+    if(!ACH_STAT[a.id]&&a.check()){ACH_STAT[a.id]={date:new Date().toISOString()};localStorage.setItem('ach',JSON.stringify(ACH_STAT));}
+  });
+}
+function showAchieves(){
+  var h='<div class="rkbox"><h2>🏅 成就徽章</h2>';
+  var unlocked=0,total=ACHIEVES.length;
+  ACHIEVES.forEach(function(a){
+    var done=!!ACH_STAT[a.id];
+    if(done)unlocked++;
+    h+='<div class="ri" style="opacity:'+(done?1:.4)+'"><span style="font-size:1em">'+(done?a.icon:'🔒')+'</span><span class="ri2"><span class="rn2">'+a.name+'</span><span class="rc2">'+(done?'✅ '+a.desc:'🔜 '+a.desc)+'</span></span></div>';
+  });
+  h+='<div style="text-align:center;margin:4px 0;font-size:.65em;color:var(--text2)">'+unlocked+'/'+total+' 已解锁</div>';
+  h+='<div style="text-align:center;margin-top:4px"><button class="act" onclick="closeAchieves()">✖</button></div></div>';
+  var el=document.getElementById('ach');
+  if(!el){el=document.createElement('div');el.id='ach';el.style.cssText='display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9993;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);justify-content:center;align-items:center';document.body.appendChild(el);}
+  el.style.display='flex';el.innerHTML=h;el.style.justifyContent='center';el.style.alignItems='center';
+}
+function closeAchieves(){var e=document.getElementById('ach');if(e)e.style.display='none';}
+// Hook share to track achievement
+(function(){var _origShare=shareWB;shareWB=function(){localStorage.setItem('shared','1');checkAchieves();_origShare();}})();
+// Check achievements periodically
+checkAchieves();
+setInterval(checkAchieves,60000);
 
 // ===== PWA =====
 if('serviceWorker' in navigator){
