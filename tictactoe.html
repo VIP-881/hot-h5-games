@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>❌ 井字棋 - 热门H5游戏</title>
+<meta name="description" content="经典井字棋Tic-Tac-Toe，与AI对战，三连一线获胜，先手后手可选免费在线">
+<meta property="og:title" content="❌ 井字棋 - 热门H5游戏"><meta property="og:description" content="经典井字棋AI对战"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"井字棋"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.4em;margin:4px 0}.stats{display:flex;gap:16px;margin:4px 0;font-size:0.85em}canvas{display:block;border:1px solid #334;border-radius:6px;max-width:98vw;background:#1a1a2e;cursor:pointer}.btn{margin:4px;padding:4px 12px;border:1px solid #557;border-radius:4px;background:#2a2a4e;color:#8af;cursor:pointer;font-size:12px}.btn:hover{background:#3a3a6e}</style>
+</head>
+<body>
+<h1>❌ 井字棋</h1>
+<div class="stats"><span>👤 <b id="t3-player">0</b></span><span>🤖 <b id="t3-ai">0</b></span><span>🤝 <b id="t3-draw">0</b></span></div>
+<canvas id="c" width="300" height="300"></canvas>
+<div><button class="btn" onclick="newGame2()">🔄 重来</button><button class="btn" onclick="setFirst(!aiFirst)">⚡ 先后手</button><span id="turn-indicator" style="margin-left:8px;font-size:0.8em"></span></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),S=3,T=100,W=300;
+let board=[],turn=0,gameover=false,winner=null,aiFirst=false,pScore=0,aiScore=0,drawScore=0;
+function newGame2(){board=Array(9).fill(-1);turn=0;gameover=false;winner=null;render();document.getElementById('turn-indicator').textContent='❌ 你的回合';if(aiFirst)setTimeout(aiMove,300)}
+function setFirst(v){aiFirst=v;pScore=0;aiScore=0;drawScore=0;document.getElementById('t3-player').textContent='0';document.getElementById('t3-ai').textContent='0';document.getElementById('t3-draw').textContent='0';newGame2()}
+
+function checkWin(b){const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for(const [a,b,c] of wins){if(b[a]>=0&&b[a]===b[b]&&b[b]===b[c])return b[a]}return b.every(v=>v>=0)?2:-1}
+function minimax(b,depth,isMax,alpha,beta){const res=checkWin(b);if(res===0)return-10+depth;if(res===1)return10-depth;if(res===2)return 0;
+  if(isMax){let best=-Infinity;for(let i=0;i<9;i++){if(b[i]>=0)continue;b[i]=1;best=Math.max(best,minimax(b,depth+1,false,alpha,beta));b[i]=-1;alpha=Math.max(alpha,best);if(beta<=alpha)break}return best}
+  else{let best=Infinity;for(let i=0;i<9;i++){if(b[i]>=0)continue;b[i]=0;best=Math.min(best,minimax(b,depth+1,true,alpha,beta));b[i]=-1;beta=Math.min(beta,best);if(beta<=alpha)break}return best}}
+function aiMove(){if(gameover||turn!==0)return;let bestMove=-1,bestVal=-Infinity,b=board.slice();
+  for(let i=0;i<9;i++){if(b[i]>=0)continue;b[i]=1;const val=minimax(b,0,false,-Infinity,Infinity);b[i]=-1;if(val>bestVal){bestVal=val;bestMove=i}}
+  if(bestMove>=0){board[bestMove]=1;turn=1;checkEnd();render()}}
+function checkEnd(){const r=checkWin(board);if(r===0){winner='player';gameover=true;pScore++;document.getElementById('t3-player').textContent=pScore;document.getElementById('turn-indicator').textContent='🎉 你赢了！'}else if(r===1){winner='ai';gameover=true;aiScore++;document.getElementById('t3-ai').textContent=aiScore;document.getElementById('turn-indicator').textContent='😢 AI赢了'}else if(r===2){winner='draw';gameover=true;drawScore++;document.getElementById('t3-draw').textContent=drawScore;document.getElementById('turn-indicator').textContent='🤝 平局'}}
+
+cv.addEventListener('click',e=>{if(gameover||turn!==1)return;const r=cv.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/T),y=Math.floor((e.clientY-r.top)/T);if(x<0||x>=S||y<0||y>=S)return;const i=y*S+x;if(board[i]>=0)return;board[i]=0;turn=0;checkEnd();render();document.getElementById('turn-indicator').textContent='🤖 AI思考中...';if(!gameover)setTimeout(aiMove,200)});
+
+function render(){ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,W);
+  // Grid
+  ctx.strokeStyle='#446';ctx.lineWidth=2;
+  for(let i=1;i<S;i++){ctx.beginPath();ctx.moveTo(i*T,10);ctx.lineTo(i*T,W-10);ctx.stroke();ctx.beginPath();ctx.moveTo(10,i*T);ctx.lineTo(W-10,i*T);ctx.stroke()}
+  // Marks
+  for(let i=0;i<9;i++){const x=i%3*T+T/2,y=Math.floor(i/3)*T+T/2;
+    if(board[i]===0){ctx.strokeStyle='#f44';ctx.lineWidth=3;
+      ctx.beginPath();ctx.moveTo(x-20,y-20);ctx.lineTo(x+20,y+20);ctx.stroke();ctx.beginPath();ctx.moveTo(x+20,y-20);ctx.lineTo(x-20,y+20);ctx.stroke()}
+    else if(board[i]===1){ctx.strokeStyle='#4af';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.stroke()}}
+  // Win line
+  if(winner&&winner!=='draw'){ctx.strokeStyle='#ff0';ctx.lineWidth=3}
+  if(gameover){ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fillRect(0,0,W,W);ctx.fillStyle='#ff0';ctx.font='bold 22px monospace';ctx.textAlign='center';
+    ctx.fillText(winner==='player'?'🎉 你赢了！':winner==='ai'?'😢 AI赢了':'🤝 平局',W/2,W/2-8);ctx.fillStyle='#8af';ctx.font='12px monospace';ctx.fillText('点击重来',W/2,W/2+18)}
+}
+newGame2();render();
+</script>
+</body>
+</html>
