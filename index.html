@@ -88,6 +88,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC',sans
 .viewer-header .back-btn{background:rgba(255,255,255,.06);border:none;color:#e0e0f0;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:.78em}
 .viewer-header .back-btn:hover{background:rgba(139,92,246,.2)}
 .viewer-header .title{font-size:.82em;font-weight:600}
+.viewer-header .hint{font-size:.62em;color:#666}
 .viewer-body{flex:1}
 .viewer-body iframe{width:100%;height:100%;border:none;background:#fff}
 
@@ -140,7 +141,7 @@ footer{text-align:center;padding:24px;color:#555;font-size:.68em;line-height:1.6
   <div class="viewer-header">
     <button class="back-btn" onclick="closeGame()">← 返回</button>
     <span class="title" id="viewerTitle">Loading...</span>
-    <span></span>
+    <span class="hint" id="viewerHint"></span>
   </div>
   <div class="viewer-body"><iframe id="gameFrame" allow="autoplay;fullscreen"></iframe></div>
 </div>
@@ -209,7 +210,37 @@ var GAMES=[
 var CAT_GRAD = {puzzle:'g-puzzle',action:'g-action',arcade:'g-arcade',sport:'g-sport',casino:'g-casino',creative:'g-creative',music:'g-music',classic:'g-classic',viral:'g-viral',hot:'g-hot'};
 var CAT_TAG = {puzzle:'tag-puzzle',action:'tag-action',arcade:'tag-arcade',sport:'tag-sport',casino:'tag-casino',creative:'tag-creative',music:'tag-music',classic:'tag-classic',viral:'tag-hot',hot:'tag-hot'};
 
-var curCat='all',curQ='';
+var curCat='all',curQ='',currentGameIdx=-1;
+
+// Keyboard shortcuts
+document.addEventListener('keydown',function(e){
+  if(currentGameIdx===-1)return;
+  if(e.key==='Escape'){closeGame();e.preventDefault();return;}
+  if(e.key==='ArrowLeft'){e.preventDefault();navigateGame(-1);}
+  if(e.key==='ArrowRight'){e.preventDefault();navigateGame(1);}
+});
+
+function navigateGame(dir){
+  var idx=currentGameIdx+dir;
+  if(idx<0)idx=GAMES.length-1;
+  if(idx>=GAMES.length)idx=0;
+  var g=GAMES[idx];
+  currentGameIdx=idx;
+  document.getElementById('gameFrame').src=g[0]+'.html';
+  document.getElementById('viewerTitle').textContent=g[1]+' '+g[2];
+  highlightGame(idx);
+}
+
+function highlightGame(idx){
+  var cards=document.getElementById('grid').children;
+  for(var i=0;i<cards.length;i++){cards[i].style.outline='';cards[i].style.outlineOffset='';}
+  var tgt=GAMES[idx][2];
+  for(var i=0;i<cards.length;i++){
+    if(cards[i].querySelector('.card-body h3')&&cards[i].querySelector('.card-body h3').textContent===tgt){
+      cards[i].style.outline='2px solid #7c3aed';cards[i].style.outlineOffset='-2px';cards[i].scrollIntoView({behavior:'smooth',block:'nearest'});break;
+    }
+  }
+}
 
 function filter(c){curCat=c;document.querySelectorAll('.cat-btn').forEach(function(b){b.classList.toggle('active',b.textContent.includes(c)||c==='all'&&b===document.querySelector('.cat-btn'));});render();}
 function onSearch(){curQ=document.getElementById('searchBox').value.toLowerCase();render();}
@@ -227,8 +258,15 @@ function render(){
   document.getElementById('count').textContent=n;
 }
 
-function openGame(f,t){document.getElementById('viewer').classList.add('active');document.getElementById('gameFrame').src=f+'.html';document.getElementById('viewerTitle').textContent=t;}
-function closeGame(){document.getElementById('viewer').classList.remove('active');document.getElementById('gameFrame').src='';}
+function openGame(f,t){
+  currentGameIdx=-1;
+  for(var i=0;i<GAMES.length;i++){if(GAMES[i][0]===f){currentGameIdx=i;break;}}
+  document.getElementById('viewer').classList.add('active');
+  document.getElementById('gameFrame').src=f+'.html';
+  document.getElementById('viewerTitle').textContent=t;
+  document.getElementById('viewerHint').textContent='ESC关闭 · ← 上一个 · → 下一个';
+}
+function closeGame(){document.getElementById('viewer').classList.remove('active');document.getElementById('gameFrame').src='';currentGameIdx=-1;}
 render();
 </script>
 </body>
