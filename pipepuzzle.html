@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🔧 水管工 - 热门H5游戏</title>
+<meta name="description" content="经典水管连接Pipe Puzzle游戏，旋转管道连接水源到出口，限时完成通关解谜免费在线">
+<meta property="og:title" content="🔧 水管工 - 热门H5游戏"><meta property="og:description" content="经典水管旋转连接解谜"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"水管工"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0}canvas{display:block;border:1px solid #334;border-radius:6px;max-width:98vw;background:#1a1a2e;cursor:pointer}.btn{margin:4px;padding:4px 14px;border:1px solid #557;border-radius:4px;background:#2a2a4e;color:#8af;cursor:pointer;font-size:12px}</style>
+</head>
+<body>
+<h1>🔧 水管工</h1>
+<div class="stats"><span>📋 <b id="pipe-level">1</b></span><span>🔥 <b id="pipe-moves">0</b></span><span>🏆 <b id="pipe-best">-</b></span></div>
+<canvas id="c" width="320" height="320"></canvas>
+<div><button class="btn" onclick="newPuzzle()">🔄 新谜题</button></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),N=5,S=64,W=320;
+const PIECE_TYPES=['─','│','┐','└','┌','┘','┼']; // 0=H,1=V,2=SE,3=SW,4=NE,5=NW,6=cross
+const CONNECT=[[[0,0,1,1],[0,0,1,1],[0,0,0,0],[0,0,0,0]],// ─ connects left-right
+              [[0,0,0,0],[0,0,0,0],[1,0,0,1],[0,1,1,0]],// │ connects up-down
+              [[0,0,1,1],[0,0,0,0],[0,0,1,1],[0,1,0,0]],// ┐
+              [[0,0,0,0],[0,0,1,1],[0,0,1,1],[0,0,0,1]],// └
+              [[1,0,0,0],[0,0,0,0],[1,0,0,0],[0,0,1,0]],// ┌
+              [[0,0,1,0],[0,0,0,0],[0,0,0,0],[0,0,1,0]],// ┘ wait... let me simplify
+              [[0,0,1,1],[0,0,1,1],[1,1,0,0],[1,1,0,0]]];// ┼ cross all
+
+// Simplify: just use 0=H,1=V,2=curve,3=cross
+const PIPE_CONN=[[1,1,0,0],[0,0,1,1],[1,0,0,1],[0,1,1,0],[1,0,1,0],[0,1,0,1],[1,1,1,1]]; // L,R,U,D for each type
+const TYPES=6;const SYMBOLS=['─','│','┐','└','┌','┘'];
+let grid=[],rows=N,cols=N,level=1,sourceR=0,sourceC=Math.floor(N/2),moves=0,best={},completed=false;
+
+try{const d=JSON.parse(localStorage.getItem('pipe_best')||'{}');best=typeof d==='object'?d:{}}catch(e){}
+document.getElementById('pipe-best').textContent=best[level]||'-';
+
+function newPuzzle(){rows=4+Math.min(level,4);cols=rows;grid=Array.from({length:rows},()=>Array(cols).fill(0));
+  sourceR=0;sourceC=Math.floor(cols/2);moves=0;completed=false;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){if(r===sourceR&&c===sourceC){grid[r][c]=2;continue}// ┐ default
+    const t=Math.floor(Math.random()*TYPES);grid[r][c]=t}
+  document.getElementById('pipe-level').textContent=level;document.getElementById('pipe-moves').textContent='0';render();checkFlow()}
+
+function rotate(r,c){if(completed)return;const t=grid[r][c];grid[r][c]=(t+1)%TYPES;moves++;document.getElementById('pipe-moves').textContent=moves;checkFlow();render()}
+
+function checkFlow(){const visited=new Set();const q=[{r:sourceR,c:sourceC}];visited.add(`${sourceR},${sourceC}`);
+  while(q.length>0){const {r,c}=q.shift();
+    const t=grid[r][c];const conn=PIPE_CONN[t];
+    const dirs=[[0,-1,'L'],[0,1,'R'],[1,0,'D'],[-1,0,'U']];const dirIdx={L:0,R:1,U:2,D:3};
+    dirs.forEach(([dr,dc,dir],i)=>{
+      if(conn[i]===0)return;const nr=r+dr,nc=c+dc;const key=`${nr},${nc}`;
+      if(nr<0||nr>=rows||nc<0||nc>=cols||visited.has(key))return;
+      const nt=grid[nr][nc];const oppIdx={U:3,D:2,L:1,R:0}[dir];const nConn=PIPE_CONN[nt];
+      if(nConn[oppIdx]===1){visited.add(key);q.push({r:nr,c:nc})}})}
+  const allConnected=visited.size===rows*cols;
+  if(allConnected){completed=true;if(!best[level]||moves<best[level]){best[level]=moves;try{localStorage.setItem('pipe_best',JSON.stringify(best))}catch(e)}
+    document.getElementById('pipe-best').textContent=best[level]||'-';setTimeout(()=>{if(confirm(`🎉 通关! 用了${moves}步\n进入下一关?`)){level++;newPuzzle()}},200)}}
+
+cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/S),y=Math.floor((e.clientY-r.top)/S);
+  if(y>=0&&y<rows&&x>=0&&x<cols)rotate(y,x)});
+
+function render(){ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,W);
+  const visited=new Set();
+  if(!completed){const q=[{r:sourceR,c:sourceC}];visited.add(`${sourceR},${sourceC}`);
+    while(q.length>0){const {r,c}=q.shift();const t=grid[r][c];const conn=PIPE_CONN[t];
+      [[0,1,'R'],[1,0,'D'],[-1,0,'U'],[0,-1,'L']].forEach(([dr,dc,dir],i)=>{
+        if(conn[i]===0)return;const nr=r+dr,nc=c+dc;const k=`${nr},${nc}`;
+        if(nr<0||nr>=rows||nc<0||nc>=cols||visited.has(k))return;
+        const nt=grid[nr][nc];const opp={U:3,D:2,L:1,R:0}[dir];if(PIPE_CONN[nt][opp]===1)visited.add(k),q.push({r:nr,c:nc})})}}
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const x=c*S,y=r*S;const connected=visited.has(`${r},${c}`);
+    ctx.fillStyle=connected?'rgba(68,170,68,0.1)':'rgba(0,0,0,0.2)';ctx.fillRect(x,y,S,S);
+    ctx.strokeStyle='#334';ctx.lineWidth=1;ctx.strokeRect(x,y,S,S);
+    drawPipe(x+S/2,y+S/2,grid[r][c],connected);}
+  // Source marker
+  ctx.fillStyle='#ff0';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText('💧',sourceC*S+S/2,sourceR*S+20);
+  if(completed){ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fillRect(0,0,W,W);ctx.fillStyle='#ff0';ctx.font='bold 22px monospace';ctx.textAlign='center';ctx.fillText('🎉 全部连通!',W/2,W/2-5);ctx.fillStyle='#8af';ctx.font='12px monospace';ctx.fillText(`${moves}步  最佳${best[level]||'-'}步`,W/2,W/2+18)}}
+
+function drawPipe(cx,cy,t,on){const s=18;const lw=6;const co=on?'#4f4':'#557';const co2=on?'rgba(100,255,100,0.3)':'rgba(100,100,100,0.2)';
+  ctx.strokeStyle=co;ctx.lineWidth=lw;ctx.lineCap='round';
+  const conn=PIPE_CONN[t];
+  if(conn[0]===1){ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx-s,cy);ctx.stroke()}
+  if(conn[1]===1){ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+s,cy);ctx.stroke()}
+  if(conn[2]===1){ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx,cy-s);ctx.stroke()}
+  if(conn[3]===1){ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx,cy+s);ctx.stroke()}
+  ctx.fillStyle=co2;ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);ctx.fill();ctx.fillStyle=co;ctx.beginPath();ctx.arc(cx,cy,2,0,Math.PI*2);ctx.fill()}
+newPuzzle();
+</script>
+</body>
+</html>
