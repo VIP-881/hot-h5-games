@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>⌨️ 打字速度 - 热门H5游戏</title>
+<meta name="description" content="纯英文打字速度测试Typing Test，30秒限时输入尽可能多的单词，统计WPM准确率免费在线">
+<meta property="og:title" content="⌨️ 打字速度 - 热门H5游戏"><meta property="og:description" content="纯英文打字速度测试"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"打字速度"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none;padding:10px}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0;flex-wrap:wrap;justify-content:center}#words{font-size:1.4em;margin:6px 0;padding:10px;min-height:3em;text-align:center;max-width:380px;background:#2a2a4e;border-radius:8px;word-break:break-word;line-height:1.6}#input{font-size:1.2em;padding:8px 12px;border:2px solid #446;border-radius:8px;background:#0a0a1a;color:#8af;text-align:center;width:280px;outline:none;font-family:monospace}#input:focus{border-color:#8af}#timer{font-size:2em;margin:4px;color:#ff0}#result{font-size:1em;margin:4px;color:#ff0;text-align:center}.btn{margin:4px;padding:6px 18px;border:1px solid #557;border-radius:6px;background:#2a2a4e;color:#8af;cursor:pointer;font-size:14px}.word{display:inline-block;margin:2px 4px;padding:1px 3px;border-radius:3px}.word.active{background:#3a3a6e;color:#fff}.word.done{color:#4a4}.word.wrong{color:#f44;text-decoration:underline}</style>
+</head>
+<body>
+<h1>⌨️ 打字速度</h1>
+<div class="stats"><span>⏱️ <b id="t-time">30</b>s</span><span>📝 <b id="t-wpm">0</b> WPM</span><span>🎯 <b id="t-acc">0</b>%</span><span>🏆 <b id="t-best">0</b></span></div>
+<div id="timer">30</div>
+<div id="words">点击开始打字...</div>
+<input id="input" type="text" placeholder="在此输入..." disabled>
+<div id="result"></div>
+<div><button class="btn" onclick="startTT()">🚀 开始</button></div>
+<script>
+const WORDS=['the','quick','brown','fox','jumps','over','lazy','dog','hello','world','code','type','test','speed','fast','time','game','play','word','list','good','luck','have','fun','more','less','than','this','that','with','from','your','their','which','what','when','where','there','here','about','after','again','could','would','should','think','know','great','learn','build','create','solve','debug','deploy','stack','queue','loop','array','string','class','function','variable','constant','promise','async','await','export','import','module','react','state','props','effect','fetch','route','style'];
+let wordList=[],idx=0,correct=0,total=0,timeLeft=30,timer=null,running=false,best=0;
+try{best=parseInt(localStorage.getItem('tt_best'))||0;document.getElementById('t-best').textContent=best}catch(e){}
+const input=document.getElementById('input'),wordsEl=document.getElementById('words');
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function startTT(){if(running)return;
+  wordList=shuffle([...WORDS]).slice(0,40);idx=0;correct=0;total=0;timeLeft=30;running=true;
+  document.getElementById('t-time').textContent='30';document.getElementById('t-wpm').textContent='0';document.getElementById('t-acc').textContent='0';
+  document.getElementById('timer').textContent='30';document.getElementById('result').textContent='';
+  input.value='';input.disabled=false;input.focus();renderWords();
+  if(timer)clearInterval(timer);
+  timer=setInterval(()=>{timeLeft--;document.getElementById('t-time').textContent=timeLeft;document.getElementById('timer').textContent=timeLeft;
+    if(timeLeft<=0){clearInterval(timer);endTT()}},1000)}
+function endTT(){running=false;input.disabled=true;const wpm=Math.round((correct/30)*60);const acc=total>0?Math.round(correct/total*100):0;
+  document.getElementById('t-wpm').textContent=wpm;document.getElementById('t-acc').textContent=acc;
+  if(wpm>best){best=wpm;document.getElementById('t-best').textContent=wpm;try{localStorage.setItem('tt_best',wpm)}catch(e)}
+  document.getElementById('result').textContent=`⏱️ 时间到! ${correct}个正确 / ${total}个尝试 | ${wpm} WPM | 准确率 ${acc}%`}
+
+function renderWords(){wordsEl.innerHTML='';
+  for(let i=0;i<wordList.length;i++){const span=document.createElement('span');span.className='word'+(i===idx?' active':i<idx?' done':i<idx?' wrong':'');
+    span.textContent=wordList[i];wordsEl.appendChild(span)}wordsEl.children[idx]?.scrollIntoView({block:'center',behavior:'smooth'})}
+
+input.addEventListener('keydown',e=>{if(!running||e.key===' ')e.preventDefault()});
+input.addEventListener('input',()=>{if(!running)return;const val=input.value.trim();
+  if(val.endsWith(' ')){const typed=val.trim().toLowerCase();if(typed.length===0){input.value='';return}
+    total++;if(typed===wordList[idx])correct++;else wordsEl.children[idx]?.classList.add('wrong');
+    idx++;input.value='';renderWords();if(idx>=wordList.length){clearInterval(timer);endTT()}return}});
+startTT();
+</script>
+</body>
+</html>
