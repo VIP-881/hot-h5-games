@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎲 快艇骰子 — 灵犀游戏大厅</title>
+<meta name="description" content="经典快艇骰子（Yahtzee）——掷5颗骰子填13类得分项，策略与运气的完美结合。灵犀游戏大厅收录，免费H5在线游戏。">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0f0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(15,15,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(139,92,246,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#a78bfa;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(139,92,246,.1);transition:.3s}
+nav a:hover{background:rgba(139,92,246,.2)}
+.arena{max-width:500px;margin:15px auto;text-align:center}
+h1{font-size:22px;color:#c084fc;margin-bottom:8px}
+.dice{display:flex;justify-content:center;gap:12px;margin:15px 0;flex-wrap:wrap}
+.die{width:56px;height:56px;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;transition:all .2s;user-select:none;position:relative}
+.die:hover{border-color:rgba(139,92,246,.5);box-shadow:0 0 15px rgba(139,92,246,.2)}
+.die.held{border-color:#c084fc;background:rgba(139,92,246,.15);box-shadow:0 0 12px rgba(139,92,246,.3)}
+.die.rolling{animation:shake .1s ease-in-out infinite}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-15deg)}75%{transform:rotate(15deg)}}
+.rolls{font-size:13px;color:#888;margin:8px 0}
+.rolls span{color:#c084fc;font-weight:600}
+.btn{padding:8px 20px;border-radius:20px;border:1px solid rgba(139,92,246,.3);background:rgba(139,92,246,.1);color:#a78bfa;cursor:pointer;font-size:14px;transition:.3s;margin:3px}
+.btn:hover{background:rgba(139,92,246,.2);border-color:#7c3aed}
+.btn:disabled{opacity:.3;cursor:default}
+.btn.roll{background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border:none;font-size:16px;padding:10px 30px}
+.btn.roll:hover{box-shadow:0 0 20px rgba(139,92,246,.4)}
+.scorecard{display:grid;grid-template-columns:1fr 80px;gap:2px;max-width:400px;margin:15px auto;text-align:left;font-size:13px}
+.row{display:contents}
+.section{grid-column:1/-1;color:var(--accent);font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:8px 0 2px;font-weight:700}
+.scorecard>span{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.04)}
+.lbl{color:#a0a0b0}
+.val{text-align:center;font-weight:600;cursor:pointer;border-radius:6px;transition:.2s}
+.val:hover{background:rgba(139,92,246,.1)}
+.val.filled{color:#888;cursor:default}
+.val.filled:hover{background:transparent}
+.val.hint{background:rgba(139,92,246,.1);color:#c084fc;font-weight:700}
+.total{font-size:16px;font-weight:800;color:#c084fc}
+.bonus{grid-column:1/-1;text-align:right;font-size:12px;color:#888;padding:4px 10px}
+</style>
+
+<meta name="description" content="掷5颗骰子填13类得分项，策略与运气。灵犀游戏大厅收录，免费H5在线游戏，即点即玩。">
+<meta name="keywords" content="快艇骰子,Yahtzee,H5游戏,免费游戏,在线游戏,骰子游戏,灵犀游戏大厅">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://vip-881.github.io/hot-h5-games/yahtzee.html">
+<meta property="og:title" content="🎮 快艇骰子 - 灵犀游戏大厅">
+<meta property="og:description" content="掷5颗骰子填13类得分项，策略与运气。免费H5在线游戏，即点即玩。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vip-881.github.io/hot-h5-games/yahtzee.html">
+<meta property="og:site_name" content="灵犀游戏大厅">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="🎮 快艇骰子 - 灵犀游戏大厅">
+<meta name="twitter:description" content="掷5颗骰子填13类得分项，策略与运气。免费H5在线游戏。">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"快艇骰子","alternateName":"Yahtzee","description":"掷5颗骰子填13类得分项，策略与运气","url":"https://vip-881.github.io/hot-h5-games/yahtzee.html","playMode":"SinglePlayer","applicationCategory":"GameApplication","genre":"Dice","inLanguage":"zh-CN","isAccessibleForFree":true,"isFamilyFriendly":true}</script>
+
+</head>
+<body>
+<nav><a href="index.html">← 返回大厅</a><span>🎲 快艇骰子 Yahtzee</span></nav>
+<div class="arena">
+<h1>🎲 快艇骰子</h1>
+<div class="dice" id="dice"></div>
+<p class="rolls">剩余掷骰次数：<span id="rollsLeft">3</span></p>
+<button class="btn roll" id="rollBtn" onclick="rollDice()">🎲 掷骰子</button>
+<div id="scorecard" class="scorecard"></div>
+<p style="font-size:18px;color:#4ade80;margin-top:8px" id="msg"></p>
+<button class="btn" onclick="newGame()" style="margin-top:10px">🔄 新游戏</button>
+</div>
+
+<script>
+let dice=[1,1,1,1,1], held=[false,false,false,false,false], rolls=0, scores={}, gameOver=false;
+
+const CATEGORIES = [
+  {id:'ones',name:'1点',desc:'所有1点之和',fn:d=>sumEq(d,1),section:'上部'},
+  {id:'twos',name:'2点',desc:'所有2点之和',fn:d=>sumEq(d,2),section:'上部'},
+  {id:'threes',name:'3点',desc:'所有3点之和',fn:d=>sumEq(d,3),section:'上部'},
+  {id:'fours',name:'4点',desc:'所有4点之和',fn:d=>sumEq(d,4),section:'上部'},
+  {id:'fives',name:'5点',desc:'所有5点之和',fn:d=>sumEq(d,5),section:'上部'},
+  {id:'sixes',name:'6点',desc:'所有6点之和',fn:d=>sumEq(d,6),section:'上部'},
+  {id:'3kind',name:'三条',desc:'所有骰子之和',fn:d=>ofAKind(d,3)?sum(d):0,section:'下部'},
+  {id:'4kind',name:'四条',desc:'所有骰子之和',fn:d=>ofAKind(d,4)?sum(d):0,section:'下部'},
+  {id:'fullhouse',name:'葫芦',desc:'三条+一对',fn:d=>fullHouse(d)?25:0,section:'下部'},
+  {id:'smstraight',name:'小顺子',desc:'连续4个数',fn:d=>smStraight(d)?30:0,section:'下部'},
+  {id:'lgstraight',name:'大顺子',desc:'连续5个数',fn:d=>lgStraight(d)?40:0,section:'下部'},
+  {id:'yahtzee',name:'快艇',desc:'五个相同=50分',fn:d=>yahtzee(d)?50:0,section:'下部'},
+  {id:'chance',name:'机会',desc:'所有骰子之和',fn:d=>sum(d),section:'下部'},
+];
+
+function sumEq(d,n){return d.filter(v=>v===n).reduce((a,b)=>a+b,0)}
+function sum(d){return d.reduce((a,b)=>a+b,0)}
+function ofAKind(d,n){let c=counts(d);return c.some(x=>x>=n)}
+function count(d){let c=Array(7).fill(0);d.forEach(v=>c[v]++);return c}
+function counts(d){return count(d).filter(x=>x>0)}
+function fullHouse(d){let c=counts(d);return c.includes(3)&&c.includes(2)}
+function smStraight(d){let s=[...new Set(d)].sort((a,b)=>a-b);for(let i=0;i<=s.length-4;i++) if(s[i+3]-s[i]===3) return true;return false}
+function lgStraight(d){let s=[...new Set(d)].sort((a,b)=>a-b);return s.length===5&&(s[4]-s[0]===4)}
+function yahtzee(d){return new Set(d).size===1}
+
+function rollDice(){
+  if(gameOver||rolls>=3) return;
+  for(let i=0;i<5;i++) if(!held[i]) dice[i]=Math.floor(Math.random()*6)+1;
+  rolls++;
+  document.getElementById('rollsLeft').textContent=3-rolls;
+  if(rolls>=3) document.getElementById('rollBtn').disabled=true;
+  renderDice();
+  renderHints();
+}
+
+function toggleHold(i){
+  if(rolls===0) return;
+  held[i]=!held[i];
+  renderDice();
+}
+
+function renderDice(){
+  let emojis=['','⚀','⚁','⚂','⚃','⚄','⚅'];
+  let d=document.getElementById('dice');
+  d.innerHTML=dice.map((v,i)=>`<div class="die${held[i]?' held':''}" onclick="toggleHold(${i})">${emojis[v]}</div>`).join('');
+}
+
+function scoreCategory(catId){
+  if(gameOver||rolls===0||scores[catId]!==undefined) return;
+  let cat=CATEGORIES.find(c=>c.id===catId);
+  scores[catId]=cat.fn(dice);
+  // Reset for next round
+  dice=[1,1,1,1,1]; held=[false,false,false,false,false]; rolls=0;
+  document.getElementById('rollsLeft').textContent=3;
+  document.getElementById('rollBtn').disabled=false;
+  renderDice();
+  renderScorecard();
+  checkEnd();
+}
+
+function renderHints(){
+  if(rolls===0||gameOver) return;
+  // Highlight possible scores
+  CATEGORIES.forEach(cat=>{
+    if(scores[cat.id]!==undefined) return;
+    let el=document.getElementById('v_'+cat.id);
+    if(el) el.textContent=cat.fn(dice);
+    if(el&&!el.classList.contains('filled')) el.classList.add('hint');
+  });
+}
+
+function renderScorecard(){
+  let sc=document.getElementById('scorecard');
+  let html='';
+  let upperSum=0,upperBonus=0,totalScore=0;
+  let sections=[];
+  
+  CATEGORIES.forEach(cat=>{
+    if(!sections.includes(cat.section)){
+      if(sections.length>0){
+        html+=`<div class="bonus">上部合计: ${upperSum} ${upperSum>=63?'✅ +35分奖励!':'(需≥63)'}</div>`;
+        upperBonus=upperSum>=63?35:0;
+      }
+      sections.push(cat.section);
+      html+=`<span class="section">${cat.section}</span>`;
+    }
+    let val=scores[cat.id];
+    let filled=val!==undefined;
+    html+=`<span class="lbl" title="${cat.desc}">${cat.name}</span>`;
+    html+=`<span class="val${filled?' filled':''}" id="v_${cat.id}" onclick="scoreCategory('${cat.id}')">${filled?val:rolls>0?cat.fn(dice):'—'}</span>`;
+    if(cat.section==='上部'&&filled) upperSum+=val;
+  });
+  html+=`<div class="bonus">上部合计: ${upperSum} ${upperBonus?'+35=奖励':'(需≥63)'}</div>`;
+  
+  // Calculate total
+  totalScore=upperBonus;
+  Object.values(scores).forEach(v=>totalScore+=v);
+  // Bonus yahtzee
+  if(scores.yahtzee===50&&yahtzeeBonus) totalScore+=100;
+  
+  html+=`<span class="total">总计</span><span class="total">${totalScore}</span>`;
+  sc.innerHTML=html;
+  document.getElementById('msg').textContent=gameOver?`🎉 最终得分: ${totalScore}`:'';
+}
+
+function checkEnd(){
+  if(Object.keys(scores).length>=13){
+    gameOver=true;
+    document.getElementById('rollBtn').disabled=true;
+    renderScorecard();
+    let total=0;
+    let upperSum=0;
+    CATEGORIES.forEach(c=>{
+      if(c.section==='上部') upperSum+=scores[c.id]||0;
+      total+=scores[c.id]||0;
+    });
+    if(upperSum>=63) total+=35;
+    let best=localStorage.getItem('yahtzee_best');
+    if(!best||total>parseInt(best)){
+      localStorage.setItem('yahtzee_best',total);
+      document.getElementById('msg').textContent=`🎉 最终得分: ${total} 🆕 新纪录！`;
+    } else {
+      document.getElementById('msg').textContent=`🎉 最终得分: ${total} (纪录: ${best})`;
+    }
+  }
+}
+
+function newGame(){
+  scores={}; dice=[1,1,1,1,1]; held=[false,false,false,false,false]; rolls=0; gameOver=false;
+  document.getElementById('rollsLeft').textContent=3;
+  document.getElementById('rollBtn').disabled=false;
+  document.getElementById('msg').textContent='';
+  renderDice();
+  renderScorecard();
+}
+
+renderDice(); renderScorecard();
+</script>
+</body>
+</html>
