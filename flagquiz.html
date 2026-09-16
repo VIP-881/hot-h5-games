@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🏴 国旗猜猜 - 热门H5游戏</title>
+<meta name="description" content="世界国旗识别知识问答，猜国家名称根据国旗图案，涵盖30个主要国家免费在线">
+<meta property="og:title" content="🏴 国旗猜猜 - 热门H5游戏"><meta property="og:description" content="世界国旗识别大挑战"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"国旗猜猜"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none;padding:10px}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0}#flag{font-size:5em;margin:8px;line-height:1;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3))}#q{font-size:1em;margin:6px;color:#ff0;text-align:center}#opts{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:320px}.opt{padding:6px 14px;border:2px solid #446;border-radius:6px;background:#2a2a4e;color:#8af;cursor:pointer;text-align:center;font-size:13px;min-width:80px}.opt:hover{border-color:#8af}.opt.correct{background:#1a4a1a;border-color:#4a4;color:#4f4}.opt.wrong{background:#4a1a1a;border-color:#a44;color:#f44}.opt.disabled{opacity:0.4;pointer-events:none}#result{font-size:1em;margin:4px;color:#ff0}.btn{margin:6px;padding:6px 18px;border:1px solid #557;border-radius:6px;background:#2a2a4e;color:#8af;cursor:pointer;font-size:13px}</style>
+</head>
+<body>
+<h1>🏴 国旗猜猜</h1>
+<div class="stats"><span>✅ <b id="fg-correct">0</b></span><span>📋 <b id="fg-num">0</b>/10</span><span>🏆 <b id="fg-best">0</b></span></div>
+<div id="flag">🇨🇳</div>
+<div id="q">下面哪个国家?</div>
+<div id="opts"></div>
+<div id="result"></div>
+<div><button class="btn" onclick="startFG()">🔄 新游戏</button></div>
+<script>
+const FLAGS=[{f:'🇨🇳',n:'中国',alt:['中华人民共和国','China']},{f:'🇺🇸',n:'美国',alt:['USA','美利坚']},{f:'🇬🇧',n:'英国',alt:['UK','大不列颠']},{f:'🇯🇵',n:'日本',alt:['Japan']},{f:'🇰🇷',n:'韩国',alt:['South Korea']},{f:'🇫🇷',n:'法国',alt:['France']},{f:'🇩🇪',n:'德国',alt:['Germany']},{f:'🇮🇹',n:'意大利',alt:['Italy']},{f:'🇪🇸',n:'西班牙',alt:['Spain']},{f:'🇷🇺',n:'俄罗斯',alt:['Russia']},{f:'🇧🇷',n:'巴西',alt:['Brazil']},{f:'🇮🇳',n:'印度',alt:['India']},{f:'🇦🇺',n:'澳大利亚',alt:['Australia']},{f:'🇨🇦',n:'加拿大',alt:['Canada']},{f:'🇲🇽',n:'墨西哥',alt:['Mexico']},{f:'🇳🇱',n:'荷兰',alt:['Netherlands']},{f:'🇸🇪',n:'瑞典',alt:['Sweden']},{f:'🇨🇭',n:'瑞士',alt:['Switzerland']},{f:'🇳🇴',n:'挪威',alt:['Norway']},{f:'🇩🇰',n:'丹麦',alt:['Denmark']},{f:'🇫🇮',n:'芬兰',alt:['Finland']},{f:'🇵🇹',n:'葡萄牙',alt:['Portugal']},{f:'🇬🇷',n:'希腊',alt:['Greece']},{f:'🇹🇷',n:'土耳其',alt:['Turkey']},{f:'🇸🇬',n:'新加坡',alt:['Singapore']},{f:'🇲🇾',n:'马来西亚',alt:['Malaysia']},{f:'🇹🇭',n:'泰国',alt:['Thailand']},{f:'🇻🇳',n:'越南',alt:['Vietnam']},{f:'🇦🇷',n:'阿根廷',alt:['Argentina']},{f:'🇿🇦',n:'南非',alt:['South Africa']}];
+let questions=[],idx=0,correct=0,best=0,answered=false;
+try{best=parseInt(localStorage.getItem('flag_best'))||0;document.getElementById('fg-best').textContent=best}catch(e){}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function startFG(){questions=shuffle([...FLAGS]).slice(0,10);idx=0;correct=0;answered=false;
+  document.getElementById('fg-correct').textContent='0';document.getElementById('fg-num').textContent='0/10';document.getElementById('result').textContent='';showQ()}
+function showQ(){if(idx>=10){document.getElementById('flag').textContent='🏆';document.getElementById('q').textContent='🎉 完成!';document.getElementById('opts').innerHTML='';
+    if(correct>best){best=correct;document.getElementById('fg-best').textContent=best;try{localStorage.setItem('flag_best',best)}catch(e)}
+    document.getElementById('result').textContent=`最终得分: ${correct}/10`;return}
+  const q=questions[idx];document.getElementById('flag').textContent=q.f;document.getElementById('fg-num').textContent=`${idx+1}/10`;answered=false;
+  const opts=document.getElementById('opts');opts.innerHTML='';
+  const options=shuffle([q,...shuffle(FLAGS.filter(f=>f!==q)).slice(0,3)]);
+  options.forEach(o=>{const btn=document.createElement('div');btn.className='opt';btn.textContent=o.n;
+    btn.addEventListener('click',()=>{if(answered)return;answered=true;document.querySelectorAll('.opt').forEach(b=>b.classList.add('disabled'));
+      if(o===q){btn.classList.add('correct');correct++;document.getElementById('fg-correct').textContent=correct;document.getElementById('result').textContent='✅ 正确!'}
+      else{btn.classList.add('wrong');document.querySelectorAll('.opt').forEach((b,i)=>{if(options[i]===q)b.classList.add('correct')});
+        document.getElementById('result').textContent=`❌ 正确答案: ${q.n}`}
+      setTimeout(()=>{idx++;document.getElementById('result').textContent='';showQ()},1200)});opts.appendChild(btn)})}
+startFG();
+</script>
+</body>
+</html>
