@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎯 瞄准训练 - 热门H5游戏</title>
+<meta name="description" content="FPS瞄准训练Aim Trainer，快速点击弹出目标测试反应速度和精准度免费在线">
+<meta property="og:title" content="🎯 瞄准训练 - 热门H5游戏"><meta property="og:description" content="FPS瞄准训练反应测试"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"瞄准训练"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#8af;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0}canvas{display:block;border:1px solid #224;border-radius:6px;max-width:98vw;background:#0a0a1a;cursor:crosshair}.btn{margin:4px;padding:4px 14px;border:1px solid #446;border-radius:4px;background:#162a4a;color:#8af;cursor:pointer;font-size:12px;padding:6px 20px}</style>
+</head>
+<body>
+<h1>🎯 瞄准训练</h1>
+<div class="stats"><span>🎯 <b id="aim-hits">0</b></span><span>💨 <b id="aim-misses">0</b></span><span>⏱️ <b id="aim-time">30</b>s</span><span>🏆 <b id="aim-best">0</b></span></div>
+<canvas id="c" width="400" height="400"></canvas>
+<div><button class="btn" onclick="startAim()">🚀 开始</button></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=400,H=400;
+let targets=[],hits=0,misses=0,timeLeft=30,gameover=true,best=0,timer=null;
+try{best=parseInt(localStorage.getItem('aim_best'))||0;document.getElementById('aim-best').textContent=best}catch(e){}
+
+function startAim(){targets=[];hits=0;misses=0;timeLeft=30;gameover=false;
+  document.getElementById('aim-hits').textContent='0';document.getElementById('aim-misses').textContent='0';document.getElementById('aim-time').textContent='30';
+  if(timer)clearInterval(timer);spawnTarget();timer=setInterval(()=>{timeLeft--;document.getElementById('aim-time').textContent=timeLeft;
+    if(timeLeft<=0){clearInterval(timer);gameover=true;if(hits>best){best=hits;document.getElementById('aim-best').textContent=best;try{localStorage.setItem('aim_best',best)}catch(e)}render()}
+    // Spawn a target periodically
+    if(Math.random()<0.15&&targets.length<5)spawnTarget();
+    // Shrink targets
+    for(let i=targets.length-1;i>=0;i--){targets[i].r-=0.15;if(targets[i].r<=0)targets.splice(i,1)}},1000);render()}
+
+function spawnTarget(){targets.push({x:20+Math.random()*(W-40),y:20+Math.random()*(H-40),r:15+Math.random()*15,vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2,maxR:0})}
+
+cv.addEventListener('click',e=>{if(gameover)return;const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let hit=false;
+  for(let i=targets.length-1;i>=0;i--){const t=targets[i];if(Math.hypot(x-t.x,y-t.y)<t.r){targets.splice(i,1);hits++;hit=true;document.getElementById('aim-hits').textContent=hits;spawnTarget();break}}
+  if(!hit){misses++;document.getElementById('aim-misses').textContent=misses}render()});
+
+function render(){ctx.fillStyle='#0a0a1a';ctx.fillRect(0,0,W,H);
+  // Grid crosshair
+  ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=1;ctx.setLineDash([5,10]);
+  for(let i=0;i<W;i+=40){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,H);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(W,i);ctx.stroke()}ctx.setLineDash([]);
+  // Targets
+  for(const t of targets){const grad=ctx.createRadialGradient(t.x-4,t.y-4,2,t.x,t.y,t.r);
+    grad.addColorStop(0,'#f84');grad.addColorStop(0.5,'#f44');grad.addColorStop(1,'#a22');
+    ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();ctx.arc(t.x-3,t.y-3,t.r*0.4,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(t.x-12,t.y);ctx.lineTo(t.x+12,t.y);ctx.stroke();ctx.beginPath();ctx.moveTo(t.x,t.y-12);ctx.lineTo(t.x,t.y+12);ctx.stroke()}
+  // Crosshair
+  ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1;
+  // Game over
+  if(gameover){ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fillRect(0,0,W,H);
+    if(timeLeft<=0){ctx.fillStyle='#ff0';ctx.font='bold 26px monospace';ctx.textAlign='center';ctx.fillText('⏱️ 时间到!',W/2,H/2-15);ctx.fillStyle='#8af';ctx.font='14px monospace';ctx.fillText(`命中: ${hits}  最高: ${best}`,W/2,H/2+15)}else{ctx.fillStyle='#ff0';ctx.font='bold 20px monospace';ctx.fillText('🎯 点击开始',W/2,H/2)}}}
+startAim();render();
+</script>
+</body>
+</html>
