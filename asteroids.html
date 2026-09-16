@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🪐 小行星 - 热门H5游戏</title>
+<meta name="description" content="经典小行星射击游戏，驾驶飞船在太空击碎岩石，躲避碎片生存得分免费在线">
+<meta property="og:title" content="🪐 小行星 - 热门H5游戏"><meta property="og:description" content="经典太空射击，击碎小行星"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"小行星"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#8af;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.4em;margin:4px 0}.stats{display:flex;gap:12px;margin:4px 0;font-size:0.85em}canvas{display:block;border:1px solid #335;border-radius:6px;max-width:98vw;background:#0a0a1a}</style>
+</head>
+<body>
+<h1>🪐 小行星</h1>
+<div class="stats"><span>💫 <b id="score">0</b></span><span>👾 <b id="level">1</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="600" height="500"></canvas>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=600,H=500;
+let ship={x:W/2,y:H/2,a:0,speed:0,vx:0,vy:0,radius:12,alive:true,invincible:0};
+let bullets=[],asteroids=[],particles=[],score=0,level=1,best=0;
+let keys={},running=true,gameover=false;
+try{best=parseInt(localStorage.getItem('ast_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function spawnAsteroids(n,lvl){for(let i=0;i<n;i++){const r=15+Math.random()*35;let a={x:Math.random()*W,y:Math.random()*H,r,r,dx:(Math.random()-0.5)*2*lvl,dy:(Math.random()-0.5)*2*lvl,rot:Math.random()*6,rotS:(Math.random()-0.5)*0.05,verts:[]};const v=8+Math.floor(Math.random()*6);for(let j=0;j<v;j++)a.verts.push(r*(0.7+Math.random()*0.3));while(Math.hypot(a.x-W/2,a.y-H/2)<120){a.x=Math.random()*W;a.y=Math.random()*H}asteroids.push(a)}}
+spawnAsteroids(4,1);
+
+function reset(){ship={x:W/2,y:H/2,a:0,speed:0,vx:0,vy:0,radius:12,alive:true,invincible:120};bullets=[];particles=[];score=0;level=1;gameover=false;asteroids=[];spawnAsteroids(4,1);document.getElementById('score').textContent='0';document.getElementById('level').textContent='1'}
+
+function fire(){if(!ship.alive||gameover)return;const spd=6;bullets.push({x:ship.x,y:ship.y,dx:Math.cos(ship.a)*spd,dy:Math.sin(ship.a)*spd,life:60})}
+document.addEventListener('keydown',e=>{keys[e.key]=true;if(e.key===' '){e.preventDefault();if(gameover)reset();else fire()}});
+document.addEventListener('keyup',e=>keys[e.key]=false);
+cv.addEventListener('click',()=>{if(gameover)reset();else fire()});
+
+function spawnParticles(x,y,n,color){for(let i=0;i<n;i++)particles.push({x,y,dx:(Math.random()-0.5)*4,dy:(Math.random()-0.5)*4,life:30+Math.random()*20,maxLife:50,color:color||'#8af'})}
+
+function splitAsteroid(a,idx){const r=a.r;if(r<22)return;const n=2+Math.floor(Math.random()*2);for(let i=0;i<n;i++){const nr=r*0.45;let na={x:a.x+(Math.random()-0.5)*10,y:a.y+(Math.random()-0.5)*10,r:nr,dx:(Math.random()-0.5)*4+Math.sign(a.dx||0.1)*1.5,dy:(Math.random()-0.5)*4+Math.sign(a.dy||0.1)*1.5,rot:Math.random()*6,rotS:(Math.random()-0.5)*0.08,verts:[]};const v=6+Math.floor(Math.random()*5);for(let j=0;j<v;j++)na.verts.push(nr*(0.65+Math.random()*0.35));asteroids.push(na)}}
+
+function update(){if(gameover)return;
+  // Ship controls
+  if(ship.alive){if(keys['ArrowLeft']||keys['a'])ship.a-=0.06;if(keys['ArrowRight']||keys['d'])ship.a+=0.06;if(keys['ArrowUp']||keys['w']){ship.speed=Math.min(ship.speed+0.15,4);spawnParticles(ship.x-Math.cos(ship.a)*12,ship.y-Math.sin(ship.a)*12,1,'#f84')}else ship.speed*=0.97;ship.vx=Math.cos(ship.a)*ship.speed;ship.vy=Math.sin(ship.a)*ship.speed;ship.x+=ship.vx;ship.y+=ship.vy;if(ship.x<0)ship.x=W;if(ship.x>W)ship.x=0;if(ship.y<0)ship.y=H;if(ship.y>H)ship.y=0;if(ship.invincible>0)ship.invincible--}
+  // Bullets
+  for(let i=bullets.length-1;i>=0;i--){const b=bullets[i];b.x+=b.dx;b.y+=b.dy;b.life--;if(b.life<=0||b.x<0||b.x>W||b.y<0||b.y>H){bullets.splice(i,1);continue}
+    // Hit asteroids
+    for(let j=asteroids.length-1;j>=0;j--){const a=asteroids[j];if(Math.hypot(b.x-a.x,b.y-a.y)<a.r){bullets.splice(i,1);spawnParticles(a.x,a.y,15,'#fa4');const pts=Math.max(10,Math.floor(40-a.r));score+=pts;document.getElementById('score').textContent=score;splitAsteroid(a,j);asteroids.splice(j,1);if(asteroids.length===0){level++;document.getElementById('level').textContent=level;spawnAsteroids(4+level,level)}break}}}
+  // Asteroids
+  for(const a of asteroids){a.x+=a.dx;a.y+=a.dy;a.rot+=a.rotS;if(a.x<-a.r)a.x=W+a.r;if(a.x>W+a.r)a.x=-a.r;if(a.y<-a.r)a.y=H+a.r;if(a.y>H+a.r)a.y=-a.r}
+  // Ship vs asteroids
+  if(ship.alive&&ship.invincible<=0)for(const a of asteroids){if(Math.hypot(ship.x-a.x,ship.y-a.y)<ship.radius+a.r){spawnParticles(ship.x,ship.y,30,'#f44');ship.alive=false;gameover=true;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('ast_best',best)}catch(e)}}}
+  // Particles
+  for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.dx;p.y+=p.dy;p.life--;if(p.life<=0)particles.splice(i,1)}
+}
+
+function draw(){
+  ctx.fillStyle='#0a0a1a';ctx.fillRect(0,0,W,H);
+  // Stars
+  ctx.fillStyle='#fff';for(let i=0;i<60;i++){const sx=(i*137.5)%W,sy=(i*97.3)%H;ctx.globalAlpha=0.3+0.7*(i%3)/3;ctx.fillRect(sx,sy,1.5,1.5)}ctx.globalAlpha=1;
+  // Asteroids
+  for(const a of asteroids){ctx.save();ctx.translate(a.x,a.y);ctx.rotate(a.rot);ctx.strokeStyle='#889';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<=a.verts.length;i++){const j=i%a.verts.length;const ang=(j/a.verts.length)*Math.PI*2;const r=a.verts[j];if(i===0)ctx.moveTo(Math.cos(ang)*r,Math.sin(ang)*r);else ctx.lineTo(Math.cos(ang)*r,Math.sin(ang)*r)}ctx.closePath();ctx.stroke();ctx.restore()}
+  // Bullets
+  ctx.fillStyle='#ff8';for(const b of bullets){ctx.beginPath();ctx.arc(b.x,b.y,2.5,0,Math.PI*2);ctx.fill()}
+  // Ship
+  if(ship.alive){if(ship.invincible>0&&Math.floor(ship.invincible/4)%2===0){}else{ctx.save();ctx.translate(ship.x,ship.y);ctx.rotate(ship.a);ctx.strokeStyle='#8af';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(18,0);ctx.lineTo(-12,-10);ctx.lineTo(-8,0);ctx.lineTo(-12,10);ctx.closePath();ctx.stroke();ctx.restore()}}
+  // Particles
+  for(const p of particles){const alpha=p.life/p.maxLife;ctx.globalAlpha=alpha;ctx.fillStyle=p.color||'#8af';ctx.fillRect(p.x-1.5,p.y-1.5,3,3)}ctx.globalAlpha=1;
+  // Game over
+  if(gameover){ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#f44';ctx.font='bold 28px monospace';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-15);ctx.fillStyle='#8af';ctx.font='14px monospace';ctx.fillText(`得分: ${score}  点击重来`,W/2,H/2+15)}
+}
+
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
