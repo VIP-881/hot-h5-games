@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🐸 过河蛙 - 热门H5游戏</title>
+<meta name="description" content="经典青蛙过河游戏，穿越车流和河流抵达对岸，方向键或滑屏控制免费在线">
+<meta property="og:title" content="🐸 过河蛙 - 热门H5游戏"><meta property="og:description" content="经典青蛙穿越车流和河流"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"过河蛙"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.4em;margin:4px 0}.stats{display:flex;gap:12px;margin:4px 0;font-size:0.85em}canvas{display:block;border:1px solid #333;border-radius:6px;max-width:98vw;background:#111}</style>
+</head>
+<body>
+<h1>🐸 过河蛙</h1>
+<div class="stats"><span>🏆 <b id="frog-score">0</b></span><span>❤️ <b id="frog-lives">3</b></span><span>🏆 <b id="frog-best">0</b></span></div>
+<canvas id="c" width="400" height="480"></canvas>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=400,H=480,T=40,COLS=10,ROWS=12;
+let frog={x:4,y:11,ox:4,oy:11},score=0,lives=3,best=0,moving=false,gameover=false,level=1;
+const lanes=[];
+function initLanes(){lanes.length=0;
+  const laneData=[{t:'safe',c:'#2a4'},{t:'road',c:'#444',d:1,s:1.5},{t:'road',c:'#444',d:-1,s:2},{t:'road',c:'#555',d:1,s:1},
+  {t:'safe',c:'#2a4'},{t:'river',c:'#24a',d:-1,s:1.2},{t:'river',c:'#24a',d:1,s:1.8},{t:'river',c:'#24a',d:-1,s:1.4},
+  {t:'safe',c:'#2a4'},{t:'road',c:'#555',d:-1,s:2.5},{t:'road',c:'#444',d:1,s:1.8},{t:'road',c:'#555',d:-1,s:1.2}];
+  for(let i=0;i<ROWS;i++){const ld=laneData[i];lanes.push({...ld,y:i,items:[]});
+    if(ld.t==='road'){const n=1+Math.floor(Math.random()*2);for(let j=0;j<n;j++)ld.items.push({x:Math.random()*W,w:30+Math.random()*25,c:['#e55','#ea5','#5ae','#5a5'][j%4]})}
+    if(ld.t==='river'){const n=2+Math.floor(Math.random()*2);for(let j=0;j<n;j++)ld.items.push({x:Math.random()*W,w:50+Math.random()*30})}}}
+initLanes();
+try{best=parseInt(localStorage.getItem('frog_best'))||0;document.getElementById('frog-best').textContent=best}catch(e){}
+
+function reset(){frog.x=4;frog.y=11;frog.ox=4;frog.oy=11;moving=false;gameover=false}
+function fullReset(){reset();score=0;lives=3;level=1;initLanes();document.getElementById('frog-score').textContent='0';document.getElementById('frog-lives').textContent='3'}
+function move(dx,dy){if(moving||gameover)return;const nx=frog.x+dx,ny=frog.y+dy;if(nx<0||nx>=COLS||ny<0||ny>=ROWS)return;frog.ox=frog.x;frog.oy=frog.y;frog.x=nx;frog.y=ny;moving=true;setTimeout(()=>{moving=false},150)}
+
+document.addEventListener('keydown',e=>{if(gameover)fullReset();const k=e.key;if(k==='ArrowUp')move(0,-1);else if(k==='ArrowDown')move(0,1);else if(k==='ArrowLeft')move(-1,0);else if(k==='ArrowRight')move(1,0)});
+cv.addEventListener('click',()=>{if(gameover)fullReset();move(0,-1)});
+let tx=0,ty=0;
+cv.addEventListener('touchstart',e=>{const t=e.touches[0];tx=t.clientX;ty=t.clientY});
+cv.addEventListener('touchend',e=>{if(gameover)fullReset();const dx=tx-(e.changedTouches[0]?.clientX||tx),dy=ty-(e.changedTouches[0]?.clientY||ty);const adx=Math.abs(dx),ady=Math.abs(dy);if(adx>ady&&adx>20)move(dx>0?-1:1,0);else if(ady>20)move(0,dy>0?-1:1)});
+
+function update(){if(gameover)return;if(moving)return;
+  const lane=lanes[frog.y];if(!lane)return;
+  // Update lane items
+  for(const l of lanes){if(l.t==='road')for(const v of l.items){v.x+=v.w/80*l.d*l.s*level;if(v.x>W+50)v.x=-50;if(v.x<-60)v.x=W+50}
+    if(l.t==='river')for(const v of l.items){v.x+=v.w/100*l.d*l.s*level;if(v.x>W+60)v.x=-60;if(v.x<-70)v.x=W+60}}
+  // Check collision
+  const fx=frog.x*T+T/2,fy=frog.y*T+T/2;
+  if(lane.t==='road'){for(const v of lane.items){if(fx>v.x&&fx<v.x+v.w&&Math.abs(fy-(v.y*T+T/2))<T/2){die();return}}}
+  if(lane.t==='river'){let onLog=false;for(const v of lane.items){if(fx>v.x&&fx<v.x+v.w){onLog=true;move(v.d>0?1:-1,0);break}}if(!onLog){die();return}}
+  if(lane.t==='safe'&&frog.y===0){score+=10*level;document.getElementById('frog-score').textContent=score;level++;frog.x=4;frog.y=11;if(level>5){initLanes()}if(score>best){best=score;document.getElementById('frog-best').textContent=best;try{localStorage.setItem('frog_best',best)}catch(e)}}}
+function die(){lives--;document.getElementById('frog-lives').textContent=lives;if(lives<=0){gameover=true;if(score>best){best=score;document.getElementById('frog-best').textContent=best;try{localStorage.setItem('frog_best',best)}catch(e)}}else reset()}
+
+function draw(){
+  ctx.fillStyle='#111';ctx.fillRect(0,0,W,H);
+  for(let y=0;y<ROWS;y++){const l=lanes[y];ctx.fillStyle=l.c;ctx.fillRect(0,y*T,W,T);
+    if(l.t==='road'){ctx.fillStyle='#ff0';ctx.globalAlpha=0.15;for(let x=0;x<W;x+=20)ctx.fillRect(x,y*T+T/2-1,10,2);ctx.globalAlpha=1;
+      for(const v of l.items){ctx.fillStyle=v.c;ctx.beginPath();ctx.roundRect(v.x,y*T+4,v.w,T-8,4);ctx.fill()}}
+    if(l.t==='river'){ctx.fillStyle='rgba(255,255,255,0.08)';for(let x=0;x<W;x+=25)ctx.fillRect((x+Date.now()*0.02*l.d)%W,y*T+5,12,2);
+      for(const v of l.items){ctx.fillStyle='#8b5';ctx.beginPath();ctx.roundRect(v.x,y*T+6,v.w,T-12,6);ctx.fill();ctx.fillStyle='#6a4';ctx.beginPath();ctx.roundRect(v.x+3,y*T+8,v.w-6,T-16,4);ctx.fill()}}}
+  // Frog
+  ctx.fillStyle=frog.y<=3?'#4f4':'#5c5';const fx=frog.x*T+T/2,fy=frog.y*T+T/2;ctx.beginPath();ctx.arc(fx,fy-2,T/2-4,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff';ctx.fillRect(fx-4,fy-6,3,3);ctx.fillRect(fx+1,fy-6,3,3);ctx.fillStyle='#111';ctx.fillRect(fx-3,fy-5,2,2);ctx.fillRect(fx+1,fy-5,2,2);
+  ctx.strokeStyle='#3a3';ctx.lineWidth=2;ctx.beginPath();ctx.arc(fx,fy+2,T/2-3,0.2,Math.PI-0.2);ctx.stroke();
+  if(gameover){ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#f44';ctx.font='bold 24px monospace';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-10);ctx.fillStyle='#fff';ctx.font='13px monospace';ctx.fillText(`得分: ${score}  点击重来`,W/2,H/2+18)}}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
