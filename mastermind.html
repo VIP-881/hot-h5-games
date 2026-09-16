@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🔐 破译密码 - 热门H5游戏</title>
+<meta name="description" content="经典破译密码游戏Mastermind，根据提示猜出隐藏的颜色组合，每次反馈对错位免费在线">
+<meta property="og:title" content="🔐 破译密码 - 热门H5游戏"><meta property="og:description" content="经典密码破译逻辑推理游戏"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"破译密码"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.4em;margin:4px 0}.stats{font-size:0.85em;margin:4px 0}canvas{display:block;border:1px solid #334;border-radius:6px;max-width:98vw;background:#1a1a2e;cursor:pointer}.colors{display:flex;gap:4px;margin:4px 0;padding:4px}.cbtn{width:28px;height:28px;border-radius:50%;border:2px solid #557;cursor:pointer}.cbtn:hover{border-color:#8af}.cbtn.active{border-color:#ff0}</style>
+</head>
+<body>
+<h1>🔐 破译密码</h1>
+<div class="stats"><span>📋 <b id="master-row">0</b>/10</span><span>🏆 <b id="master-best">-</b></span></div>
+<canvas id="c" width="280" height="420"></canvas>
+<div id="palette" class="colors"></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=280,H=420,COLS=4,ROWS=10,COLORS=['#f44','#fa0','#ff0','#0a0','#44f','#c4f'];
+let secret=[],board=[],feedback=[],row=0,pos=0,selectedColor=0,gameover=false;
+let best=99;try{const v=parseInt(localStorage.getItem('master_best'));if(v)best=v}catch(e){}
+document.getElementById('master-best').textContent=best<99?best:'-';
+function newGame(){secret=[];for(let i=0;i<COLS;i++)secret.push(Math.floor(Math.random()*COLORS.length));
+  board=Array.from({length:ROWS},()=>Array(COLS).fill(-1));feedback=Array.from({length:ROWS},()=>[0,0]);
+  row=0;pos=0;gameover=false;render();document.getElementById('master-row').textContent='0'}
+function checkGuess(){const g=board[row];let exact=0,color=0;const sCopy=[...secret],gCopy=[...g];
+  for(let i=0;i<COLS;i++)if(g[i]===secret[i]){exact++;sCopy[i]=-1;gCopy[i]=-1}
+  for(let i=0;i<COLS;i++){if(gCopy[i]===-1)continue;for(let j=0;j<COLS;j++)if(gCopy[i]===sCopy[j]){color++;sCopy[j]=-1;break}}
+  feedback[row]=[exact,color];if(exact===COLS){gameover=true;if(row+1<best){best=row+1;document.getElementById('master-best').textContent=best;try{localStorage.setItem('master_best',best)}catch(e)}setTimeout(()=>alert(`🎉 破解成功！用了${row+1}次`),200)}else{row++;pos=0;document.getElementById('master-row').textContent=Math.min(row,ROWS);if(row>=ROWS){gameover=true;setTimeout(()=>alert(`😢 失败！密码是: ${secret.map(c=>'🔴🟠🟡🟢🔵🟣'[c]).join(' ')}`),200)}}}
+
+cv.addEventListener('click',e=>{if(gameover){newGame();return}if(row>=ROWS)return;
+  const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+  // Click on answer row
+  const startY=H-40-60*row-5;
+  if(y>startY&&y<startY+50){const slot=Math.floor((x-20)/60);if(slot>=0&&slot<COLS){board[row][slot]=selectedColor;render();return}}
+  // Click submit
+  if(y>H-30&&x>W/2-30&&x<W/2+30){if(board[row].every(c=>c>=0))checkGuess();render();return}});
+
+function render(){ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  for(let r=0;r<ROWS;r++){const y=H-40-60*r-5;const isActive=r===row&&!gameover;
+    // Row bg
+    ctx.fillStyle=isActive?'rgba(255,255,255,0.05)':'transparent';ctx.fillRect(15,y-2,W-30,52);
+    // Slots
+    for(let c=0;c<COLS;c++){const x=20+c*60;const val=board[r][c];
+      ctx.strokeStyle=isActive?'#557':'#334';ctx.lineWidth=isActive&&c===pos?2:1;ctx.fillStyle=val>=0?COLORS[val]:'#222';ctx.beginPath();ctx.arc(x+25,y+25,18,0,Math.PI*2);ctx.fill();ctx.stroke()}
+    // Feedback
+    for(let i=0;i<COLS;i++){const fx=W-48+(i%2)*20,fy=y+8+Math.floor(i/2)*20;
+      ctx.fillStyle=i<feedback[r][0]?'#4f4':i<feedback[r][0]+feedback[r][1]?'#fa0':'#222';ctx.beginPath();ctx.arc(fx,fy,5,0,Math.PI*2);ctx.fill()}}
+  // Submit button
+  if(!gameover){ctx.fillStyle='#2a2a4e';ctx.beginPath();ctx.roundRect(W/2-25,H-28,50,22,4);ctx.fill();ctx.fillStyle='#8af';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText('确认',W/2,H-12)}
+  if(gameover){ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#ff0';ctx.font='bold 18px monospace';ctx.textAlign='center';ctx.fillText('🎉 点击重来',W/2,H/2)}}
+
+// Color palette
+const pal=document.getElementById('palette');
+COLORS.forEach((c,i)=>{const btn=document.createElement('div');btn.className='cbtn';btn.style.background=c;btn.dataset.idx=i;
+  btn.addEventListener('click',()=>{selectedColor=i;document.querySelectorAll('.cbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active')});
+  pal.appendChild(btn)});
+pal.children[0].classList.add('active');newGame();
+</script>
+</body>
+</html>
