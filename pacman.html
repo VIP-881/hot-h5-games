@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>👾 吃豆人 - 热门H5游戏</title>
+<meta name="description" content="经典吃豆人迷宫追逐游戏，吃掉所有豆子躲避幽灵，方向键或滑屏控制免费在线">
+<meta property="og:title" content="👾 吃豆人 - 热门H5游戏"><meta property="og:description" content="经典迷宫追逐，吃掉所有豆子"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"吃豆人"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#ff0;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.4em;margin:4px 0}.stats{display:flex;gap:12px;margin:4px 0;font-size:0.85em}canvas{display:block;border:1px solid #333;border-radius:6px;max-width:98vw;background:#111}</style>
+</head>
+<body>
+<h1>👾 吃豆人</h1>
+<div class="stats"><span>🍒 <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="420" height="465"></canvas>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=420,H=465,T=15,COLS=28,ROWS=31;
+const MAP=[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,1,0,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,0,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1];
+const pac={x:14,y:23,dx:0,dy:0,ndx:0,ndy:0,dir:0,mouth:0,alive:true};
+const ghosts=[{x:14,y:11,c:'#f44',fx:14,fy:11,dx:-1,dy:0,scared:0,mode:'scatter',inHome:false},{x:12,y:14,c:'#f8f',fx:12,fy:14,dx:1,dy:0,scared:0,mode:'scatter',inHome:false},{x:16,y:14,c:'#4df',fx:16,fy:14,dx:-1,dy:0,scared:0,mode:'scatter',inHome:false},{x:14,y:14,c:'#fa4',fx:14,fy:14,dx:0,dy:-1,scared:0,mode:'chase',inHome:true}];
+let score=0,best=0,gameover=false,pellets=0,totalPellets=0,frightTimer=0,level=1;
+try{best=parseInt(localStorage.getItem('pac_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+for(let i=0;i<MAP.length;i++)if(MAP[i]===0){totalPellets++;if(i===14+23*COLS||i===13+23*COLS||i===12+23*COLS||i===3+3*COLS||i===27+3*COLS)totalPellets--}
+pellets=totalPellets;
+
+function isWall(x,y){if(x<0||x>=COLS||y<0||y>=ROWS)return true;return MAP[y*COLS+x]===1}
+function isDot(x,y){if(x<0||x>=COLS||y<0||y>=ROWS)return false;return MAP[y*COLS+x]===0}
+function eatDot(x,y){if(x<0||x>=COLS||y<0||y>=ROWS)return false;const idx=y*COLS+x;if(MAP[idx]!==0&&MAP[idx]!==2)return false;const isBig=MAP[idx]===2;MAP[idx]=-1;return isBig}
+function resetLevel(){for(let i=0;i<MAP.length;i++)if(MAP[i]===-1)MAP[i]=0;pellets=totalPellets;pac.x=14;pac.y=23;pac.dx=0;pac.dy=0;pac.alive=true}
+function fullReset(){resetLevel();score=0;level=1;frightTimer=0;gameover=false;document.getElementById('score').textContent='0';ghosts.forEach((g,i)=>{g.x=g.fx;g.y=g.fy;g.scared=0;g.dx=i===0?-1:i===1?1:-1;g.dy=0;g.mode='scatter';g.inHome=i===3})}
+
+document.addEventListener('keydown',e=>{if(gameover)fullReset();const k=e.key;if(k==='ArrowUp'){pac.ndx=0;pac.ndy=-1}else if(k==='ArrowDown'){pac.ndx=0;pac.ndy=1}else if(k==='ArrowLeft'){pac.ndx=-1;pac.ndy=0}else if(k==='ArrowRight'){pac.ndx=1;pac.ndy=0}});
+cv.addEventListener('click',()=>{if(gameover)fullReset()});
+let touchStartX=0,touchStartY=0;
+cv.addEventListener('touchstart',e=>{const t=e.touches[0];touchStartX=t.clientX;touchStartY=t.clientY});
+cv.addEventListener('touchend',e=>{if(gameover)fullReset();const dx=touchStartX-(e.changedTouches[0]?.clientX||touchStartX),dy=touchStartY-(e.changedTouches[0]?.clientY||touchStartY);const adx=Math.abs(dx),ady=Math.abs(dy);if(adx>ady&&adx>20)pac.ndx=dx>0?-1:1,pac.ndy=0;else if(ady>20)pac.ndx=0,pac.ndy=dy>0?-1:1});
+
+function getDirTowards(x1,y1,x2,y2){const dirs=[[0,-1],[0,1],[-1,0],[1,0]];let bestD=null,bestDist=Infinity;for(const d of dirs){const nx=x1+d[0],ny=y1+d[1];if(isWall(nx,ny))continue;if(ghosts.some(g=>g.x===nx&&g.y===ny&&g.scared<=0))continue;const dist=Math.hypot(nx-x2,ny-y2);if(dist<bestDist){bestDist=dist;bestD=d}}return bestD||[0,0]}
+
+function update(){if(gameover)return;
+  // Pac movement
+  const ni=pac.y+pac.ndy,ni2=pac.x+pac.ndx;
+  if(!isWall(ni2,ni)){pac.dx=pac.ndx;pac.dy=pac.ndy}
+  const nx=pac.x+pac.dx,ny=pac.y+pac.dy;
+  if(!isWall(nx,ny)){pac.x=nx;pac.y=ny;if(pac.x<0)pac.x=COLS-1;if(pac.x>=COLS)pac.x=0}
+  // Eat dots
+  if(isDot(pac.x,pac.y)){const big=eatDot(pac.x,pac.y);score+=big?50:10;document.getElementById('score').textContent=score;pellets--;if(pellets===0){level++;fullReset()}
+    if(big){frightTimer=300;ghosts.forEach(g=>{if(!g.inHome)g.scared=200})}}
+  // Ghosts
+  for(const g of ghosts){if(g.scared>0)g.scared--;if(frightTimer>0)frightTimer--;
+    if(g.inHome){if(Math.hypot(g.x-pac.x,g.y-pac.y)<8&&frightTimer<1){g.inHome=false;g.dx=-1;g.dy=0};continue}
+    const target=g.scared>0?{x:14+14*(Math.random()<0.5?1:-1),y:14}:{x:pac.x,y:pac.y};
+    const d=getDirTowards(g.x,g.y,target.x,target.y);if(d){g.dx=d[0];g.dy=d[1]}
+    const gnx=g.x+g.dx,gny=g.y+g.dy;
+    if(!isWall(gnx,gny)){g.x=gnx;g.y=gny;if(g.x<0)g.x=COLS-1;if(g.x>=COLS)g.x=0}
+    // Pac vs ghost
+    if(g.x===pac.x&&g.y===pac.y){if(g.scared>0){g.scared=0;g.x=g.fx;g.y=g.fy;g.inHome=true;score+=200;document.getElementById('score').textContent=score}else{pac.alive=false;gameover=true;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('pac_best',best)}catch(e)}}}}
+  pac.mouth+=0.15;
+}
+
+function draw(){
+  ctx.fillStyle='#111';ctx.fillRect(0,0,W,H);
+  for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){const v=MAP[y*COLS+x];if(v===1){ctx.strokeStyle='#21f';ctx.lineWidth=1.5;ctx.strokeRect(x*T+1,y*T+1,T-2,T-2)}else if(v===0){ctx.fillStyle='#fa6';ctx.beginPath();ctx.arc(x*T+T/2,y*T+T/2,2.5,0,Math.PI*2);ctx.fill()}else if(v===2){ctx.fillStyle='#fa6';ctx.beginPath();ctx.arc(x*T+T/2,y*T+T/2,5,0,Math.PI*2);ctx.fill()}}
+  // Pac
+  if(pac.alive){ctx.fillStyle='#ff0';const a=pac.dx===1?0:pac.dx===-1?Math.PI:pac.dy===1?Math.PI/2:3*Math.PI/2;const m=0.2+0.15*Math.sin(pac.mouth);ctx.beginPath();ctx.arc(pac.x*T+T/2,pac.y*T+T/2,T/2-1,a+m,a+Math.PI*2-m);ctx.lineTo(pac.x*T+T/2,pac.y*T+T/2);ctx.closePath();ctx.fill()}
+  // Ghosts
+  for(const g of ghosts){if(g.inHome)continue;ctx.fillStyle=g.scared>0?'#44f':g.c;const gx=g.x*T+T/2,gy=g.y*T+T/2-2;ctx.beginPath();ctx.arc(gx,gy,T/2-1,Math.PI,0);ctx.fill();for(let i=0;i<3;i++){ctx.fillRect(gx-5+i*5,gy+3,5,7-i*2)}if(g.scared>0&&g.scared<120&&Math.floor(g.scared/6)%2===0){ctx.fillStyle='#fff';ctx.fillRect(gx-3,gy-2,2,4);ctx.fillRect(gx+1,gy-2,2,4)}else{ctx.fillStyle='#fff';ctx.fillRect(gx-3,gy-2,2,4);ctx.fillRect(gx+1,gy-2,2,4);ctx.fillStyle='#222';ctx.fillRect(gx-5,gy-3,2,2);ctx.fillRect(gx+3,gy-3,2,2)}}
+  if(gameover){ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#ff0';ctx.font='bold 24px monospace';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-10);ctx.fillStyle='#fff';ctx.font='13px monospace';ctx.fillText(`得分: ${score}  点击重来`,W/2,H/2+18)}
+}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
