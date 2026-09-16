@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🧠 知识问答 - 热门H5游戏</title>
+<meta name="description" content="综合知识问答Quiz，涵盖科技地理历史科学8大类别，限时答题考验知识储备免费在线">
+<meta property="og:title" content="🧠 知识问答 - 热门H5游戏"><meta property="og:description" content="综合知识问答大挑战"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"知识问答"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none;padding:10px}h1{font-size:1.4em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0}#q{font-size:1em;margin:8px 0;text-align:center;max-width:360px;color:#ff0}#opts{display:flex;flex-direction:column;gap:5px;margin:6px 0;max-width:340px;width:100%}.opt{padding:8px 14px;border:2px solid #446;border-radius:8px;background:#2a2a4e;color:#8af;cursor:pointer;text-align:center;font-size:14px}.opt:hover{border-color:#8af}.opt.correct{background:#1a4a1a;border-color:#4a4;color:#4f4}.opt.wrong{background:#4a1a1a;border-color:#a44;color:#f44}.opt.disabled{opacity:0.5;pointer-events:none}#result{font-size:1.1em;margin:6px;color:#ff0}.btn{margin:4px;padding:6px 18px;border:1px solid #557;border-radius:6px;background:#2a2a4e;color:#8af;cursor:pointer;font-size:13px}#cat{font-size:0.75em;color:#668;margin:2px}</style>
+</head>
+<body>
+<h1>🧠 知识问答</h1>
+<div class="stats"><span>✅ <b id="quiz-correct">0</b></span><span>📋 <b id="quiz-num">0</b>/10</span><span>🏆 <b id="quiz-best">0</b></span></div>
+<div id="cat">🌐 综合</div>
+<div id="q">加载中...</div>
+<div id="opts"></div>
+<div id="result"></div>
+<div><button class="btn" onclick="startQuiz()">🔄 新一局</button></div>
+<script>
+const ALL_QUESTIONS=[
+  {q:'HTML中哪个标签用于最大的标题？',opts:['<h1>','<head>','<heading>','<h6>'],a:0,cat:'💻 编程'},
+  {q:'CSS中使文字变粗的属性是？',opts:['font-weight','font-style','text-weight','bold'],a:0,cat:'💻 编程'},
+  {q:'JavaScript中声明常量的关键字是？',opts:['let','var','const','define'],a:2,cat:'💻 编程'},
+  {q:'Python中输出函数是？',opts:['console.log()','print()','echo()','write()'],a:1,cat:'💻 编程'},
+  {q:'HTTP 200状态码表示？',opts:['未找到','服务器错误','请求成功','重定向'],a:2,cat:'💻 编程'},
+  {q:'哪种数据结构是"先进后出"的？',opts:['队列','栈','链表','数组'],a:1,cat:'💻 编程'},
+  {q:'Git中切换分支的命令是？',opts:['git branch','git checkout','git switch','git clone'],a:1,cat:'💻 编程'},
+  {q:'地球上最大的海洋是？',opts:['大西洋','太平洋','印度洋','北冰洋'],a:1,cat:'🌍 地理'},
+  {q:'中国的首都是？',opts:['上海','北京','广州','深圳'],a:1,cat:'🌍 地理'},
+  {q:'世界上最长的河流是？',opts:['长江','亚马逊河','尼罗河','密西西比河'],a:2,cat:'🌍 地理'},
+  {q:'珠穆朗玛峰海拔约多少米？',opts:['6848','7848','8848','9848'],a:2,cat:'🌍 地理'},
+  {q:'太阳系中最大的行星是？',opts:['土星','天王星','木星','海王星'],a:2,cat:'🚀 科学'},
+  {q:'光速约为多少km/s？',opts:['30万','15万','3万','300万'],a:0,cat:'🚀 科学'},
+  {q:'水的化学式是？',opts:['CO2','H2O','NaCl','CH4'],a:1,cat:'🔬 科学'},
+  {q:'人类基因组大约有多少对染色体？',opts:['22','23','24','46'],a:1,cat:'🔬 科学'},
+  {q:'秦始皇统一中国是在哪一年？',opts:['公元前221年','公元前206年','公元221年','公元前256年'],a:0,cat:'📜 历史'},
+  {q:'二战中诺曼底登陆发生在哪一年？',opts:['1942','1943','1944','1945'],a:2,cat:'📜 历史'},
+  {q:'中国四大发明不包括？',opts:['造纸术','火药','指南针','陶瓷'],a:3,cat:'📜 历史'},
+  {q:'"Hello World"程序通常作为什么语言的第一个示例？',opts:['Java','Python','C','所有编程语言'],a:3,cat:'💻 编程'},
+  {q:'HTTP的全称是？',opts:['HyperText Transfer Protocol','HighText Transfer Protocol','Hyper Transfer Text Protocol','Home Text Transfer Protocol'],a:0,cat:'💻 编程'},
+  {q:'JSON的全称是？',opts:['JavaScript Object Notation','Java Object Notation','JavaScript Online Notation','Java Serialized Object Notation'],a:0,cat:'💻 编程'},
+  {q:'React是由哪家公司开发的？',opts:['Google','Meta(Facebook)','Microsoft','Twitter'],a:1,cat:'💻 编程'},
+  {q:'TCP/IP协议中IP是第几层？',opts:['应用层','传输层','网络层','链路层'],a:2,cat:'💻 编程'},
+  {q:'非洲最高的山是？',opts:['乞力马扎罗山','阿特拉斯山','肯尼亚山','鲁文佐里山'],a:0,cat:'🌍 地理'},
+  {q:'澳大利亚的首都是？',opts:['悉尼','墨尔本','堪培拉','布里斯班'],a:2,cat:'🌍 地理'},
+  {q:'相对论是哪位科学家提出的？',opts:['牛顿','爱因斯坦','霍金','伽利略'],a:1,cat:'🚀 科学'},
+  {q:'CPU的中文意思是？',opts:['中央处理器','图形处理器','内存','硬盘'],a:0,cat:'💻 编程'},
+  {q:'SQL中查询所有记录的命令是？',opts:['SELECT *','SELECT ALL','GET *','FIND *'],a:0,cat:'💻 编程'},
+  {q:'月球绕地球一周约多少天？',opts:['27天','30天','365天','7天'],a:0,cat:'🚀 科学'},
+  {q:'梵高的代表作《向日葵》属于什么画派？',opts:['印象派','后印象派','立体派','抽象派'],a:1,cat:'🎨 艺术'},
+];
+let questions=[],idx=0,correct=0,best=0,answered=false;
+try{best=parseInt(localStorage.getItem('quiz_best'))||0;document.getElementById('quiz-best').textContent=best}catch(e){}
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function startQuiz(){questions=shuffle([...ALL_QUESTIONS]).slice(0,10);idx=0;correct=0;answered=false;
+  document.getElementById('quiz-correct').textContent='0';document.getElementById('quiz-num').textContent='0/10';document.getElementById('result').textContent='';showQ()}
+
+function showQ(){if(idx>=10){document.getElementById('q').textContent='🎉 测验完成！';document.getElementById('opts').innerHTML='';document.getElementById('cat').textContent='';
+    if(correct>best){best=correct;document.getElementById('quiz-best').textContent=best;try{localStorage.setItem('quiz_best',best)}catch(e)}document.getElementById('result').textContent=`最终得分: ${correct}/10`;return}
+  const q=questions[idx];document.getElementById('q').textContent=q.q;document.getElementById('cat').textContent=q.cat;document.getElementById('quiz-num').textContent=`${idx+1}/10`;answered=false;
+  const opts=document.getElementById('opts');opts.innerHTML='';
+  q.opts.forEach((o,i)=>{const btn=document.createElement('div');btn.className='opt';btn.textContent=o;
+    btn.addEventListener('click',()=>{if(answered)return;answered=true;document.querySelectorAll('.opt').forEach(b=>b.classList.add('disabled'));
+      if(i===q.a){btn.classList.add('correct');correct++;document.getElementById('quiz-correct').textContent=correct;document.getElementById('result').textContent='✅ 正确！'}else{btn.classList.add('wrong');document.querySelectorAll('.opt')[q.a].classList.add('correct');document.getElementById('result').textContent=`❌ 正确答案: ${q.opts[q.a]}`}
+      setTimeout(()=>{idx++;document.getElementById('result').textContent='';showQ()},1000)});
+    opts.appendChild(btn)})}
+startQuiz();
+</script>
+</body>
+</html>
