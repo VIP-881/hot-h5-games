@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎲 骰子扑克 - 热门H5游戏</title>
+<meta name="description" content="经典骰子扑克Yahtzee游戏，掷五颗骰子组合最佳牌型，三个回合比大小赢取最高分免费在线">
+<meta property="og:title" content="🎲 骰子扑克 - 热门H5游戏"><meta property="og:description" content="经典骰子扑克Yahtzee"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"骰子扑克"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0}.dice{display:flex;gap:6px;margin:8px}.die{width:48px;height:48px;border-radius:8px;background:#fff;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:2px;cursor:pointer;font-size:24px;transition:all 0.2s}.die.held{border:3px solid #ff0;background:#ffe}.die.disabled{opacity:0.5;pointer-events:none}#hint{font-size:0.9em;margin:6px;color:#ff0;text-align:center}#scoreboard{font-size:0.8em;color:#8af;text-align:center;margin:2px}.btn{margin:4px;padding:4px 14px;border:1px solid #557;border-radius:4px;background:#2a2a4e;color:#8af;cursor:pointer;font-size:12px}</style>
+</head>
+<body>
+<h1>🎲 骰子扑克</h1>
+<div class="stats"><span>🎯 <b id="dice-round">1</b>/3</span><span>🏆 <b id="dice-best">0</b></span></div>
+<div class="dice" id="dice-area"></div>
+<div id="hint">🎲 点击骰子保留，点掷骰!</div>
+<div id="scoreboard"></div>
+<div><button class="btn" onclick="rollDice()">🎲 掷骰</button><button class="btn" onclick="resetDice()">🔄 新局</button></div>
+<script>
+let dice=[],held=[false,false,false,false,false],rolls=3,round=1,score=0,best=0,gameover=false;
+try{best=parseInt(localStorage.getItem('dice_best'))||0;document.getElementById('dice-best').textContent=best}catch(e){}
+const HANDS={0:'🃏 散牌',1:'🪙 一对',2:'🎯 两对',3:'🍀 三条',4:'♠️ 顺子',5:'♦️ 同花',6:'🔥 葫芦',7:'💎 四条',8:'🏆 五条!'};
+function resetDice(){dice=Array(5).fill(1);held=Array(5).fill(false);rolls=3;round=1;score=0;gameover=false;
+  document.getElementById('dice-round').textContent='1';document.getElementById('hint').textContent='🎲 点击骰子保留，点掷骰!';renderDice();updateScore()}
+function rollDice(){if(gameover||rolls<=0){if(rolls<=0){calcScore();round++;document.getElementById('dice-round').textContent=round;
+    if(round>3){gameover=true;if(score>best){best=score;document.getElementById('dice-best').textContent=score;try{localStorage.setItem('dice_best',score)}catch(e)}
+      document.getElementById('hint').textContent=`🏁 游戏结束! 总分: ${score}`}else{rolls=3;held=Array(5).fill(false);document.getElementById('hint').textContent='🎲 新回合!';renderDice()}}return}
+  dice=dice.map((d,i)=>held[i]?d:1+Math.floor(Math.random()*6));rolls--;
+  document.getElementById('hint').textContent=rolls>0?`🎲 还剩${rolls}次可掷`:rolls===0?'📋 确认得分!':'🎲 点击新回合!';renderDice();if(rolls===0)calcPreview()}
+
+function calcScore(){const counts=Array(6).fill(0);dice.forEach(d=>counts[d-1]++);const pairs=counts.filter(c=>c>=2).length;
+  const threes=counts.some(c=>c>=3);const fours=counts.some(c=>c>=4);const yahtzee=counts.some(c=>c>=5);
+  const straight=counts.every(c=>c<=1)&&counts.slice(1,5).every(c=>c===1)||counts.slice(0,4).every(c=>c===1);
+  const fullHouse=pairs>=1&&threes;let hand=0,pts=0;
+  if(yahtzee){hand=8;pts=50}else if(fours){hand=7;pts=30}else if(fullHouse){hand=6;pts=25}else if(straight){hand=4;pts=20}else if(threes){hand=3;pts=15}
+  else if(pairs>=2){hand=2;pts=10}else if(pairs>=1){hand=1;pts=5}else{hand=0;pts=2}
+  score+=pts;document.getElementById('hint').textContent=`${HANDS[hand]} +${pts}分 | 总分: ${score}`;
+  if(round>=3&&!gameover){gameover=true;if(score>best){best=score;document.getElementById('dice-best').textContent=score;try{localStorage.setItem('dice_best',score)}catch(e)}document.getElementById('hint').textContent=`🏁 游戏结束! 总分: ${score}`}}
+
+function calcPreview(){const counts=Array(6).fill(0);dice.forEach(d=>counts[d-1]++);const pairs=counts.filter(c=>c>=2).length;
+  const threes=counts.some(c=>c>=3);const fours=counts.some(c=>c>=4);const yahtzee=counts.some(c=>c>=5);
+  const straight=counts.every(c=>c<=1)&&(counts.slice(1,5).every(c=>c===1)||counts.slice(0,4).every(c=>c===1));
+  const fullHouse=pairs>=1&&threes;let hand=0,pts=0;
+  if(yahtzee){hand=8;pts=50}else if(fours){hand=7;pts=30}else if(fullHouse){hand=6;pts=25}else if(straight){hand=4;pts=20}else if(threes){hand=3;pts=15}
+  else if(pairs>=2){hand=2;pts=10}else if(pairs>=1){hand=1;pts=5}else{hand=0;pts=2}
+  document.getElementById('scoreboard').textContent=`当前牌型: ${HANDS[hand]} (${pts}分)`}
+
+function renderDice(){const el=document.getElementById('dice-area');el.innerHTML='';
+  const faces=['⚀','⚁','⚂','⚃','⚄','⚅'];
+  dice.forEach((d,i)=>{const div=document.createElement('div');div.className='die'+(held[i]?' held':'');
+    div.textContent=faces[d-1];div.addEventListener('click',()=>{if(gameover||rolls===0)return;held[i]=!held[i];renderDice()});
+    el.appendChild(div)})}
+resetDice();
+</script>
+</body>
+</html>
