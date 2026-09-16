@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎡 幸运转盘 - 热门H5游戏</title>
+<meta name="description" content="幸运转盘抽奖游戏，多种奖励自定义，点击转盘旋转随机获得结果免费在线">
+<meta property="og:title" content="🎡 幸运转盘 - 热门H5游戏"><meta property="og:description" content="幸运转盘抽奖游戏"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"幸运转盘"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a0a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.4em;margin:4px 0}.stats{font-size:0.85em;margin:4px 0}canvas{display:block;border:1px solid #446;border-radius:50%;max-width:90vw;background:#1a0a2e;cursor:pointer}#result{font-size:1.2em;margin:8px;color:#ff0;text-align:center;height:1.5em}.btn{margin:4px;padding:4px 14px;border:1px solid #557;border-radius:4px;background:#2a2a4e;color:#8af;cursor:pointer;font-size:12px}</style>
+</head>
+<body>
+<h1>🎡 幸运转盘</h1>
+<canvas id="c" width="320" height="320"></canvas>
+<div id="result">🎯 点击转盘试试手气!</div>
+<div><button class="btn" onclick="spinWheel()">🎡 旋转!</button></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=320,R=140,PI=Math.PI;
+const SEGMENTS=[
+  {label:'🏆 大奖',color:'#f44',p:0.05},{label:'🎁 礼物',color:'#f84',p:0.10},
+  {label:'⭐ 好运',color:'#fa0',p:0.15},{label:'👍 还行',color:'#fd0',p:0.20},
+  {label:'🍀 小吉',color:'#8f4',p:0.20},{label:'💫 再来',color:'#4af',p:0.15},
+  {label:'😅 可惜',color:'#84f',p:0.10},{label:'💔 下次',color:'#c4f',p:0.05}];
+let angle=0,spinning=false,velocity=0;
+
+function getSegment(ang){let total=0;const r=((ang%(PI*2))+PI*2)%(PI*2);
+  for(let i=0;i<SEGMENTS.length;i++){total+=SEGMENTS[i].p*PI*2;if(r<total)return i}return SEGMENTS.length-1}
+
+function spinWheel(){if(spinning)return;velocity=15+Math.random()*20;spinning=true;document.getElementById('result').textContent='🌀 旋转中...'}
+
+cv.addEventListener('click',spinWheel);
+
+function update(){if(!spinning)return;
+  velocity*=0.985;angle+=velocity*0.02;if(velocity<0.1){velocity=0;spinning=false;
+    const seg=getSegment(angle);document.getElementById('result').textContent=`🎉 ${SEGMENTS[seg].label}`;if(seg===0)document.getElementById('result').textContent='🏆🏆🏆 中了大奖! 🏆🏆🏆'}render()}
+
+function render(){ctx.fillStyle='#1a0a2e';ctx.fillRect(0,0,W,W);
+  // Wheel shadow
+  ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.arc(R+8,R+8,R+6,0,PI*2);ctx.fill();
+  // Segments
+  let startAngle=angle-PI/2;const segAngle=PI*2/SEGMENTS.length;
+  for(let i=0;i<SEGMENTS.length;i++){const endAngle=startAngle+SEGMENTS[i].p*PI*2;
+    ctx.beginPath();ctx.moveTo(R,R);ctx.arc(R,R,140,startAngle,endAngle);ctx.closePath();
+    ctx.fillStyle=SEGMENTS[i].color;ctx.fill();ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=1;ctx.stroke();
+    // Label
+    const mid=startAngle+(endAngle-startAngle)/2;const lx=R+Math.cos(mid)*100,ly=R+Math.sin(mid)*100;
+    ctx.save();ctx.translate(lx,ly);ctx.rotate(mid+PI/2);
+    ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(SEGMENTS[i].label,0,0);ctx.restore();startAngle=endAngle}
+  // Center circle
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(R,R,18,0,PI*2);ctx.fill();
+  ctx.fillStyle='#1a0a2e';ctx.beginPath();ctx.arc(R,R,14,0,PI*2);ctx.fill();
+  // Pointer
+  ctx.fillStyle='#ff0';ctx.beginPath();ctx.moveTo(R-10,R-R-10);ctx.lineTo(R+10,R-R-10);ctx.lineTo(R,R-R-28);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#aa0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(R-10,R-R-10);ctx.lineTo(R+10,R-R-10);ctx.lineTo(R,R-R-28);ctx.closePath();ctx.stroke();
+  // Outer ring
+  ctx.strokeStyle='#ff0';ctx.lineWidth=3;ctx.beginPath();ctx.arc(R,R,R,0,PI*2);ctx.stroke();ctx.strokeStyle='#aa0';ctx.lineWidth=1;ctx.beginPath();ctx.arc(R,R,R-2,0,PI*2);ctx.stroke()}
+render();function loop(){update();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
