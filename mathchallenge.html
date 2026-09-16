@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🧮 心算大师 - 热门H5游戏</title>
+<meta name="description" content="限时心算训练游戏Math Challenge，加减乘除快速答题，训练计算速度和准确率免费在线">
+<meta property="og:title" content="🧮 心算大师 - 热门H5游戏"><meta property="og:description" content="限时心算加减乘除训练"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"心算大师"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none;padding:10px}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0}#math-q{font-size:2.2em;margin:12px;padding:14px 20px;background:#2a2a4e;border-radius:12px;color:#ff0;text-align:center;min-width:200px}#math-input{font-size:1.8em;padding:8px 12px;border:2px solid #446;border-radius:8px;background:#0a0a1a;color:#8af;text-align:center;width:160px;outline:none}#math-input:focus{border-color:#8af}#math-feedback{font-size:1em;margin:6px;color:#ff0;height:1.5em}.btn{margin:4px;padding:6px 18px;border:1px solid #557;border-radius:6px;background:#2a2a4e;color:#8af;cursor:pointer;font-size:14px}</style>
+</head>
+<body>
+<h1>🧮 心算大师</h1>
+<div class="stats"><span>✅ <b id="math-correct">0</b></span><span>📋 <b id="math-total">0</b></span><span>⏱️ <b id="math-time">60</b>s</span><span>🏆 <b id="math-best">0</b></span></div>
+<div id="math-q">12 + 34 = ?</div>
+<input id="math-input" type="number" placeholder="?" disabled>
+<div id="math-feedback"></div>
+<div><button class="btn" onclick="startMath()">🚀 开始!</button></div>
+<script>
+const input=document.getElementById('math-input');
+let answer=0,correct=0,total=0,timeLeft=60,running=false,timer=null,level=1,best=0;
+try{best=parseInt(localStorage.getItem('math_best'))||0;document.getElementById('math-best').textContent=best}catch(e){}
+
+function startMath(){correct=0;total=0;timeLeft=60;level=1;running=true;
+  document.getElementById('math-correct').textContent='0';document.getElementById('math-total').textContent='0';document.getElementById('math-time').textContent='60';
+  document.getElementById('math-feedback').textContent='';input.value='';input.disabled=false;input.focus();nextQ();
+  if(timer)clearInterval(timer);
+  timer=setInterval(()=>{timeLeft--;document.getElementById('math-time').textContent=timeLeft;
+    if(timeLeft<=0){clearInterval(timer);endMath()}},1000)}
+
+function endMath(){running=false;input.disabled=true;const acc=total>0?Math.round(correct/total*100):0;
+  document.getElementById('math-feedback').textContent=`⏱️ 时间到! ${correct}/${total} 正确 (${acc}%) 最高连续: ${best}`;document.getElementById('math-q').textContent='🎯 完成!';
+  if(correct>best){best=correct;document.getElementById('math-best').textContent=correct;try{localStorage.setItem('math_best',correct)}catch(e)}}
+
+function nextQ(){if(!running)return;level=1+Math.floor((60-timeLeft)/15);
+  const ops=['+','-','×'];const op=ops[Math.floor(Math.random()*3)];let a,b;
+  const max=10+level*5;
+  if(op==='+'){a=1+Math.floor(Math.random()*max);b=1+Math.floor(Math.random()*max);answer=a+b}
+  else if(op==='-'){a=5+Math.floor(Math.random()*(max+10));b=1+Math.floor(Math.random()*a);answer=a-b}
+  else{a=1+Math.floor(Math.random()*level*3);b=1+Math.floor(Math.random()*10);answer=a*b}
+  document.getElementById('math-q').textContent=`${a} ${op} ${b} = ?`;input.value='';input.focus()}
+
+input.addEventListener('keydown',e=>{if(e.key==='Enter'&&running){const val=parseInt(input.value);if(isNaN(val))return;
+    total++;document.getElementById('math-total').textContent=total;
+    if(val===answer){correct++;document.getElementById('math-correct').textContent=correct;document.getElementById('math-feedback').textContent='✅ 正确!'}
+    else{document.getElementById('math-feedback').textContent=`❌ 正确答案: ${answer}`}
+    setTimeout(nextQ,400)}});
+document.getElementById('math-q').textContent='🧮 点击开始!';
+</script>
+</body>
+</html>
