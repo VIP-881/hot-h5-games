@@ -416,6 +416,153 @@ function langToggle(){
   setLang(LANG==='zh'?'en':'zh');
 }
 
+// ===== COIN SYSTEM =====
+var COINS=(function(){try{return parseInt(localStorage.getItem('coins'))||0}catch(e){return 0}})();
+function saveCoins(){try{localStorage.setItem('coins',COINS)}catch(e){};var e=document.querySelector('.coin');if(e)e.textContent=COINS;}
+saveCoins();
+function earnCoins(a){COINS+=a;saveCoins();}
+var STORE_ITEMS=[{id:'theme1',name:'ᵃʰᵇᵉ ʀᵇᵉᵍᵉ',icon:'💎',price:100,desc:'深空紫主题',css:'--accent:#6d28d9;--accent2:#8b5cf6'},{id:'theme2',name:'ᶜᵉᵈᵈʀ ʙᴜᴇ',icon:'🔵',price:100,desc:'赛博蓝主题',css:'--accent:#2563eb;--accent2:#3b82f6'},{id:'theme3',name:'ʀᴇᴅ ᴄʜᴀʜ',icon:'❤️',price:100,desc:'烈焰红主题',css:'--accent:#dc2626;--accent2:#ef4444'},{id:'frame1',name:'ɢᴏʟᴅ ᴄʜᴀʀᴍ',icon:'🏆',price:200,desc:'金色头像框'},{id:'frame2',name:'ꜥɪʜᴜᴍ ʙᴏʀᴅᴇʀ',icon:'✨',price:150,desc:'流光头像框'}];
+var PURCH=(function(){try{return JSON.parse(localStorage.getItem('purch'))||{}}catch(e){return {}}})();
+function savePurch(){try{localStorage.setItem('purch',JSON.stringify(PURCH))}catch(e){}}
+function showStore(){
+  var h='<div class="rkbox"><h2>🛒 商店</h2><p style="text-align:center;font-size:.6em;color:var(--text2);margin-bottom:6px">🪙 余额: '+COINS+' 金币</p>';
+  STORE_ITEMS.forEach(function(it){
+    var owned=PURCH[it.id];
+    h+='<div class="ri" style="opacity:'+(owned?'.5':'1')+'"><span style="font-size:1.2em">'+it.icon+'</span><span class="ri2"><span class="rn2">'+it.name+'</span><span class="rc2">'+it.desc+'</span></span>';
+    if(owned)h+='<span style="font-size:.5em;color:var(--text2)">✔ 已拥有</span>';
+    else h+='<button class="rp" onclick="buyItem(\''+it.id+'\','+it.price+')">'+it.price+'🪙</button>';
+    h+='</div>';
+  });
+  h+='<div style="text-align:center;margin-top:6px"><button class="act" onclick="closeStore()">✖ 关闭</button></div></div>';
+  var el=document.getElementById('store')||function(){var d=document.createElement('div');d.id='store';d.style.cssText='display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9997;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);justify-content:center;align-items:center';document.body.appendChild(d);return d;}();
+  el.style.display='flex';el.innerHTML=h;el.style.justifyContent='center';el.style.alignItems='center';
+}
+function closeStore(){var e=document.getElementById('store');if(e)e.style.display='none';}
+function buyItem(id,price){
+  if(COINS<price){alert('金币不足！');return;}
+  COINS-=price;PURCH[id]=1;saveCoins();savePurch();
+  if(PURCH['theme1']||PURCH['theme2']||PURCH['theme3']){
+    document.documentElement.style.cssText=
+      PURCH['theme1']?'--accent:#6d28d9;--accent2:#8b5cf6':
+      PURCH['theme2']?'--accent:#2563eb;--accent2:#3b82f6':
+      PURCH['theme3']?'--accent:#dc2626;--accent2:#ef4444':'';
+  }
+  showStore();
+}
+// Patch openGame to earn coins
+(function(){var og=window.openGame;window.openGame=function(idx){
+  earnCoins(5);
+  if(typeof og==='function')og(idx);
+};})();
+
+// ===== CLOUD LEADERBOARD =====
+var LB_CACHE=null;
+function showLeaderboard(){
+  var h='<div class="rkbox"><h2>🌐 云排行榜</h2><p style="text-align:center;font-size:.55em;color:var(--text2);margin-bottom:4px" id="lbStatus">加载中...</p><div id="lbBody"></div><div style="text-align:center;margin-top:6px"><button class="act" onclick="fetchLB()">🔄 刷新</button><button class="act" onclick="closeLB()">✖</button></div></div>';
+  var el=document.getElementById('lb')||function(){var d=document.createElement('div');d.id='lb';d.style.cssText='display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9996;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);justify-content:center;align-items:center';document.body.appendChild(d);return d;}();
+  el.style.display='flex';el.innerHTML=h;el.style.justifyContent='center';el.style.alignItems='center';
+  var self={};self.pushLB=function(){pushLB()};fetchLB();
+}
+function closeLB(){var e=document.getElementById('lb');if(e)e.style.display='none';}
+function fetchLB(){
+  var s=document.getElementById('lbStatus');var b=document.getElementById('lbBody');
+  if(s)s.textContent='同步中...';
+  var x=new XMLHttpRequest();
+  x.onload=function(){try{
+    var d=JSON.parse(x.responseText);var items=d.scores||[];items.sort(function(a,b){return(b.coins||0)-(a.coins||0)});
+    if(b){
+      var hh='';items.slice(0,30).forEach(function(g,i){
+        var r=i+1,medal=r<=3?['🥇','🥈','🥉'][r-1]:r+'.';
+        hh+='<div class="ri"><span class="rn2 '+(r<=3?'r'+r:'')+'">'+medal+'</span><span class="ri2"><span class="rn2">'+(g.avatar||'👤')+' '+(g.name||'游客')+'</span><span class="rc2">🪙'+g.coins+' 🎮'+g.plays+'x 🕒'+g.time+'s</span></span></div>';
+      });
+      if(!items.length)hh+='<div style="text-align:center;padding:12px;color:var(--text2);font-size:.7em">暂无数据</div>';
+      b.innerHTML=hh;
+    }
+    if(s)s.textContent='已同步';
+  }catch(e){if(s)s.textContent='加载失败';}};
+  x.onerror=function(){if(s)s.textContent='网络错误';};
+  x.open('GET','https://raw.githubusercontent.com/VIP-881/hot-h5-games/main/leaderboard.json?v='+Date.now());
+  x.send();
+}
+function pushLB(){
+  if(!USER||!USER.name)return;
+  var totalTime=0;for(var k in TCNT)totalTime+=TCNT[k];
+  var data={scores:[{name:USER.name,avatar:USER.avatar||'🤖',coins:COINS,plays:Object.keys(PLAYS).length,time:totalTime,updated:new Date().toISOString()}]};
+  try{localStorage.setItem('lb_local',JSON.stringify(data))}catch(e){}
+  // GitHub API push via Maton
+  var key='v2.xOedfPfv9hou9ht8BXTbk7OKPlRUUvh5WuyJNC8Q3mLrU5dQVGL5rARouO2DNnC-IKG0UGeYm79Cfw1aIjsOw48Fram7uaVouZHiYKGTZzMBg4SuQLJLz4gY';
+  var x=new XMLHttpRequest();
+  x.open('GET','https://gateway.maton.ai/github/repos/VIP-881/hot-h5-games/contents/leaderboard.json?ref=main');
+  x.setRequestHeader('Authorization','Bearer '+key);
+  x.onload=function(){try{
+    var existing=JSON.parse(x.responseText);var sha=existing.sha;
+    var current=JSON.parse(atob(existing.content));var scores=current.scores||[];
+    var idx=scores.findIndex(function(s){return s.name===USER.name});
+    if(idx>=0)scores[idx]={name:USER.name,avatar:USER.avatar,coins:Math.max(COINS,scores[idx].coins||0),plays:Object.keys(PLAYS).length,time:totalTime,updated:new Date().toISOString()};
+    else scores.push({name:USER.name,avatar:USER.avatar,coins:COINS,plays:Object.keys(PLAYS).length,time:totalTime,updated:new Date().toISOString()});
+    var px=new XMLHttpRequest();
+    px.open('PUT','https://gateway.maton.ai/github/repos/VIP-881/hot-h5-games/contents/leaderboard.json');
+    px.setRequestHeader('Authorization','Bearer '+key);
+    px.setRequestHeader('Content-Type','application/json');
+    px.send(JSON.stringify({message:'sync lb',content:btoa(JSON.stringify({scores:scores})),sha:sha,branch:'main'}));
+  }catch(e){}};
+  x.send();
+}
+// Periodic sync
+setInterval(function(){if(USER&&USER.name)pushLB();},300000);
+// Synced on close
+var _origClose=closeGame;closeGame=function(){if(curIdx>0&&USER&&USER.name)setTimeout(pushLB,100);_origClose();};
+
+// ===== MULTIPLAYER =====
+var MP={mode:'',players:[],turn:0,scores:[0,0]};
+function mpBtn(){
+  var h='<div class="rkbox"><h2>👥 多人对战</h2>';
+  h+='<button class="act" onclick="startHS()" style="display:block;width:100%;margin:4px 0">🔥 Hot Seat 本地对战</button>';
+  h+='<button class="act" onclick="startChallenge()" style="display:block;width:100%;margin:4px 0">🎯 挑战链接</button>';
+  h+='<div style="text-align:center;margin-top:6px"><button class="act" onclick="closeMP()">✖</button></div></div>';
+  var el=document.getElementById('mp')||function(){var d=document.createElement('div');d.id='mp';d.style.cssText='display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9995;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);justify-content:center;align-items:center';document.body.appendChild(d);return d;}();
+  el.style.display='flex';el.innerHTML=h;el.style.justifyContent='center';el.style.alignItems='center';
+}
+function closeMP(){var e=document.getElementById('mp');if(e)e.style.display='none';}
+function startHS(){
+  closeMP();MP={mode:'hs',players:['玩家1','玩家2'],turn:0,scores:[0,0]};
+  var g=gameData[Math.floor(Math.random()*gameData.length)];
+  var t='🔥 HS ['+MP.players[0]+'] '+g.emoji+' '+g.title;
+  openGame(gameData.indexOf(g)+1);
+  document.querySelector('.vt').innerHTML='🔥 '+MP.players[0]+' | '+g.emoji+' '+g.title;
+  MP.currentGame=gameData.indexOf(g)+1;
+  // After close, switch turns
+  var _oc=closeGame;
+  closeGame=function(){
+    MP.scores[MP.turn]=Math.max(MP.scores[MP.turn],timerSec);
+    MP.turn=1-MP.turn;
+    if(MP.turn===0){
+      // Both players done - show results
+      var winner=MP.scores[0]>MP.scores[1]?MP.players[0]:MP.scores[0]<MP.scores[1]?MP.players[1]:'平局';
+      alert('🏆 '+winner+'胜利\n'+MP.players[0]+': '+MP.scores[0]+'s\n'+MP.players[1]+': '+MP.scores[1]+'s');
+      MP={mode:'',players:[],turn:0,scores:[0,0]};
+      closeGame=_oc;
+      document.getElementById('v').classList.remove('act');
+    } else {
+      var g2=gameData[Math.floor(Math.random()*gameData.length)];
+      document.querySelector('.vt').innerHTML='🔥 '+MP.players[1]+' | '+g2.emoji+' '+g2.title;
+      document.getElementById('gameFrame').src=g2.id+'.html';
+      timerSec=0;
+    }
+    _oc();
+  };
+  document.getElementById('v').classList.add('act');
+}
+function startChallenge(){
+  closeMP();
+  var url=window.location.href;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url+'\n来挑战我！我已玩了 '+Object.keys(PLAYS).length+' 次！').then(function(){
+      alert('✅ 链接已复制，发给好友挑战吧！');
+    });
+  } else {prompt('复制链接发给好友：',url);}
+}
+
 // ===== INIT =====
 document.getElementById('catBar').innerHTML=buildCatsStr();
 document.querySelector('.sbox').placeholder=t('srch');
