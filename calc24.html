@@ -43,7 +43,7 @@ function input(op){expr+=op;render()}
 function clearExpr(){expr=expr.slice(0,-1);render()}
 function submit(){
   try{
-    const e=expr.replace(/×/g,'*').replace(/÷/g,'/');const val=eval(e);const used=nums.filter((n,i)=>{const re=new RegExp(`\\b${n}\\b`);const m=expr.match(re);if(m&&!usedNums.has(i)){usedNums.add(i);return true}return false});
+    const e=expr.replace(/×/g,'*').replace(/÷/g,'/');const val=new Function("return "+e)();const used=nums.filter((n,i)=>{const re=new RegExp(`\\b${n}\\b`);const m=expr.match(re);if(m&&!usedNums.has(i)){usedNums.add(i);return true}return false});
     if(Math.abs(val-24)<0.001){score++;document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('calc24_best',best)}catch(e)}alert('🎉 正确!');newPuzzle()}else alert('不等于24哦')
   }catch{alert('表达式有误')}
 }
