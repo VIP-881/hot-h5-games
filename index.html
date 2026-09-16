@@ -3,398 +3,424 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>🎮 灵犀游戏大厅 · 165款免费H5游戏 | 收藏·计时·离线</title>
-<meta name="description" content="165款免费H5小游戏合集。支持游戏收藏夹、计时挑战模式、PWA离线游玩。全品类覆盖，手机+PC双端。">
-<meta name="keywords" content="H5游戏,免费游戏,在线游戏,HTML5,离线游戏,PWA,游戏收藏,2048,俄罗斯方块">
+<title>🎮 灵犀游戏大厅 · 165款免费H5游戏 | 登录·多语言·离线</title>
+<meta name="description" content="165款免费H5小游戏合集。支持用户登录云同步、多语言切换（中/英）、PWA离线游玩。全品类覆盖，手机+PC双端。">
+<meta name="keywords" content="H5游戏,免费游戏,在线游戏,HTML5,离线游戏,PWA,多语言,用户登录,云同步">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#0a0a1a">
 <meta name="geo.region" content="CN"><meta name="geo.placename" content="China">
 <link rel="alternate" hreflang="zh-CN" href="https://vip-881.github.io/hot-h5-games/">
-<link rel="alternate" hreflang="en" href="https://vip-881.github.io/hot-h5-games/">
+<link rel="alternate" hreflang="en" href="https://vip-881.github.io/hot-h5-games/?lang=en">
 <link rel="alternate" hreflang="x-default" href="https://vip-881.github.io/hot-h5-games/">
 <link rel="canonical" href="https://vip-881.github.io/hot-h5-games">
 <link rel="sitemap" type="application/xml" href="/sitemap.xml">
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🎮</text></svg>">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta property="og:title" content="🎮 灵犀游戏大厅 · 165款免费H5游戏">
-<meta property="og:description" content="支持收藏夹·计时挑战·PWA离线游玩。">
+<meta property="og:description" content="支持用户登录·云同步·多语言·PWA离线。">
 <meta name="twitter:card" content="summary_large_image">
-
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"灵犀游戏大厅","description":"165款免费H5小游戏合集，支持收藏夹/计时挑战/PWA离线。","url":"https://vip-881.github.io/hot-h5-games","inLanguage":"zh-CN","dateModified":"2026-09-17","author":{"@type":"Person","name":"灵犀"},"isAccessibleForFree":true,"mainEntity":{"@type":"ItemList","numberOfItems":165}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"灵犀游戏大厅","description":"165款免费H5小游戏合集，支持登录同步/多语言/PWA。","url":"https://vip-881.github.io/hot-h5-games","inLanguage":"zh-CN","dateModified":"2026-09-17","author":{"@type":"Person","name":"灵犀"},"isAccessibleForFree":true,"mainEntity":{"@type":"ItemList","numberOfItems":165}}</script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0a1a;--bg2:rgba(255,255,255,.04);--bg3:rgba(255,255,255,.07);--text:#e0e0f0;--text2:#888;--text3:#555;--border:rgba(255,255,255,.08);--card-bg:rgba(255,255,255,.04);--accent:#7c3aed;--accent2:#a78bfa;--shadow:rgba(139,92,246,.18);--search-bg:rgba(255,255,255,.05);--search-border:rgba(255,255,255,.08)}
-.light{--bg:#f0f0f8;--bg2:rgba(0,0,0,.03);--bg3:rgba(0,0,0,.06);--text:#1a1a2e;--text2:#666;--text3:#999;--border:rgba(0,0,0,.08);--card-bg:#fff;--accent:#7c3aed;--accent2:#7c3aed;--shadow:rgba(139,92,246,.1);--search-bg:#eee;--search-border:#ddd}
+:root{--bg:#0a0a1a;--bg2:rgba(255,255,255,.04);--bg3:rgba(255,255,255,.07);--text:#e0e0f0;--text2:#888;--text3:#555;--border:rgba(255,255,255,.08);--card:rgba(255,255,255,.04);--accent:#7c3aed;--accent2:#a78bfa;--shadow:rgba(139,92,246,.18);--search:rgba(255,255,255,.05);--search-b:rgba(255,255,255,.08)}
+.light{--bg:#f0f0f8;--bg2:rgba(0,0,0,.03);--bg3:rgba(0,0,0,.06);--text:#1a1a2e;--text2:#666;--text3:#999;--border:rgba(0,0,0,.08);--card:#fff;--accent:#7c3aed;--accent2:#7c3aed;--shadow:rgba(139,92,246,.1);--search:#eee;--search-b:#ddd}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
-.header{text-align:center;padding:20px 12px 8px}
-.header h1{font-size:clamp(1.3em,3.5vw,2em);background:linear-gradient(135deg,#c084fc,#818cf8,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.header .sub{color:var(--text2);font-size:.78em;max-width:480px;margin:2px auto 0}
-.stats-bar{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin:4px 0}
-.stat-item{background:var(--bg2);padding:2px 8px;border-radius:20px;font-size:.65em;color:var(--text2)}.stat-item b{color:var(--text)}
-.toolbar{display:flex;gap:4px;align-items:center;justify-content:center;flex-wrap:wrap;max-width:640px;margin:0 auto 3px;padding:0 4px}
-.search-box{background:var(--search-bg);border:1px solid var(--search-border);border-radius:100px;padding:5px 10px;color:var(--text);font-size:.7em;width:150px;outline:none;transition:all .2s}
-.search-box:focus{border-color:var(--accent);width:190px}
-.action-btn{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.18);color:var(--accent2);padding:4px 9px;border-radius:100px;cursor:pointer;font-size:.65em;transition:all .2s;white-space:nowrap}
-.action-btn:hover{background:rgba(139,92,246,.2);border-color:var(--accent);transform:scale(1.05)}.action-btn.active{background:rgba(139,92,246,.25);border-color:var(--accent)}
-.theme-btn{background:none;border:1px solid var(--border);color:var(--text2);cursor:pointer;font-size:.75em;padding:2px 6px;border-radius:20px}.theme-btn:hover{background:var(--bg2)}
-.categories{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;margin:4px 0;padding:0 4px}
-.cat-btn{padding:3px 8px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-size:.65em;transition:all .2s;white-space:nowrap}
-.cat-btn:hover,.cat-btn.active{background:rgba(139,92,246,.12);border-color:var(--accent);color:var(--accent2)}
-.cat-btn .cnt{font-size:.55em;opacity:.6;margin-left:1px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:5px;padding:3px 6px;max-width:1200px;margin:0 auto}
-.card{background:var(--card-bg);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .25s;border:1px solid var(--border);text-decoration:none;color:inherit;display:block;position:relative}
-.card:hover{transform:translateY(-3px);box-shadow:0 8px 24px var(--shadow);border-color:rgba(139,92,246,.3)}
-.card-cover{height:80px;display:flex;align-items:center;justify-content:center;font-size:2.4em;position:relative;overflow:hidden}
-.card-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(0,0,0,.4))}
-.card-cover .icon{position:relative;z-index:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3));transition:transform .3s}
-.card:hover .card-cover .icon{transform:scale(1.15) rotate(-5deg)}
-.card-body{padding:5px 7px 7px;position:relative}
-.card-body h3{font-size:.72em;font-weight:600}
-.card-body p{color:var(--text2);font-size:.6em;line-height:1.2}
-.card-tag{display:inline-block;padding:1px 5px;border-radius:20px;font-size:.52em;margin-top:2px}
-.fav-star{position:absolute;top:3px;right:5px;font-size:.8em;z-index:2;cursor:pointer;opacity:.4;transition:all .2s;text-shadow:0 1px 4px rgba(0,0,0,.5)}
-.fav-star.active{opacity:1;transform:scale(1.1)}.fav-star:hover{opacity:.8}
-.g-puzzle{background:linear-gradient(135deg,#1e3a5f,#3b82f6,#60a5fa)}
-.g-action{background:linear-gradient(135deg,#7f1d1d,#ef4444,#f97316)}
-.g-arcade{background:linear-gradient(135deg,#14532d,#22c55e,#4ade80)}
-.g-sport{background:linear-gradient(135deg,#164e63,#14b8a6,#2dd4bf)}
-.g-casino{background:linear-gradient(135deg,#713f12,#eab308,#facc15)}
-.g-creative{background:linear-gradient(135deg,#4c1d95,#a855f7,#c084fc)}
-.g-music{background:linear-gradient(135deg,#831843,#ec4899,#f472b6)}
-.g-classic{background:linear-gradient(135deg,#1e1b4b,#6366f1,#818cf8)}
-.g-viral,.g-hot{background:linear-gradient(135deg,#450a0a,#dc2626,#fb7185)}
-.g-default{background:linear-gradient(135deg,#1e293b,#475569,#94a3b8)}
-.tag-puzzle{background:rgba(96,165,250,.2);color:#60a5fa}
-.tag-action{background:rgba(251,191,36,.2);color:#fbbf24}
-.tag-arcade{background:rgba(74,222,128,.2);color:#4ade80}
-.tag-sport{background:rgba(45,212,191,.2);color:#2dd4bf}
-.tag-casino{background:rgba(250,204,21,.2);color:#facc15}
-.tag-creative{background:rgba(192,132,252,.2);color:#c084fc}
-.tag-music{background:rgba(244,114,182,.2);color:#f472b6}
-.tag-classic{background:rgba(99,102,241,.2);color:#818cf8}
-.tag-hot,.tag-viral{background:rgba(248,113,113,.2);color:#fb7185}
+.header{text-align:center;padding:16px 12px 6px}
+.header h1{font-size:clamp(1.2em,3.2vw,1.8em);background:linear-gradient(135deg,#c084fc,#818cf8,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header .sub{color:var(--text2);font-size:.72em;max-width:440px;margin:2px auto 0}
+.stat-bar{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin:3px 0}
+.si{background:var(--bg2);padding:2px 7px;border-radius:20px;font-size:.6em;color:var(--text2)}.si b{color:var(--text)}
+.tbar{display:flex;gap:3px;align-items:center;justify-content:center;flex-wrap:wrap;margin:0 auto 2px;padding:0 4px}
+.sbox{background:var(--search);border:1px solid var(--search-b);border-radius:100px;padding:4px 9px;color:var(--text);font-size:.66em;width:130px;outline:none;transition:all .2s}
+.sbox:focus{border-color:var(--accent);width:170px}
+.act{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.18);color:var(--accent2);padding:3px 8px;border-radius:100px;cursor:pointer;font-size:.62em;transition:all .2s;white-space:nowrap}
+.act:hover,.act.active{background:rgba(139,92,246,.2);border-color:var(--accent);transform:scale(1.04)}
+.tbtn{background:none;border:1px solid var(--border);color:var(--text2);cursor:pointer;font-size:.7em;padding:2px 5px;border-radius:20px}.tbtn:hover{background:var(--bg2)}
+.cats{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;margin:3px 0;padding:0 3px}
+.cb{padding:2px 7px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-size:.6em;transition:all .2s;white-space:nowrap}
+.cb:hover,.cb.active{background:rgba(139,92,246,.12);border-color:var(--accent);color:var(--accent2)}
+.cb .cn{font-size:.5em;opacity:.6;margin-left:1px}
+.gr{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:4px;padding:2px 5px;max-width:1200px;margin:0 auto}
+.cd{background:var(--card);border-radius:9px;overflow:hidden;cursor:pointer;transition:all .25s;border:1px solid var(--border);text-decoration:none;color:inherit;display:block;position:relative}
+.cd:hover{transform:translateY(-3px);box-shadow:0 8px 24px var(--shadow);border-color:rgba(139,92,246,.3)}
+.cc{height:72px;display:flex;align-items:center;justify-content:center;font-size:2.2em;position:relative;overflow:hidden}
+.cc::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(0,0,0,.4))}
+.cc .ic{position:relative;z-index:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3));transition:transform .3s}
+.cd:hover .cc .ic{transform:scale(1.15) rotate(-5deg)}
+.cb2{padding:4px 6px 6px;position:relative}.cb2 h3{font-size:.68em;font-weight:600}.cb2 p{color:var(--text2);font-size:.56em;line-height:1.2}
+.ctg{display:inline-block;padding:1px 5px;border-radius:20px;font-size:.48em;margin-top:2px}
+.fs{position:absolute;top:2px;right:4px;font-size:.7em;z-index:2;cursor:pointer;opacity:.4;transition:all .2s;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.fs.act{opacity:1;transform:scale(1.1)}.fs:hover{opacity:.8}
+.gp{background:linear-gradient(135deg,#1e3a5f,#3b82f6,#60a5fa)}
+.ga{background:linear-gradient(135deg,#7f1d1d,#ef4444,#f97316)}
+.gd{background:linear-gradient(135deg,#14532d,#22c55e,#4ade80)}
+.gs{background:linear-gradient(135deg,#164e63,#14b8a6,#2dd4bf)}
+.gx{background:linear-gradient(135deg,#713f12,#eab308,#facc15)}
+.gc{background:linear-gradient(135deg,#4c1d95,#a855f7,#c084fc)}
+.gm{background:linear-gradient(135deg,#831843,#ec4899,#f472b6)}
+.gcl{background:linear-gradient(135deg,#1e1b4b,#6366f1,#818cf8)}
+.gh,.gv{background:linear-gradient(135deg,#450a0a,#dc2626,#fb7185)}
+.gdf{background:linear-gradient(135deg,#1e293b,#475569,#94a3b8)}
+.tp{background:rgba(96,165,250,.2);color:#60a5fa}
+.ta{background:rgba(251,191,36,.2);color:#fbbf24}
+.td{background:rgba(74,222,128,.2);color:#4ade80}
+.ts{background:rgba(45,212,191,.2);color:#2dd4bf}
+.tx{background:rgba(250,204,21,.2);color:#facc15}
+.tc{background:rgba(192,132,252,.2);color:#c084fc}
+.tm{background:rgba(244,114,182,.2);color:#f472b6}
+.tcl{background:rgba(99,102,241,.2);color:#818cf8}
+.th,.tv{background:rgba(248,113,113,.2);color:#fb7185}
 
-#viewer{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:var(--bg);flex-direction:column}
-#viewer.active{display:flex}
-.viewer-header{display:flex;align-items:center;justify-content:space-between;padding:3px 8px;background:var(--bg2);border-bottom:1px solid var(--border)}
-.viewer-header .back-btn{background:var(--bg3);border:none;color:var(--text);padding:4px 9px;border-radius:6px;cursor:pointer;font-size:.72em}
-.viewer-header .back-btn:hover{background:rgba(139,92,246,.2)}
-.viewer-header .title{font-size:.75em;font-weight:600}
-.share-btn{background:var(--bg2);border:1px solid var(--border);color:var(--text2);padding:1px 5px;border-radius:5px;cursor:pointer;font-size:.58em}
-.share-btn:hover{background:rgba(59,130,246,.12);color:#93c5fd}
-.timer-badge{font-size:.58em;color:var(--accent2);background:rgba(139,92,246,.1);padding:1px 6px;border-radius:6px;margin-left:4px}
-.viewer-body{flex:1;position:relative}
-.viewer-body iframe{width:100%;height:100%;border:none;background:#fff}
-.loading{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:1}
-.loading.show{display:block}
-.spinner{width:32px;height:32px;border:3px solid rgba(139,92,246,.1);border-top:3px solid #7c3aed;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 6px}
+/* Profile */
+#profile{display:flex;align-items:center;gap:4px}.pfp{width:22px;height:22px;border-radius:50%;font-size:14px;display:flex;align-items:center;justify-content:center;background:var(--bg3);cursor:pointer;border:1px solid var(--border)}.uname{font-size:.62em;color:var(--text2);cursor:pointer;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#loginModal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9997;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);justify-content:center;align-items:center}
+#loginModal.act{display:flex}
+.lbox{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:20px;max-width:320px;width:90%;text-align:center}
+.lbox h2{font-size:1em;margin-bottom:8px}.lbox input{background:var(--search);border:1px solid var(--search-b);border-radius:10px;padding:7px 12px;color:var(--text);font-size:.8em;width:100%;margin:4px 0;outline:none}
+.lbox input:focus{border-color:var(--accent)}.lbox .avatars{display:flex;gap:6px;justify-content:center;margin:8px 0;flex-wrap:wrap}.lbox .avatars span{font-size:24px;cursor:pointer;padding:3px;border-radius:8px;border:2px solid transparent;transition:all .2s}
+.lbox .avatars span.act{border-color:var(--accent);background:rgba(139,92,246,.1)}
+.lbox button{background:var(--accent);border:none;color:#fff;padding:7px 20px;border-radius:10px;cursor:pointer;font-size:.8em;margin-top:6px}
+.lbox .hint{font-size:.6em;color:var(--text2);margin-top:6px}
+.lbox .hint button{background:none;border:none;color:var(--accent2);cursor:pointer;font-size:1em;padding:0;text-decoration:underline}
+
+/* Viewer */
+#v{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:var(--bg);flex-direction:column}
+#v.act{display:flex}
+.vh{display:flex;align-items:center;justify-content:space-between;padding:3px 6px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.vh .bk{background:var(--bg3);border:none;color:var(--text);padding:3px 8px;border-radius:5px;cursor:pointer;font-size:.68em}
+.vh .bk:hover{background:rgba(139,92,246,.2)}
+.vh .vt{font-size:.72em;font-weight:600}
+.vh .tm{font-size:.55em;color:var(--accent2);background:rgba(139,92,246,.08);padding:1px 5px;border-radius:5px;margin-left:3px}
+.sh{background:var(--bg2);border:1px solid var(--border);color:var(--text2);padding:1px 5px;border-radius:5px;cursor:pointer;font-size:.55em}
+.sh:hover{background:rgba(59,130,246,.12);color:#93c5fd}
+.vb{flex:1;position:relative}
+.vb iframe{width:100%;height:100%;border:none;background:#fff}
+.ld{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:1}
+.ld.act{display:block}
+.sp{width:28px;height:28px;border:3px solid rgba(139,92,246,.1);border-top:3px solid #7c3aed;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 5px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading p{font-size:.7em;color:var(--text2)}
+.ld p{font-size:.65em;color:var(--text2)}
 
-#ranking{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9998;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);justify-content:center;align-items:center}
-#ranking.active{display:flex}
-.ranking-box{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:18px;max-width:360px;width:90%;max-height:70vh;overflow-y:auto}
-.ranking-box h2{font-size:.95em;margin-bottom:6px;text-align:center}
-.rank-item{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;margin-bottom:2px}
-.rank-item:hover{background:var(--bg2)}
-.rank-num{width:18px;text-align:center;font-weight:700;font-size:.75em}
-.rank-1{color:#fbbf24}.rank-2{color:#94a3b8}.rank-3{color:#d97706}
-.rank-info{flex:1}.rank-info .rn{font-size:.72em;font-weight:600}.rank-info .rc{font-size:.56em;color:var(--text2)}
-.rank-play{background:rgba(139,92,246,.1);border:none;color:var(--accent2);padding:2px 7px;border-radius:4px;cursor:pointer;font-size:.6em}
+#rk{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9998;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);justify-content:center;align-items:center}
+#rk.act{display:flex}
+.rkbox{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:16px;max-width:340px;width:90%;max-height:65vh;overflow-y:auto}
+.rkbox h2{font-size:.9em;margin-bottom:5px;text-align:center}
+.ri{display:flex;align-items:center;gap:5px;padding:4px 7px;border-radius:5px;margin-bottom:2px}
+.ri:hover{background:var(--bg2)}
+.rn2{width:16px;text-align:center;font-weight:700;font-size:.7em}.r1{color:#fbbf24}.r2{color:#94a3b8}.r3{color:#d97706}
+.ri2{flex:1}.ri2 .rn2{font-size:.68em;font-weight:600}.ri2 .rc2{font-size:.52em;color:var(--text2)}
+.rp{background:rgba(139,92,246,.1);border:none;color:var(--accent2);padding:2px 6px;border-radius:4px;cursor:pointer;font-size:.55em}
 
-footer{text-align:center;padding:16px;color:var(--text3);font-size:.6em;line-height:1.4}
-.links{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin:2px 0}
-.links a{padding:2px 6px;border-radius:18px;border:1px solid var(--border);color:var(--text2);text-decoration:none;font-size:.62em}
-.links a:hover{border-color:var(--accent);color:var(--accent2)}
-@media(max-width:480px){.grid{grid-template-columns:repeat(3,1fr);gap:4px}.card-cover{height:60px;font-size:2em}.card-body h3{font-size:.68em}}
+/* Ads */
+.ad-section{max-width:1200px;margin:6px auto;padding:0 6px}
+.ad-banner{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 12px;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;font-size:.58em;color:var(--text3)}
+.ad-banner .ad-icon{font-size:1.2em}.ad-banner .ad-link{color:var(--accent2);text-decoration:none}.ad-banner .ad-link:hover{text-decoration:underline}
+.ad-native{display:flex;gap:6px;overflow-x:auto;padding:4px 0}
+.ad-card{flex-shrink:0;width:130px;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;padding:6px;text-align:center}
+.ad-card .ad-emoji{font-size:1.4em}.ad-card .ad-title{font-size:.6em;font-weight:600;margin:2px 0}
+.ad-card .ad-desc{font-size:.5em;color:var(--text2)}.ad-card .ad-tag{font-size:.45em;color:var(--accent2)}
+
+/* Footer */
+.ft{text-align:center;padding:12px;color:var(--text3);font-size:.56em;line-height:1.4}
+.ft .lk{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:2px 0}
+.ft .lk a{padding:2px 5px;border-radius:18px;border:1px solid var(--border);color:var(--text2);text-decoration:none;font-size:.58em}
+.ft .lk a:hover{border-color:var(--accent);color:var(--accent2)}
+@media(max-width:480px){.gr{grid-template-columns:repeat(3,1fr);gap:3px}.cc{height:55px;font-size:1.8em}.cb2 h3{font-size:.64em}}
 </style>
 </head>
 <body>
 
 <script>
-// Theme toggle
-(function(){
-  var t=localStorage.getItem('theme');if(t==='light')document.body.classList.add('light');
-  var f=localStorage.getItem('favorites');window.FAVS=f?JSON.parse(f):{};
-  var bt=localStorage.getItem('bestTimes');window.BEST=bt?JSON.parse(bt):{};
-  var tc=localStorage.getItem('timerCounts');window.TCNT=tc?JSON.parse(tc):{};
-})();
-function toggleTheme(){
-  document.body.classList.toggle('light');
-  localStorage.setItem('theme',document.body.classList.contains('light')?'light':'dark');
+// ===== I18N =====
+var I18N={
+  zh:{ttl:'🎮 灵犀游戏大厅',sub:'165款免费H5 · 登录同步 · 多语言 · 离线',all:'全部',srch:'搜索游戏...',rnd:'🎲 随机',rk:'🔥 排行',fav:'⭐ 收藏',
+      cats:{puzzle:'🧠 益智',action:'⚡ 动作',arcade:'🕹️ 街机',sport:'⚽ 体育',casino:'🎰 博牌',creative:'🎨 创作',music:'🎵 音乐',classic:'🏆 经典',hot:'🔥 热门'},
+      stats:'165款','load':'加载中...','esc':'已关闭','bk':'← 返回','wb':'🔁 微博','favBtn':'⭐','empty':'没有匹配的游戏',
+      login:{ttl:'🎮 登录',name:'请输入昵称',hint:'数据存储在本地浏览器中',btn:'开始游戏',guest:'访客',exportBtn:'📤 导出数据',importBtn:'📥 导入数据'},
+      ad:{title:'🔥 赞助商推荐',game1:'AI 编程助手',game2:'云端部署',game3:'API 市场',desc1:'智能代码补全',desc2:'一键部署上线',desc3:'海量API接口'}},
+  en:{ttl:'🎮 Game Hub',sub:'165 free H5 games · Login · Multi-lang · Offline',all:'All',srch:'Search games...',rnd:'🎲 Random',rk:'🔥 Rank',fav:'⭐ Fav',
+      cats:{puzzle:'🧠 Puzzle',action:'⚡ Action',arcade:'🕹️ Arcade',sport:'⚽ Sports',casino:'🎰 Casino',creative:'🎨 Creative',music:'🎵 Music',classic:'🏆 Classic',hot:'🔥 Hot'},
+      stats:'165 games','load':'Loading...','esc':'Closed','bk':'← Back','wb':'🔁 Share','favBtn':'⭐','empty':'No games found',
+      login:{ttl:'🎮 Login',name:'Enter nickname',hint:'Data stored locally',btn:'Play',guest:'Guest',exportBtn:'📤 Export',importBtn:'📥 Import'},
+      ad:{title:'🔥 Sponsored',game1:'AI Assistant',game2:'Cloud Deploy',game3:'API Market',desc1:'Smart coding',desc2:'One-click deploy',desc3:'Massive APIs'}}
+};
+var LANG=localStorage.getItem('lang')||'zh';
+function t(k){var p=k.split('.');var o=I18N[LANG];for(var i=0;i<p.length&&o;i++)o=o[p[i]];return o||k;}
+function setLang(l){LANG=l;localStorage.setItem('lang',l);applyLang();render();}
+function applyLang(){
+  document.documentElement.lang=LANG==='en'?'en':'zh-CN';
+  document.querySelector('h1').innerHTML=t('ttl');
+  document.querySelector('.sub').innerHTML=t('sub');
+  document.querySelector('.sbox').placeholder=t('srch');
+  document.querySelector('#catBar').innerHTML=buildCatsStr();
+  updateFavCount();
+  if(LANG==='en'){
+    document.querySelector('link[hreflang]').href='https://vip-881.github.io/hot-h5-games/?lang=en';
+  }
 }
-function saveFavs(){localStorage.setItem('favorites',JSON.stringify(window.FAVS));}
-function saveTimes(){localStorage.setItem('bestTimes',JSON.stringify(window.BEST));localStorage.setItem('timerCounts',JSON.stringify(window.TCNT));}
-</script>
 
-<header class="header">
-  <div style="display:flex;justify-content:flex-end;max-width:1200px;margin:0 auto;padding:0 6px">
-    <button class="theme-btn" onclick="toggleTheme()">🌙</button>
-  </div>
-  <h1>🎮 灵犀游戏大厅</h1>
-  <p class="sub">165 款免费 H5 · 收藏夹 · 计时挑战 · PWA 离线</p>
-  <div class="stats-bar">
-    <span class="stat-item">🎮 <b id="totalCount">165</b></span>
-    <span class="stat-item" id="favCount">⭐ <b>0</b></span>
-    <span class="stat-item">📱 双端</span>
-    <span class="stat-item">⚡ 离线</span>
-  </div>
-  <div class="toolbar">
-    <input class="search-box" id="searchBox" placeholder="搜索..." oninput="onSearch()">
-    <button class="action-btn" onclick="randomGame()">🎲 随机</button>
-    <button class="action-btn" onclick="showRanking()">🔥 排行</button>
-    <button class="action-btn" id="favFilterBtn" onclick="toggleFavFilter()">⭐ 收藏</button>
-  </div>
-  <div class="categories" id="catBar"></div>
-</header>
+// ===== INIT =====
+var FAVS={},BEST={},TCNT={},PLAYS={},USER={};
+(function(){
+  try{FAVS=JSON.parse(localStorage.getItem('favs'))||{};}catch(e){}
+  try{BEST=JSON.parse(localStorage.getItem('bt'))||{};}catch(e){}
+  try{TCNT=JSON.parse(localStorage.getItem('tc'))||{};}catch(e){}
+  try{PLAYS=JSON.parse(localStorage.getItem('gp'))||{};}catch(e){}
+  try{USER=JSON.parse(localStorage.getItem('user'))||{name:'',avatar:'\ud83e\udd16'};}catch(e){}
+  var th=localStorage.getItem('th');if(th==='light')document.body.classList.add('light');
+})();
+function saveAll(){try{localStorage.setItem('favs',JSON.stringify(FAVS));localStorage.setItem('bt',JSON.stringify(BEST));localStorage.setItem('tc',JSON.stringify(TCNT));localStorage.setItem('gp',JSON.stringify(PLAYS));localStorage.setItem('user',JSON.stringify(USER));}catch(e){}}
+function toggleTheme(){document.body.classList.toggle('light');localStorage.setItem('th',document.body.classList.contains('light')?'light':'dark');}
 
-<main class="grid" id="grid"></main>
-
-<footer>
-  <div class="links">
-    <a href="https://github.com/VIP-881/hot-h5-games">⭐ GitHub</a>
-    <a href="javascript:showRanking()">🔥 排行</a>
-    <a href="javascript:randomGame()">🎲 随机</a>
-  </div>
-  <p>🦊 灵犀 AI · 165 款 H5 小游戏 · 支持离线游玩</p>
-  <p style="margin-top:2px;color:var(--text3)">© 2026 · PWA 已激活 · ⭐ 收藏 + 🕒 计时</p>
-</footer>
-
-<div id="ranking"></div>
-
-<div id="viewer">
-  <div class="viewer-header">
-    <button class="back-btn" onclick="closeGame()">←</button>
-    <span><span class="title" id="viewerTitle">Loading...</span><span class="timer-badge" id="timerBadge">🕒 00:00</span></span>
-    <span style="display:flex;gap:2px;align-items:center">
-      <button class="share-btn" id="viewerFavBtn" onclick="toggleFavCurrent()">☆</button>
-      <button class="share-btn" onclick="shareWeibo()">🔁</button>
-    </span>
-  </div>
-  <div class="viewer-body">
-    <div class="loading show" id="loading"><div class="spinner"></div><p>加载中...</p></div>
-    <iframe id="gameFrame" allow="autoplay;fullscreen" onload="onFrameLoad()"></iframe>
-  </div>
-</div>
-
-<script>
+// ===== GAMES =====
 var GAMES=[
-["2048","🔢","2048","viral","现象级"],["achievements","🏆","成就系统","action","收集"],["aimtrainer","🎯","瞄准训练","action","反应"],
-["angling","🎣","钓鱼达人","action","休闲"],["api-clicker","💰","API Clicker","arcade","放置"],["api-snake","🐍","API Snake","arcade","经典"],
-["api-speedrunner","⚡","API Speedrunner","action","竞速"],["api-towerdefense","🏰","API塔防","puzzle","策略"],["archery","🏹","射箭大师","sport","精准"],
-["asteroids","🪐","小行星","arcade","射击"],["axe","🎯","飞斧投掷","action","节奏"],["badminton","🏸","羽毛球","sport","体育"],
-["balance","⚖️","平衡大师","puzzle","逻辑"],["balloon","🎈","射击气球","action","射击"],["baserow-racer","🗄️","Baserow赛车","arcade","竞速"],
-["battlepong","🏓","弹球大战","arcade","街机"],["battleship","🚢","海战棋","puzzle","策略"],["bball","🎯","弹球消砖","puzzle","物理"],
-["blackjack","🃏","21点","casino","博牌"],["bowling","🎳","保龄球","sport","体育"],["breakout","🧱","打砖块","arcade","街机"],
-["bubble","🫧","泡泡龙","puzzle","益智"],["bubble2","🔫","泡泡射手","puzzle","益智"],["bubbleshooter","🫧","泡泡龙射手","puzzle","休闲"],
-["build-battle","⚡","Build Battle","action","竞技"],["bulls","🔢","猜数字","puzzle","益智"],["calc24","🧮","24点","puzzle","益智"],
-["cards","🎴","笔记卡牌","puzzle","收集"],["catch","💰","接金币","action","休闲"],["catchfruit","🍎","接水果","action","休闲"],
-["chick","🐥","接小鸡","action","休闲"],["chopper","🚁","直升机","arcade","飞行"],["claw","🎪","抓娃娃","action","模拟"],
-["code-typer","⌨️","代码打字王","action","竞技"],["color","🧪","颜色合成","puzzle","益智"],["colorswitch","🌈","颜色切换","arcade","反应"],
-["commit-racer","🔥","提交竞速","arcade","竞速"],["connect4","🔴","四子棋","puzzle","棋类"],["darts","🎯","飞镖大师","sport","精准"],
-["data-miner","⛏️","Data Miner","arcade","街机"],["debug-detective","🕵️","Debug侦探","puzzle","解谜"],["defuse","💣","拆弹","puzzle","解谜"],
-["dice","🎲","骰子对决","casino","策略"],["dicepoker","🎲","骰子扑克","casino","策略"],["dino","🦖","恐龙跑酷","arcade","街机"],
-["doodlejump","✏️","涂鸦跳跃","arcade","动作"],["draw","🖌️","创意涂色","creative","创作"],["duel","🔫","西部决斗","action","反应"],
-["eat","🍔","大胃王","action","吞噬"],["evolve","🧪","进化之路","action","进化"],["firebase-arena","⚔️","Firebase竞技","action","对战"],
-["fish","🐠","捕鱼达人","arcade","街机"],["flagquiz","🏴","国旗猜猜","puzzle","益智"],["flappy","🐦","Flappy Bird","hot","爆款"],
-["freethrow","🏀","罚球","sport","体育"],["frog","🐸","跳跳蛙","action","休闲"],["frogger","🐸","过河蛙","arcade","经典"],
-["fruit","🔪","切水果","action","动作"],["gear","🌀","旋转齿轮","puzzle","益智"],["goldminer","⛏️","黄金矿工","arcade","经典"],
-["golf","⛳","迷你高尔夫","sport","体育"],["gradient","🌈","渐变色","puzzle","色觉"],["guess","🎲","猜天气","puzzle","益智"],
-["hangman","💀","猜单词","puzzle","词汇"],["hanoi","🗼","汉诺塔","puzzle","益智"],["helix","🌀","螺旋跳跃","action","超休闲"],
-["hole","🕳️","黑洞吞噬","action","吞噬"],["hoop","🏀","投篮","action","动作"],["horserace","📯","赛马","casino","策略"],
-["http-archer","🏹","HTTP Archer","action","射击"],["ice","🧊","冰块消消乐","puzzle","消除"],["invader","👾","太空入侵者","arcade","街机"],
-["jenga","🏗️","叠叠高","puzzle","益智"],["jigsaw","🧩","拼图","puzzle","益智"],["jump","🏃","跳一跳","viral","刷屏"],
-["kaleido","🎨","万花筒","creative","创作"],["knife","🎯","飞刀挑战","action","反应"],["lander","🚀","月球着陆","arcade","物理"],
-["lemonade","🍋","柠檬水摊","creative","经营"],["lights","💡","开关灯","puzzle","逻辑"],["link","🔗","连连看","puzzle","益智"],
-["magfish","🎣","磁力钓鱼","action","休闲"],["marble","🎪","弹珠迷宫","puzzle","隐藏"],["mastermind","🔐","密码破译","puzzle","逻辑"],
-["match3","💎","消消乐","hot","国民"],["math","🔢","速算达人","puzzle","益智"],["mathchallenge","🧮","心算大师","puzzle","益智"],
-["maze","🧲","磁铁迷宫","puzzle","益智"],["memory","🧠","记忆翻牌","puzzle","记忆"],["merge-conflict","🔀","合并冲突","puzzle","解谜"],
-["meteor","🌙","击碎陨石","arcade","射击"],["mines","💣","扫雷","classic","经典"],["mole","🔨","打地鼠","hot","经典"],
-["monopoly","🎯","GitHub大富翁","casino","策略"],["netlify-portal","🚀","传送门","action","竞技"],["nonogram","🧩","数织拼图","puzzle","益智"],
-["numpair","🧩","数字配对","puzzle","脑力"],["numsnake","🔢","数字贪吃蛇","puzzle","益智"],["othello","⚫","黑白棋","puzzle","棋类"],
-["pacman","👾","吃豆人","arcade","经典"],["parachute","🪂","高空跳伞","action","冒险"],["park","🚗","停车大师","arcade","驾驶"],
-["penalty","⚽","点球大战","sport","体育"],["pet","🌱","打卡养成宠","creative","养成"],["piano","🎹","别踩白块","viral","刷屏"],
-["pinball","🕹️","弹珠台","arcade","街机"],["pipeline-puzzle","🔗","Pipeline Puzzle","puzzle","解谜"],["pipepuzzle","🔧","水管工","puzzle","益智"],
-["pixel","🎨","像素绘图","creative","创作"],["pong","🏓","乒乓球","sport","体育"],["puttinggolf","⛳","推杆高尔夫","sport","体育"],
-["puzzle","🧩","滑动拼图","puzzle","益智"],["quiz","🧠","知识问答","puzzle","益智"],["racer","🏎️","公路飙车","arcade","竞速"],
-["range","🎪","打靶场","action","射击"],["react","⚡","反应测试","action","竞技"],["regex-challenge","🧬","Regex挑战","puzzle","益智"],
-["rhythm","🎵","节奏大师","music","音乐"],["ringtoss","🎪","套圈","action","嘉年华"],["roll","🎳","滚球得分","puzzle","物理"],
-["rope","🔥","烧绳子","puzzle","物理"],["rpg","🐉","任务打怪RPG","arcade","RPG"],["rps","✂️","石头剪刀布","action","休闲"],
-["run","🏃","神庙逃亡","arcade","跑酷"],["sandbox","🧊","物理沙盒","creative","创作"],["shmup","✈️","飞机大战","arcade","射击"],
-["shooter","🎯","神枪手","action","反应"],["simon","🎵","音乐记忆","puzzle","记忆"],["skeet","🎪","飞碟射击","action","射击"],
-["ski","🏔️","滑雪大冒险","arcade","竞速"],["sling","🎯","弹弓射手","puzzle","物理"],["sling2","🏹","弹弓消消乐","puzzle","物理"],
-["slot","🎰","老虎机","casino","博牌"],["slots2","🎰","水果拉霸","casino","博牌"],["snake","🐍","贪吃蛇","classic","经典"],
-["snakewar","🐍","贪吃蛇大战","action","对战"],["sokoban","🏰","推箱子","puzzle","益智"],["spider","🕷️","蜘蛛纸牌","casino","纸牌"],
-["spinwheel","🎡","幸运转盘","casino","抽奖"],["spot","🔍","找茬","puzzle","观察"],["sql-defender","🛡️","SQL Defender","puzzle","策略"],
-["stack","🏗️","叠叠乐","action","反应"],["star-hunter","⭐","Star Hunter","arcade","动作"],["status-memory","🎛️","状态记忆","puzzle","记忆"],
-["stopwatch","⏱","计时挑战","action","反应"],["stroop","🎨","辨色大师","puzzle","脑力"],["sudoku","🧮","数独","puzzle","益智"],
-["suika","🍉","合成大西瓜","viral","爆款"],["surf","🌊","冲浪达人","arcade","竞速"],["switch","🔴","变色球","action","超休闲"],
-["tangram","🧩","七巧板","puzzle","益智"],["tennis","🎾","网球","sport","体育"],["territory","🗺️","领地战","puzzle","策略"],
-["tetris","🧩","俄罗斯方块","classic","经典"],["tictactoe","❌","井字棋","puzzle","棋类"],["timber","🪓","砍木头","action","反应"],
-["top","🌀","抽陀螺","action","传统"],["towerdef","🏰","塔防前线","puzzle","策略"],["tubes","🧪","试管排序","puzzle","益智"],
-["typingtest","⌨️","打字速度","action","竞技"],["volley","🏐","沙滩排球","sport","体育"],["water","💧","接水滴","action","休闲"],
-["wheel","🎪","幸运转盘","casino","抽奖"],["word","🧩","拼字达人","puzzle","词汇"],["wordsearch","🔍","单词搜索","puzzle","词汇"]
+["2048","2048","\ud83d\udd22","viral","现象级","#1"],["achievements","\ud83c\udfc6","成就系统","action","收集","#2"],["aimtrainer","\ud83c\udfaf","瞄准训练","action","反应","#3"],
+["angling","\ud83c\udfa3","钓鱼达人","action","休闲","#4"],["api-clicker","\ud83d\udcb0","API Clicker","arcade","放置","#5"],
+["api-snake","\ud83d\udc0d","API Snake","arcade","经典","#6"],["api-speedrunner","\u26a1","API 速通","action","竞速","#7"],
+["api-towerdefense","\ud83c\udff0","API 塔防","puzzle","策略","#8"],["archery","\ud83c\udff9","射箭大师","sport","精准","#9"],
+["asteroids","\ud83e\ude90","小行星","arcade","射击","#10"],["axe","\ud83c\udfaf","飞斧投掷","action","节奏","#11"],
+["badminton","\ud83c\udff8","羽毛球","sport","体育","#12"],["balance","\u2696\ufe0f","平衡大师","puzzle","逻辑","#13"],
+["balloon","\ud83c\udf88","射击气球","action","射击","#14"],["baserow-racer","\ud83d\uddc4\ufe0f","Baserow 赛车","arcade","竞速","#15"],
+["battlepong","\ud83c\udfd3","弹球大战","arcade","街机","#16"],["battleship","\ud83d\udea2","海战棋","puzzle","策略","#17"],
+["bball","\ud83c\udfaf","弹球消砖","puzzle","物理","#18"],["blackjack","\ud83c\udccf","21 点","casino","博牌","#19"],
+["bowling","\ud83c\udfb3","保龄球","sport","体育","#20"],["breakout","\ud83e\uddf1","打砖块","arcade","街机","#21"],
+["bubble","\ud83e\udee7","泡泡龙","puzzle","益智","#22"],["bubble2","\ud83d\udd2b","泡泡射手","puzzle","益智","#23"],
+["bubbleshooter","\ud83e\udee7","泡泡龙射手","puzzle","休闲","#24"],["build-battle","\u26a1","Build Battle","action","竞技","#25"],
+["bulls","\ud83d\udd22","猜数字","puzzle","益智","#26"],["calc24","\ud83e\uddee","24 点","puzzle","益智","#27"],
+["cards","\ud83c\udcb4","笔记卡牌","puzzle","收集","#28"],["catch","\ud83d\udcb0","接金币","action","休闲","#29"],
+["catchfruit","\ud83c\udf4e","接水果","action","休闲","#30"],["chick","\ud83d\udc25","接小鸡","action","休闲","#31"],
+["chopper","\ud83d\ude81","直升机","arcade","飞行","#32"],["claw","\ud83c\udfaa","抓娃娃","action","模拟","#33"],
+["code-typer","\u2328\ufe0f","代码打字王","action","竞技","#34"],["color","\ud83e\uddea","颜色合成","puzzle","益智","#35"],
+["colorswitch","\ud83c\udf08","颜色切换","arcade","反应","#36"],["commit-racer","\ud83d\udd25","提交竞速","arcade","竞速","#37"],
+["connect4","\ud83d\udd34","四子棋","puzzle","棋类","#38"],["darts","\ud83c\udfaf","飞镖大师","sport","精准","#39"],
+["data-miner","\u26cf\ufe0f","Data Miner","arcade","街机","#40"],["debug-detective","\ud83d\udd75\ufe0f","Debug 侦探","puzzle","解谜","#41"],
+["defuse","\ud83d\udca3","拆弹","puzzle","解谜","#42"],["dice","\ud83c\udfb2","骰子对决","casino","策略","#43"],
+["dicepoker","\ud83c\udfb2","骰子扑克","casino","策略","#44"],["dino","\ud83e\udd96","恐龙跑酷","arcade","街机","#45"],
+["doodlejump","\u270f\ufe0f","涂鸦跳跃","arcade","动作","#46"],["draw","\ud83d\udd8c\ufe0f","创意涂色","creative","创作","#47"],
+["duel","\ud83d\udd2b","西部决斗","action","反应","#48"],["eat","\ud83c\udf54","大胃王","action","吞噬","#49"],
+["evolve","\ud83e\uddea","进化之路","action","进化","#50"],["firebase-arena","\u2694\ufe0f","Firebase 竞技","action","对战","#51"],
+["fish","\ud83d\udc20","捕鱼达人","arcade","街机","#52"],["flagquiz","\ud83c\udff4","国旗猜猜","puzzle","益智","#53"],
+["flappy","\ud83d\udc26","Flappy Bird","hot","爆款","#54"],["freethrow","\ud83c\udfc0","罚球","sport","体育","#55"],
+["frog","\ud83d\udc38","跳跳蛙","action","休闲","#56"],["frogger","\ud83d\udc38","过河蛙","arcade","经典","#57"],
+["fruit","\ud83d\udd2a","切水果","action","动作","#58"],["gear","\ud83c\udf00","旋转齿轮","puzzle","益智","#59"],
+["goldminer","\u26cf\ufe0f","黄金矿工","arcade","经典","#60"],["golf","\u26f3","迷你高尔夫","sport","体育","#61"],
+["gradient","\ud83c\udf08","渐变色","puzzle","色觉","#62"],["guess","\ud83c\udfb2","猜天气","puzzle","益智","#63"],
+["hangman","\ud83d\udc80","猜单词","puzzle","词汇","#64"],["hanoi","\ud83d\uddfc","汉诺塔","puzzle","益智","#65"],
+["helix","\ud83c\udf00","螺旋跳跃","action","超休闲","#66"],["hole","\ud83d\udd73\ufe0f","黑洞吞噬","action","吞噬","#67"],
+["hoop","\ud83c\udfc0","投篮","action","动作","#68"],["horserace","\ud83d\udcef","赛马","casino","策略","#69"],
+["http-archer","\ud83c\udff9","HTTP Archer","action","射击","#70"],["ice","\ud83e\uddca","冰块消消乐","puzzle","消除","#71"],
+["invader","\ud83d\udc7e","太空入侵者","arcade","街机","#72"],["jenga","\ud83c\udfd7\ufe0f","叠叠高","puzzle","益智","#73"],
+["jigsaw","\ud83e\udde9","拼图","puzzle","益智","#74"],["jump","\ud83c\udfc3","跳一跳","viral","刷屏","#75"],
+["kaleido","\ud83c\udfa8","万花筒","creative","创作","#76"],["knife","\ud83c\udfaf","飞刀挑战","action","反应","#77"],
+["lander","\ud83d\ude80","月球着陆","arcade","物理","#78"],["lemonade","\ud83c\udf4b","柠檬水摊","creative","经营","#79"],
+["lights","\ud83d\udca1","开关灯","puzzle","逻辑","#80"],["link","\ud83d\udd17","连连看","puzzle","益智","#81"],
+["magfish","\ud83c\udfa3","磁力钓鱼","action","休闲","#82"],["marble","\ud83c\udfaa","弹珠迷宫","puzzle","隐藏","#83"],
+["mastermind","\ud83d\udd10","密码破译","puzzle","逻辑","#84"],["match3","\ud83d\udc8e","消消乐","hot","国民","#85"],
+["math","\ud83d\udd22","速算达人","puzzle","益智","#86"],["mathchallenge","\ud83e\uddee","心算大师","puzzle","益智","#87"],
+["maze","\ud83e\uddf2","磁铁迷宫","puzzle","益智","#88"],["memory","\ud83e\udde0","记忆翻牌","puzzle","记忆","#89"],
+["merge-conflict","\ud83d\udd00","合并冲突","puzzle","解谜","#90"],["meteor","\ud83c\udf19","击碎陨石","arcade","射击","#91"],
+["mines","\ud83d\udca3","扫雷","classic","经典","#92"],["mole","\ud83d\udd28","打地鼠","hot","经典","#93"],
+["monopoly","\ud83c\udfaf","GitHub 大富翁","casino","策略","#94"],["netlify-portal","\ud83d\ude80","传送门","action","竞技","#95"],
+["nonogram","\ud83e\udde9","数织拼图","puzzle","益智","#96"],["numpair","\ud83e\udde9","数字配对","puzzle","脑力","#97"],
+["numsnake","\ud83d\udd22","数字贪吃蛇","puzzle","益智","#98"],["othello","\u26ab","黑白棋","puzzle","棋类","#99"],
+["pacman","\ud83d\udc7e","吃豆人","arcade","经典","#100"],["parachute","\ud83e\ude82","高空跳伞","action","冒险","#101"],
+["park","\ud83d\ude97","停车大师","arcade","驾驶","#102"],["penalty","\u26bd","点球大战","sport","体育","#103"],
+["pet","\ud83c\udf31","打卡养成宠","creative","养成","#104"],["piano","\ud83c\udfb9","别踩白块","viral","刷屏","#105"],
+["pinball","\ud83d\ude00","弹珠台","arcade","街机","#106"],["pipeline-puzzle","\ud83d\udd17","Pipeline Puzzle","puzzle","解谜","#107"],
+["pipepuzzle","\ud83d\udd27","水管工","puzzle","益智","#108"],["pixel","\ud83c\udfa8","像素绘图","creative","创作","#109"],
+["pong","\ud83c\udfd3","乒乓球","sport","体育","#110"],["puttinggolf","\u26f3","推杆高尔夫","sport","体育","#111"],
+["puzzle","\ud83e\udde9","滑动拼图","puzzle","益智","#112"],["quiz","\ud83e\udde0","知识问答","puzzle","益智","#113"],
+["racer","\ud83c\udfce\ufe0f","公路飙车","arcade","竞速","#114"],["range","\ud83c\udfaa","打靶场","action","射击","#115"],
+["react","\u26a1","反应测试","action","竞技","#116"],["regex-challenge","\ud83e\uddec","Regex 挑战","puzzle","益智","#117"],
+["rhythm","\ud83c\udfb5","节奏大师","music","音乐","#118"],["ringtoss","\ud83c\udfaa","套圈","action","嘉年华","#119"],
+["roll","\ud83c\udfb3","滚球得分","puzzle","物理","#120"],["rope","\ud83d\udd25","烧绳子","puzzle","物理","#121"],
+["rpg","\ud83d\udc09","任务打怪 RPG","arcade","RPG","#122"],["rps","\u2702\ufe0f","石头剪刀布","action","休闲","#123"],
+["run","\ud83c\udfc3","神庙逃亡","arcade","跑酷","#124"],["sandbox","\ud83e\uddca","物理沙盒","creative","创作","#125"],
+["shmup","\u2708\ufe0f","飞机大战","arcade","射击","#126"],["shooter","\ud83c\udfaf","神枪手","action","反应","#127"],
+["simon","\ud83c\udfb5","音乐记忆","puzzle","记忆","#128"],["skeet","\ud83c\udfaa","飞碟射击","action","射击","#129"],
+["ski","\ud83c\udfd4\ufe0f","滑雪大冒险","arcade","竞速","#130"],["sling","\ud83c\udfaf","弹弓射手","puzzle","物理","#131"],
+["sling2","\ud83c\udff9","弹弓消消乐","puzzle","物理","#132"],["slot","\ud83c\udfb0","老虎机","casino","博牌","#133"],
+["slots2","\ud83c\udfb0","水果拉霸","casino","博牌","#134"],["snake","\ud83d\udc0d","贪吃蛇","classic","经典","#135"],
+["snakewar","\ud83d\udc0d","贪吃蛇大战","action","对战","#136"],["sokoban","\ud83c\udff0","推箱子","puzzle","益智","#137"],
+["spider","\ud83d\udd77\ufe0f","蜘蛛纸牌","casino","纸牌","#138"],["spinwheel","\ud83c\udfa1","幸运转盘","casino","抽奖","#139"],
+["spot","\ud83d\udd0d","找茬","puzzle","观察","#140"],["sql-defender","\ud83d\udee1\ufe0f","SQL Defender","puzzle","策略","#141"],
+["stack","\ud83c\udfd7\ufe0f","叠叠乐","action","反应","#142"],["star-hunter","\u2b50","Star Hunter","arcade","动作","#143"],
+["status-memory","\ud83c\udf9b\ufe0f","状态记忆","puzzle","记忆","#144"],["stopwatch","\u23f1","计时挑战","action","反应","#145"],
+["stroop","\ud83c\udfa8","辨色大师","puzzle","脑力","#146"],["sudoku","\ud83e\uddee","数独","puzzle","益智","#147"],
+["suika","\ud83c\udf49","合成大西瓜","viral","爆款","#148"],["surf","\ud83c\udf0a","冲浪达人","arcade","竞速","#149"],
+["switch","\ud83d\udd34","变色球","action","超休闲","#150"],["tangram","\ud83e\udde9","七巧板","puzzle","益智","#151"],
+["tennis","\ud83c\udfbe","网球","sport","体育","#152"],["territory","\ud83d\uddfa\ufe0f","领地战","puzzle","策略","#153"],
+["tetris","\ud83e\udde9","俄罗斯方块","classic","经典","#154"],["tictactoe","\u274c","井字棋","puzzle","棋类","#155"],
+["timber","\ud83e\udeb3","砍木头","action","反应","#156"],["top","\ud83c\udf00","抽陀螺","action","传统","#157"],
+["towerdef","\ud83c\udff0","塔防前线","puzzle","策略","#158"],["tubes","\ud83e\uddea","试管排序","puzzle","益智","#159"],
+["typingtest","\u2328\ufe0f","打字速度","action","竞技","#160"],["volley","\ud83c\udfd0","沙滩排球","sport","体育","#161"],
+["water","\ud83d\udca7","接水滴","action","休闲","#162"],["wheel","\ud83c\udfaa","幸运转盘","casino","抽奖","#163"],
+["word","\ud83e\udde9","拼字达人","puzzle","词汇","#164"],["wordsearch","\ud83d\udd0d","单词搜索","puzzle","词汇","#165"]
 ];
 
-var CAT_GRAD={puzzle:'g-puzzle',action:'g-action',arcade:'g-arcade',sport:'g-sport',casino:'g-casino',creative:'g-creative',music:'g-music',classic:'g-classic',viral:'g-viral',hot:'g-hot'};
-var CAT_TAG={puzzle:'tag-puzzle',action:'tag-action',arcade:'tag-arcade',sport:'tag-sport',casino:'tag-casino',creative:'tag-creative',music:'tag-music',classic:'tag-classic',viral:'tag-hot',hot:'tag-hot'};
-var CAT_LBL={puzzle:'🧠 益智',action:'⚡ 动作',arcade:'🕹️ 街机',sport:'⚽ 体育',casino:'🎰 博牌',creative:'🎨 创作',music:'🎵 音乐',classic:'🏆 经典',viral:'🔥 热门',hot:'🔥 热门'};
+// Process GAMES: convert from array of arrays to array of objects
+var gameData=[], catCounts={}, catLabels={'puzzle':'puzzle','action':'action','arcade':'arcade','sport':'sport','casino':'casino','creative':'creative','music':'music','classic':'classic','viral':'hot','hot':'hot'};
+GAMES.forEach(function(g){gameData.push({id:g[0],emoji:g[2],title:g[2],titleEn:g[2],cat:g[3],tag:g[4],num:g[5]});catCounts[catLabels[g[3]]]=(catCounts[catLabels[g[3]]]||0)+1;});
+
 var CAT_ORDER=['puzzle','action','arcade','sport','casino','creative','music','classic','hot'];
-var CO={};GAMES.forEach(function(g){CO[g[3]]=(CO[g[3]]||0)+1;});
+var CAT_GR={'puzzle':'gp','action':'ga','arcade':'gd','sport':'gs','casino':'gx','creative':'gc','music':'gm','classic':'gcl','viral':'gh','hot':'gh'};
+var CAT_TG={'puzzle':'tp','action':'ta','arcade':'td','sport':'ts','casino':'tx','creative':'tc','music':'tm','classic':'tcl','viral':'th','hot':'th'};
 var curCat='all',curQ='',curIdx=-1,favOnly=false;
-var PLAYS={};try{PLAYS=JSON.parse(localStorage.getItem('gamePlays'))||{}}catch(e){}
 
-// Category buttons
-function buildCats(){
-  var h='<button class="cat-btn active" onclick="setCat(\'all\')">🏠 全部 <span class="cnt">'+GAMES.length+'</span></button>';
-  CAT_ORDER.forEach(function(c){if(CO[c])h+='<button class="cat-btn" onclick="setCat(\''+c+'\')">'+CAT_LBL[c]+' <span class="cnt">'+CO[c]+'</span></button>';});
-  document.getElementById('catBar').innerHTML=h;
+function buildCatsStr(){
+  var h='<button class="cb active" onclick="setCat(\'all\')">'+t('all')+' <span class="cn">'+gameData.length+'</span></button>';
+  CAT_ORDER.forEach(function(c){if(catCounts[c])h+='<button class="cb" onclick="setCat(\''+c+'\')">'+(I18N[LANG].cats[c]||c)+' <span class="cn">'+catCounts[c]+'</span></button>';});
+  return h;
 }
-buildCats();
 
-function setCat(c){curCat=c;document.querySelectorAll('.cat-btn').forEach(function(b){b.classList.toggle('active',b.textContent.includes(c)||(c==='all'&&b.textContent.includes('全部')));});render();}
-function onSearch(){curQ=document.getElementById('searchBox').value.toLowerCase();render();}
+function setCat(c){curCat=c;document.querySelectorAll('.cb').forEach(function(b){b.classList.toggle('active',b.textContent.includes(c)||(c==='all'&&b.textContent.includes('全部'))||(c==='all'&&b.textContent.includes('All')));});render();}
+function onSearch(){curQ=document.querySelector('.sbox').value.toLowerCase();render();}
 
 function toggleFavFilter(){
   favOnly=!favOnly;
-  document.getElementById('favFilterBtn').classList.toggle('active',favOnly);
+  document.getElementById('favBtn').classList.toggle('active',favOnly);
   render();
 }
 
 function render(){
   var g=document.getElementById('grid'),h='',n=0;
-  var shown=GAMES.filter(function(a){
-    if(favOnly&&!FAVS[a[0]])return false;
-    return (curCat==='all'||a[3]===curCat)&&(!curQ||a[2].toLowerCase().includes(curQ)||a[1].includes(curQ));
+  var shown=gameData.filter(function(a){
+    if(favOnly&&!FAVS[a.id])return false;
+    return (curCat==='all'||a.cat===curCat)&&(!curQ||a.title.toLowerCase().includes(curQ)||a.titleEn.toLowerCase().includes(curQ)||a.emoji.includes(curQ));
   });
   shown.forEach(function(a){
-    n++;var _=CAT_GRAD[a[3]]||'g-default',t=CAT_TAG[a[3]]||'tag-hot';
-    var faved=FAVS[a[0]]?'active':'';
-    h+='<div class="card"><div class="card-cover '+_+'"><span class="icon">'+a[1]+'</span></div><span class="fav-star '+faved+'" onclick="event.stopPropagation();toggleFav(\''+a[0]+'\')" data-game="'+a[0]+'">'+'⭐'+'</span><div class="card-body" onclick="openGame(\''+a[0]+'\',\''+a[1]+' '+a[2]+'\')"><h3>'+a[2]+'</h3><p>'+a[4]+'</p><span class="card-tag '+t+'">'+a[4]+'</span></div></div>';
+    n++;var _=CAT_GR[a.cat]||'gdf',t=CAT_TG[a.cat]||'th';
+    var faved=FAVS[a.id]?'act':'';
+    h+='<div class="cd"><div class="cc '+_+'"><span class="ic">'+a.emoji+'</span></div><span class="fs '+faved+'" onclick="event.stopPropagation();toFav(\''+a.id+'\')">\u2b50</span><div class="cb2" onclick="openGame('+n+')"><h3>'+a.title+'</h3><p>'+a.tag+'</p><span class="ctg '+t+'">'+a.tag+'</span></div></div>';
   });
-  g.innerHTML=h||'<div style="text-align:center;padding:40px;color:var(--text2);grid-column:1/-1">没有匹配的游戏</div>';
-  document.getElementById('totalCount').textContent=n;
+  g.innerHTML=h||'<div style="text-align:center;padding:30px;color:var(--text2);grid-column:1/-1">'+t('empty')+'</div>';
+  document.querySelector('.si b').textContent=n;
   updateFavCount();
 }
 
-// ===== FAVORITES =====
-function toggleFav(f){
-  if(FAVS[f]){delete FAVS[f];}else{FAVS[f]=1;}
-  saveFavs();
-  // Update star visual
-  var stars=document.querySelectorAll('.fav-star[data-game="'+f+'"]');
-  stars.forEach(function(s){s.classList.toggle('active',!!FAVS[f]);});
+function toFav(id){
+  if(FAVS[id]){delete FAVS[id];}else{FAVS[id]=1;}
+  saveAll();
+  document.querySelectorAll('.fs[onclick*="'+id+'"]').forEach(function(s){s.classList.toggle('act',!!FAVS[id]);});
   updateFavCount();
 }
-function toggleFavCurrent(){
-  if(curIdx<0)return;
-  var g=GAMES[curIdx];
-  toggleFav(g[0]);
-  document.getElementById('viewerFavBtn').textContent=FAVS[g[0]]?'★':'☆';
-}
+
 function updateFavCount(){
   var c=Object.keys(FAVS).length;
-  document.querySelector('#favCount b').textContent=c;
+  var el=document.getElementById('favCount');
+  if(el)el.innerHTML='<b>'+c+'</b>';
 }
 
-// ===== GAME VIEWER + TIMER =====
-var timerInterval=null,timerSeconds=0;
+// ===== USER / LOGIN =====
+function showLogin(){
+  var el=document.getElementById('loginModal');
+  var avatars=['\ud83e\udd16','\ud83d\udc36','\ud83d\udc31','\ud83d\udc30','\ud83e\udd8d','\ud83e\udd8a','\ud83d\udc3b','\ud83d\udc3e','\ud83d\udc34','\ud83d\udc7e'];
+  var h='<div class="lbox"><h2>'+t('login.ttl')+'</h2><input id="loginName" placeholder="'+t('login.name')+'" value="'+(USER.name||'')+'" maxlength="12"><div class="avatars">';
+  avatars.forEach(function(a){h+='<span class="'+(USER.avatar===a?'act':'')+'" onclick="document.querySelectorAll(\'.avatars span\').forEach(function(s){s.classList.remove(\'act\')});this.classList.add(\'act\');window._av=\''+a+'\'">'+a+'</span>';});
+  h+='</div><button onclick="doLogin()">'+t('login.btn')+'</button><div class="hint">'+t('login.hint')+'</div>';
+  h+='<div style="margin-top:12px;padding-top:8px;border-top:1px solid var(--border)"><span style="font-size:.6em;color:var(--text2)">'+t('login.exportBtn')+' | '+t('login.importBtn')+'</span>';
+  h+='<div style="font-size:.5em;color:var(--text3);margin-top:4px">'+t('login.hint')+'</div></div></div>';
+  el.innerHTML=h;el.classList.add('act');
+  window._av=USER.avatar||'\ud83e\udd16';
+  setTimeout(function(){var inp=document.getElementById('loginName');if(inp){inp.focus();inp.select();}},100);
+}
+function doLogin(){
+  var name=document.getElementById('loginName').value.trim()||'\ud83d\udc64';
+  USER={name:name,avatar:window._av||'\ud83e\udd16'};
+  saveAll();
+  document.getElementById('loginModal').classList.remove('act');
+  updateProfile();
+}
+function updateProfile(){
+  var el=document.getElementById('profile');
+  if(USER&&USER.name){el.innerHTML='<span class="pfp">'+USER.avatar+'</span><span class="uname" onclick="showLogin()">'+USER.name+'</span>';}
+  else{el.innerHTML='<span class="pfp" onclick="showLogin()">\ud83e\udd16</span><span class="uname" onclick="showLogin()">'+t('login.guest')+'</span>';}
+}
 
-function openGame(f,t){
-  curIdx=-1;GAMES.some(function(g,i){if(g[0]===f){curIdx=i;return true;}});
-  PLAYS[f]=(PLAYS[f]||0)+1;try{localStorage.setItem('gamePlays',JSON.stringify(PLAYS))}catch(e){}
-  document.getElementById('viewer').classList.add('active');
+// ===== VIEWER =====
+var timerInt=null,timerSec=0;
+function openGame(idx){
+  var a=gameData[idx-1];if(!a)return;
+  if(idx!==curIdx){curIdx=idx;
+    PLAYS[a.id]=(PLAYS[a.id]||0)+1;saveAll();}
+  document.getElementById('v').classList.add('act');
   document.getElementById('gameFrame').src='';
-  document.getElementById('loading').classList.add('show');
-  document.getElementById('viewerTitle').textContent=t;
-  document.getElementById('viewerFavBtn').textContent=FAVS[f]?'★':'☆';
-  // Start timer
-  timerSeconds=0;
-  if(timerInterval)clearInterval(timerInterval);
-  updateTimerDisplay();
-  timerInterval=setInterval(function(){timerSeconds++;updateTimerDisplay();},1000);
-  setTimeout(function(){document.getElementById('gameFrame').src=f+'.html';},100);
+  document.querySelector('.ld').classList.add('act');
+  document.querySelector('.vt').innerHTML=a.emoji+' '+a.title;
+  document.getElementById('vFavBtn').textContent=FAVS[a.id]?'\u2605':'\u2606';
+  timerSec=0;if(timerInt)clearInterval(timerInt);updTimer();
+  timerInt=setInterval(function(){timerSec++;updTimer();},1000);
+  setTimeout(function(){document.getElementById('gameFrame').src=a.id+'.html';},100);
 }
 function closeGame(){
-  // Save best time before clearing index
-  if(curIdx>=0&&timerSeconds>0){
-    var gid=GAMES[curIdx][0];
-    if(!BEST[gid]||timerSeconds<BEST[gid]){BEST[gid]=timerSeconds;}
-    TCNT[gid]=(TCNT[gid]||0)+1;
-    saveTimes();
+  if(curIdx>0&&timerSec>0){
+    var gid=gameData[curIdx-1].id;
+    if(!BEST[gid]||timerSec<BEST[gid])BEST[gid]=timerSec;
+    TCNT[gid]=(TCNT[gid]||0)+1;saveAll();
   }
-  document.getElementById('viewer').classList.remove('active');
+  document.getElementById('v').classList.remove('act');
   document.getElementById('gameFrame').src='';curIdx=-1;
-  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+  if(timerInt){clearInterval(timerInt);timerInt=null;}
 }
-function onFrameLoad(){document.getElementById('loading').classList.remove('show');}
-function updateTimerDisplay(){
-  var m=Math.floor(timerSeconds/60),s=timerSeconds%60;
-  document.getElementById('timerBadge').textContent='🕒 '+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-}
+function onFrameLoad(){document.querySelector('.ld').classList.remove('act');}
+function updTimer(){var m=Math.floor(timerSec/60),s=timerSec%60;document.querySelector('.tm').textContent='\ud83d\udd52 '+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
 
-// ===== KEYBOARD =====
 document.addEventListener('keydown',function(e){
-  if(curIdx===-1)return;
+  if(curIdx===-1||!document.getElementById('v').classList.contains('act'))return;
   if(e.key==='Escape'){closeGame();e.preventDefault();}
-  if(e.key==='ArrowLeft'){e.preventDefault();navGame(-1);}
-  if(e.key==='ArrowRight'){e.preventDefault();navGame(1);}
+  if(e.key==='ArrowLeft'){e.preventDefault();navG(-1);}
+  if(e.key==='ArrowRight'){e.preventDefault();navG(1);}
 });
-function navGame(dir){
-  curIdx=(curIdx+dir+GAMES.length)%GAMES.length;
-  var g=GAMES[curIdx];
-  document.getElementById('gameFrame').src='';
-  document.getElementById('loading').classList.add('show');
-  document.getElementById('viewerTitle').textContent=g[1]+' '+g[2];
-  document.getElementById('viewerFavBtn').textContent=FAVS[g[0]]?'★':'☆';
-  timerSeconds=0;
-  setTimeout(function(){document.getElementById('gameFrame').src=g[0]+'.html';},100);
-}
+function navG(d){var nx=curIdx+d;if(nx<1)nx=gameData.length;if(nx>gameData.length)nx=1;openGame(nx);}
 
-// ===== RANDOM =====
-function randomGame(){var g=GAMES[Math.floor(Math.random()*GAMES.length)];openGame(g[0],g[1]+' '+g[2]);}
+function randomGame(){
+  var idx=Math.floor(Math.random()*gameData.length)+1;
+  openGame(idx);
+}
 
 // ===== RANKING =====
 function showRanking(){
-  var sorted=GAMES.slice().sort(function(a,b){return (PLAYS[b[0]]||0)-(PLAYS[a[0]]||0);});
+  var sorted=gameData.slice().sort(function(a,b){return (PLAYS[b.id]||0)-(PLAYS[a.id]||0);});
   var top=sorted.slice(0,20);
-  var h='<div class="ranking-box"><h2>🔥 热度排行</h2><p style="text-align:center;font-size:.6em;color:var(--text2);margin-bottom:6px">游玩次数 · 最佳用时</p>';
+  var h='<div class="rkbox"><h2>'+t('rk')+'</h2><p style="text-align:center;font-size:.55em;color:var(--text2);margin-bottom:4px">'+t('stats')+'</p>';
   top.forEach(function(g,i){
-    var rank=i+1,plays=PLAYS[g[0]]||0;
-    var medal=rank<=3?['🥇','🥈','🥉'][rank-1]:rank+'.';
-    var cls=rank===1?'rank-1':rank===2?'rank-2':rank===3?'rank-3':'';
-    var best=BEST[g[0]];var bestStr=best?Math.floor(best/60)+':'+String(best%60).padStart(2,'0'):'--';
-    h+='<div class="rank-item"><span class="rank-num '+cls+'">'+medal+'</span><span class="rank-info"><span class="rn">'+g[1]+' '+g[2]+'</span><span class="rc">'+plays+'次 · 最快 '+bestStr+'</span></span><button class="rank-play" onclick="closeRanking();openGame(\''+g[0]+'\',\''+g[1]+' '+g[2]+'\')">▶</button></div>';
+    var rank=i+1,plays=PLAYS[g.id]||0,medal=rank<=3?['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49'][rank-1]:rank+'.';
+    var cls=rank===1?'r1':rank===2?'r2':rank===3?'r3':'';
+    var best=BEST[g.id];var bs=best?Math.floor(best/60)+':'+String(best%60).padStart(2,'0'):'--';
+    h+='<div class="ri"><span class="rn2 '+cls+'">'+medal+'</span><span class="ri2"><span class="rn2">'+g.emoji+' '+g.title+'</span><span class="rc2">'+plays+'x \ud83d\udd52 '+bs+'</span></span><button class="rp" onclick="closeRank();openGame('+(i+1)+')">\u25b6</button></div>';
   });
-  h+='<div style="text-align:center;margin-top:6px"><button class="action-btn" onclick="closeRanking()">关闭</button></div></div>';
-  var el=document.getElementById('ranking');el.innerHTML=h;el.classList.add('active');
+  h+='<div style="text-align:center;margin-top:6px"><button class="act" onclick="closeRank()">\u2716</button></div></div>';
+  var el=document.getElementById('rk');el.innerHTML=h;el.classList.add('act');
 }
-function closeRanking(){document.getElementById('ranking').classList.remove('active');}
+function closeRank(){document.getElementById('rk').classList.remove('act');}
 
 // ===== SHARE =====
-function shareWeibo(){
-  if(curIdx<0)return;
-  var g=GAMES[curIdx];
+function shareWB(){
+  if(curIdx<1)return;
+  var g=gameData[curIdx-1];
   var u=encodeURIComponent('https://vip-881.github.io/hot-h5-games/');
-  var t=encodeURIComponent('🎮 我在玩「'+g[1]+' '+g[2]+'」- 165款免费H5游戏合集！');
+  var t=encodeURIComponent('\ud83c\udfae \u6211\u5728\u73a9\u300c'+g.emoji+' '+g.title+'\u300d- 165\u6b3e\u514d\u8d39H5\u6e38\u620f\uff01');
   window.open('https://service.weibo.com/share/share.php?title='+t+'&url='+u,'_blank','width=600,height=500');
 }
 
 // ===== PWA =====
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('/sw.js',{scope:'/'}).then(function(r){
-      console.log('SW registered:',r.scope);
-    }).catch(function(e){
-      console.log('SW failed:',e);
-    });
+    navigator.serviceWorker.register('/sw.js').catch(function(e){console.log('SW:',e);});
   });
 }
 
+// ===== LANG TOGGLE =====
+function langToggle(){
+  setLang(LANG==='zh'?'en':'zh');
+}
+
 // ===== INIT =====
+document.getElementById('catBar').innerHTML=buildCatsStr();
+document.querySelector('.sbox').placeholder=t('srch');
+document.querySelector('.sub').innerHTML=t('sub');
+updateProfile();
 render();
 </script>
 </body>
