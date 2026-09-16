@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🚀 月球着陆 - 热门H5游戏</title>
+<meta name="description" content="月球着陆器H5物理游戏，精准控制推力让登月舱安全着陆在平台上，考验微操和物理直觉，免费在线">
+<meta property="og:title" content="🚀 月球着陆 - 热门H5游戏">
+<meta property="og:description" content="精准控制推力，安全着陆登月舱">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"月球着陆","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
+h1{font-size:1.8em;margin:4px 0;color:#fff}
+.stats{display:flex;gap:12px;margin:6px 0 8px}
+.stats span{background:rgba(255,255,255,0.1);padding:5px 14px;border-radius:20px;font-size:0.95em}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(100,150,255,0.15)}
+</style>
+</head>
+<body>
+<h1>🚀 月球着陆</h1>
+<div class="stats"><span>⛽ <b id="fuel">100</b></span><span>🌙 <b id="level">1</b>/5</span><span>🏆 <b id="best">--</b></span></div>
+<canvas id="c" width="360" height="520"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=360,H=520,G=0.04,THRUST=0.08;
+let lander={x:W/2,y:40,vx:0,vy:0,angle:0,w:24,h:28},pad={x:140,y:380,w:100},fuel=100,level=1,thrusting=false,landed=false,crashed=false,bestLvl;
+try{bestLvl=parseInt(localStorage.getItem('lander_best'))||0;document.getElementById('best').textContent=bestLvl?`${bestLvl}关`:'--'}catch(e){}
+
+const LEVELS=[{padX:W/2-40,padY:H-80,padW:120,startX:W/2,startY:40},
+  {padX:60,padY:H-80,padW:80,startX:280,startY:30},
+  {padX:W/2-35,padY:H-100,padW:70,startX:W/3,startY:30},
+  {padX:30,padY:H-60,padW:60,startX:W-50,startY:30},
+  {padX:W/2-30,padY:H-70,padW:60,startX:180,startY:25}];
+
+function loadLevel(l){
+  const lv=LEVELS[l-1];pad.x=lv.padX;pad.y=lv.padY;pad.w=lv.padW;
+  lander={x:lv.startX,y:lv.startY,vx:0,vy:0,angle:0,w:24,h:28};
+  fuel=100;thrusting=false;landed=false;crashed=false;
+  document.getElementById('fuel').textContent='100';document.getElementById('level').textContent=`${l}/5`
+}
+function update(){
+  if(landed||crashed)return;
+  if(thrusting&&fuel>0){lander.vy-=THRUST*0.6;lander.vx+=THRUST*0.1*(lander.angle/Math.PI);fuel--;document.getElementById('fuel').textContent=fuel}
+  lander.vy+=G;lander.x+=lander.vx;lander.y+=lander.vy;
+  if(lander.y+lander.h/2>pad.y&&lander.y-lander.h/2<pad.y+10&&lander.x>pad.x&&lander.x<pad.x+pad.w){
+    if(Math.abs(lander.vy)<0.8&&Math.abs(lander.vx)<0.6){landed=true;lander.y=pad.y-lander.h/2;setTimeout(()=>{if(level<5){level++;loadLevel(level)}else{endGame(true)}},1000)}
+    else{crashed=true;endGame(false)}
+  }
+  if(lander.x<0||lander.x>W||lander.y>H+50){crashed=true;endGame(false)}
+}
+function draw(){
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<50;i++){ctx.fillStyle=`rgba(255,255,255,${Math.random()*0.8})`;ctx.fillRect(Math.random()*W,Math.random()*H,1.5,1.5)}
+  ctx.fillStyle='#888';ctx.fillRect(pad.x,pad.y,pad.w,6);
+  ctx.fillStyle='#0f0';ctx.fillRect(pad.x+2,pad.y-3,pad.w-4,4);
+  ctx.fillStyle='rgba(0,255,0,0.3)';ctx.fillRect(pad.x-4,pad.y-8,pad.w+8,16);
+  ctx.save();ctx.translate(lander.x,lander.y);ctx.rotate(lander.angle);
+  ctx.fillStyle='#ddd';ctx.beginPath();ctx.moveTo(0,-lander.h/2);ctx.lineTo(-lander.w/2,lander.h/2);ctx.lineTo(lander.w/2,lander.h/2);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#3498db';ctx.beginPath();ctx.arc(0,0,5,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+  if(thrusting&&fuel>0&&!landed&&!crashed){
+    ctx.fillStyle='#ff0';ctx.beginPath();ctx.arc(lander.x,lander.y+lander.h/2,4+Math.random()*4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#ffa502';ctx.beginPath();ctx.arc(lander.x,lander.y+lander.h/2+5,3+Math.random()*3,0,Math.PI*2);ctx.fill();
+  }
+  ctx.fillStyle='#fff';ctx.font='11px monospace';ctx.textAlign='right';ctx.fillText(`vY:${Math.abs(lander.vy).toFixed(2)} vX:${Math.abs(lander.vx).toFixed(2)}`,W-10,20);
+}
+function endGame(win){
+  if(win&&level>bestLvl){bestLvl=level;document.getElementById('best').textContent=`${bestLvl}关`;try{localStorage.setItem('lander_best',bestLvl)}catch(e){}}
+  ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=win?'#2ed573':'#ff4757';ctx.font='bold 26px sans-serif';ctx.textAlign='center';
+  ctx.fillText(win?'🏆 完美着陆!':crashed&&level===1?'💥 坠毁了!':'💥 坠毁了!',W/2,H/2-15);
+  ctx.fillStyle='#fff';ctx.font='16px sans-serif';ctx.fillText(`点击重新开始`,W/2,H/2+20);
+}
+document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();thrusting=true}});
+document.addEventListener('keyup',e=>{if(e.key===' '||e.key==='ArrowUp'){thrusting=false}});
+c.addEventListener('touchstart',e=>{e.preventDefault();if(landed||crashed){restart();return}thrusting=true});
+c.addEventListener('touchend',e=>{thrusting=false});
+c.addEventListener('click',()=>{if(landed||crashed)restart()});
+function restart(){level=1;loadLevel(1)}
+function loop(){update();draw();requestAnimationFrame(loop)}
+loadLevel(1);loop();
+</script>
+</body>
+</html>

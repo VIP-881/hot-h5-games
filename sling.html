@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎯 弹弓射手 - 热门H5游戏</title>
+<meta name="description" content="弹弓射手H5物理游戏，拉弹弓瞄准射击目标，考验角度和力度的精准控制，免费在线物理益智游戏">
+<meta property="og:title" content="🎯 弹弓射手 - 热门H5游戏">
+<meta property="og:description" content="拉弹弓瞄准射击，精准物理学">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"弹弓射手","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#87CEEB,#5dade2);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
+h1{font-size:1.8em;margin:4px 0;text-shadow:0 2px 6px rgba(0,0,0,0.2)}
+.stats{display:flex;gap:12px;margin:6px 0 8px}
+.stats span{background:rgba(255,255,255,0.2);padding:5px 14px;border-radius:20px;font-size:0.95em;font-weight:600}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(0,0,0,0.15)}
+</style>
+</head>
+<body>
+<h1>🎯 弹弓射手</h1>
+<div class="stats"><span>🎯 <b id="score">0</b></span><span>🪨 <b id="shots">5</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="380" height="450"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=380,H=450,SLING={x:80,y:H-80};
+let projectile=null,targets=[],score=0,shots=5,best=0,dragging=false,dragX=0,dragY=0,state='aim',particles=[],frame=0;
+try{best=parseInt(localStorage.getItem('sling_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function spawnTargets(){
+  targets=[];
+  for(let i=0;i<4;i++){
+    targets.push({x:W-100-Math.random()*150,y:50+Math.random()*250,r:18+Math.random()*18,pts:10+Math.floor(Math.random()*40),alive:true,color:`hsl(${Math.random()*360},70%,55%)`});
+  }
+}
+function fire(power,angle){
+  if(state!=='aim'||shots<=0)return;
+  shots--;document.getElementById('shots').textContent=shots;
+  projectile={x:SLING.x,y:SLING.y,vx:Math.cos(angle)*power*0.25,vy:Math.sin(angle)*power*0.25,r:8,life:150,trail:[]};
+  state='flying';
+}
+function update(){
+  frame++;
+  if(state==='flying'&&projectile){
+    projectile.x+=projectile.vx;projectile.y+=projectile.vy;projectile.vy+=0.15;projectile.life--;
+    projectile.trail.push({x:projectile.x,y:projectile.y,life:8});
+    projectile.trail.forEach(t=>t.life--);
+    projectile.trail=projectile.trail.filter(t=>t.life>0);
+    if(projectile.y>H+20||projectile.life<=0||projectile.x>W+20){projectile=null;state='aim';if(shots<=0)endGame()}
+    for(const t of targets){
+      if(!t.alive)continue;
+      const dx=projectile.x-t.x,dy=projectile.y-t.y;
+      if(Math.sqrt(dx*dx+dy*dy)<projectile.r+t.r){
+        t.alive=false;score+=t.pts;document.getElementById('score').textContent=score;
+        if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('sling_best',best)}catch(e){}}
+        for(let p=0;p<10;p++)particles.push({x:t.x,y:t.y,vx:(Math.random()-0.5)*5,vy:(Math.random()-0.5)*5,life:15});
+        projectile=null;state='aim';
+        if(targets.every(t=>!t.alive))spawnTargets();
+        if(shots<=0)endGame();break;
+      }
+    }
+  }
+  for(let i=particles.length-1;i>=0;i--){particles[i].life--;particles[i].x+=particles[i].vx;particles[i].y+=particles[i].vy;if(particles[i].life<=0)particles.splice(i,1)}
+}
+function endGame(){
+  state='over';ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#ffd700';ctx.font='bold 26px sans-serif';ctx.textAlign='center';
+  ctx.fillText('弹药耗尽!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`总分: ${score}  点击重新开始`,W/2,H/2+20);
+}
+function draw(){
+  ctx.fillStyle='#87CEEB';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#228B22';ctx.fillRect(0,H-30,W,30);
+  ctx.fillStyle='#2ecc71';ctx.fillRect(0,H-32,W,4);
+  ctx.fillStyle='#8B4513';ctx.fillRect(SLING.x-5,SLING.y-10,10,40);
+  ctx.beginPath();ctx.arc(SLING.x,SLING.y-10,8,0,Math.PI*2);ctx.fill();
+  targets.forEach(t=>{if(t.alive){ctx.fillStyle=t.color;ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText(t.pts,t.x,t.y+3)}});
+  particles.forEach(p=>{ctx.fillStyle=`rgba(255,215,0,${p.life/15})`;ctx.beginPath();ctx.arc(p.x,p.y,2+Math.random()*2,0,Math.PI*2);ctx.fill()});
+  if(projectile){projectile.trail.forEach(t=>{ctx.fillStyle=`rgba(255,255,255,${t.life/8})`;ctx.beginPath();ctx.arc(t.x,t.y,3,0,Math.PI*2);ctx.fill()});ctx.fillStyle='#8B4513';ctx.beginPath();ctx.arc(projectile.x,projectile.y,projectile.r,0,Math.PI*2);ctx.fill()}
+  if(dragging&&state==='aim'){
+    const dx=dragX-SLING.x,dy=dragY-SLING.y,dist=Math.min(Math.sqrt(dx*dx+dy*dy),80);
+    if(dist>10){
+      const ax=Math.atan2(dy,dx);
+      ctx.strokeStyle='#654321';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(SLING.x-3,SLING.y-10);ctx.lineTo(SLING.x+Math.cos(ax)*dist,SLING.y-10+Math.sin(ax)*dist);ctx.stroke();
+      ctx.fillStyle='#8B4513';ctx.beginPath();ctx.arc(SLING.x+Math.cos(ax)*dist,SLING.y-10+Math.sin(ax)*dist,8,0,Math.PI*2);ctx.fill();
+    }
+  }
+  if(state==='aim'&&shots>0){ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText('拖动弹弓瞄准松手发射',SLING.x+100,SLING.y-20)}
+}
+c.addEventListener('mousedown',e=>{if(state==='over'){restart();return};const r=c.getBoundingClientRect();dragging=true;dragX=e.clientX-r.left;dragY=e.clientY-r.top});
+c.addEventListener('mousemove',e=>{if(!dragging)return;const r=c.getBoundingClientRect();dragX=e.clientX-r.left;dragY=e.clientY-r.top});
+c.addEventListener('mouseup',e=>{if(!dragging)return;dragging=false;const dx=dragX-SLING.x,dy=dragY-SLING.y;const dist=Math.sqrt(dx*dx+dy*dy),angle=Math.atan2(dy,dx);fire(Math.min(dist,80),angle)});
+c.addEventListener('touchstart',e=>{e.preventDefault();if(state==='over'){restart();return};const r=c.getBoundingClientRect();dragging=true;dragX=e.touches[0].clientX-r.left;dragY=e.touches[0].clientY-r.top});
+c.addEventListener('touchmove',e=>{e.preventDefault();if(!dragging)return;const r=c.getBoundingClientRect();dragX=e.touches[0].clientX-r.left;dragY=e.touches[0].clientY-r.top});
+c.addEventListener('touchend',e=>{if(!dragging)return;dragging=false;const dx=dragX-SLING.x,dy=dragY-SLING.y;const dist=Math.sqrt(dx*dx+dy*dy),angle=Math.atan2(dy,dx);fire(Math.min(dist,80),angle)});
+function restart(){score=0;shots=5;state='aim';projectile=null;particles=[];targets=[];spawnTargets();document.getElementById('score').textContent='0';document.getElementById('shots').textContent='5'}
+function loop(){update();draw();requestAnimationFrame(loop)}
+spawnTargets();loop();
+</script>
+</body>
+</html>

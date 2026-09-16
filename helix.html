@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🌀 螺旋跳跃 - 热门H5游戏</title>
+<meta name="description" content="螺旋跳跃H5超休闲游戏，点击让球跳跃通过旋转平台的缺口，考验节奏感和反应力，免费在线">
+<meta property="og:title" content="🌀 螺旋跳跃 - 热门H5游戏">
+<meta property="og:description" content="点击让球跳跃通过旋转平台缺口">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"螺旋跳跃","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#1a0533,#0d1b3e);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
+h1{font-size:1.8em;margin:4px 0}
+.stats{display:flex;gap:12px;margin:6px 0 8px}
+.stats span{background:rgba(255,255,255,0.12);padding:5px 14px;border-radius:20px;font-size:0.95em}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(100,50,200,0.2)}
+</style>
+</head>
+<body>
+<h1>🌀 螺旋跳跃</h1>
+<div class="stats"><span>⬇️ <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="560"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=360,H=560;
+let platforms=[],ball={y:80,vy:0,jumping:false},score=0,best=0,rotation=0,speed=0.02,state='idle',cameraY=0;
+try{best=parseInt(localStorage.getItem('helix_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function genPlatforms(){
+  platforms=[];
+  const gap=Math.PI*0.6;
+  for(let i=0;i<8;i++){
+    platforms.push({y:100+i*75,rot:i*0.5,gap,gapRot:i*0.5+Math.random()*Math.PI,r:140+Math.random()*30,color:`hsl(${i*40},70%,${50+i*3}%)`});
+  }
+}
+function update(){
+  if(state!=='playing')return;
+  rotation+=speed;
+  if(ball.jumping){ball.vy+=0.5;ball.y+=ball.vy;if(ball.y>=ball.targetY){ball.y=ball.targetY;ball.jumping=false}}
+  cameraY=ball.y-H*0.4;
+  platforms.forEach((p,i)=>{
+    const py=p.y-cameraY;
+    if(py>H+100){platforms.splice(i,1);const last=platforms[platforms.length-1];
+      platforms.push({y:last.y+75,rot:last.rot+0.5,gap:Math.PI*0.55+Math.random()*0.3,r:120+Math.random()*40,color:`hsl(${Math.random()*360},70%,55%)`});
+    }
+  });
+  if(!ball.jumping){
+    const cp=platforms[0];
+    if(cp&&ball.y>=cp.y-5&&ball.y<=cp.y+5){
+      const br=(rotation+cp.gapRot+cp.gap*0.5)%(Math.PI*2);
+      if(br<cp.gap){state='dead';endGame();return}
+      score++;document.getElementById('score').textContent=score;
+      if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('helix_best',best)}catch(e){}}
+      speed+=0.0003;
+    }
+  }
+  if(ball.y-cameraY>H+50){state='dead';endGame()}
+}
+function endGame(){
+  state='over';ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';
+  ctx.fillText('GAME OVER',W/2,H/2-15);ctx.font='16px sans-serif';
+  ctx.fillText(`得分: ${score}  点击重新开始`,W/2,H/2+20);
+}
+function draw(){
+  ctx.fillStyle='#1a0533';ctx.fillRect(0,0,W,H);
+  platforms.forEach(p=>{
+    const py=p.y-cameraY;if(py<-100||py>H+100)return;
+    const r=p.r;
+    ctx.strokeStyle=p.color;ctx.lineWidth=4;
+    ctx.beginPath();
+    const startAngle=rotation+p.gapRot+p.gap/2;
+    for(let a=startAngle;a<startAngle+Math.PI*2-p.gap;a+=0.05){
+      const x=W/2+Math.cos(a)*r,y2=py+Math.sin(a)*r*0.3;
+      a===startAngle?ctx.moveTo(x,y2):ctx.lineTo(x,y2);
+    }
+    ctx.stroke();
+  });
+  const by=ball.y-cameraY;
+  ctx.fillStyle='#ff0';ctx.shadowColor='#ff0';ctx.shadowBlur=10;
+  ctx.beginPath();ctx.arc(W/2,by,14,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(W/2-4,by-4,4,0,Math.PI*2);ctx.fill();
+}
+c.addEventListener('click',()=>{
+  if(state==='over'){restart();return}
+  if(state==='idle'){state='playing';return}
+  if(!ball.jumping){ball.jumping=true;ball.vy=-10;ball.targetY=ball.y-70}
+});
+c.addEventListener('touchstart',e=>{e.preventDefault();if(state==='over'){restart();return};if(state==='idle'){state='playing';return};if(!ball.jumping){ball.jumping=true;ball.vy=-10;ball.targetY=ball.y-70}});
+function restart(){score=0;speed=0.02;rotation=0;ball={y:80,vy:0,jumping:false};state='idle';cameraY=0;genPlatforms();document.getElementById('score').textContent='0'}
+function loop(){update();draw();requestAnimationFrame(loop)}
+genPlatforms();loop();
+</script>
+</body>
+</html>

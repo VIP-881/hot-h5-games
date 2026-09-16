@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🔴 变色球 - 热门H5游戏</title>
+<meta name="description" content="变色球Color Switch超休闲H5游戏，点击让小球跳跃并匹配颜色通过障碍，考验色觉和反应力，免费在线">
+<meta property="og:title" content="🔴 变色球 - 热门H5游戏">
+<meta property="og:description" content="匹配颜色通过障碍，Color Switch风格">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"变色球","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
+h1{font-size:1.8em;margin:4px 0;background:linear-gradient(135deg,#e74c3c,#2ecc71,#3498db,#f39c12);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stats{display:flex;gap:12px;margin:6px 0 8px}
+.stats span{background:rgba(255,255,255,0.1);padding:5px 14px;border-radius:20px;font-size:0.95em}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(100,100,200,0.15)}
+</style>
+</head>
+<body>
+<h1>🔴 变色球</h1>
+<div class="stats"><span>⬆️ <b id="score">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="560"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=360,H=560;
+const COLORS=['#e74c3c','#2ecc71','#3498db','#f39c12'];
+let ball={x:W/2,y:H*0.7,vy:0,r:16,color:0,jumping:false},obstacles=[],score=0,best=0,speed=2,state='idle',rotation=0,cameraY=0;
+try{best=parseInt(localStorage.getItem('switch_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function spawnObstacle(y){
+  const sections=4;
+  for(let i=0;i<sections;i++){
+    obstacles.push({x:W/2+Math.cos(i*Math.PI/2+rotation)*120,y,color:i,passed:false});
+  }
+}
+function update(){
+  if(state!=='playing')return;
+  rotation+=0.015;
+  if(ball.jumping){ball.vy+=0.6;ball.y+=ball.vy;if(ball.y<=ball.targetY){ball.y=ball.targetY;ball.jumping=false}}
+  cameraY=Math.min(cameraY,ball.y-H*0.6);
+  if(!ball.jumping){
+    for(const o of obstacles){
+      const dy=o.y-ball.y;if(Math.abs(dy)<60&&Math.abs(dy)>30){
+        const angle=Math.atan2(ball.y-o.y,ball.x-o.x);
+        let oa=Math.atan2(0,-1)-rotation;
+        oa=((oa%(Math.PI/2))+(Math.PI/2))%(Math.PI/2)-Math.PI/4;
+        const sector=Math.floor(((oa+Math.PI/4)/(Math.PI/2)));
+        if(o.color!==ball.color&&!o.passed&&Math.abs(dy)<ball.r+10){
+          state='dead';endGame();return;
+        }
+        if(!o.passed){o.passed=true;score++;document.getElementById('score').textContent=score;if(score>best){best=score;document.getElementById('best').textContent=best;try{localStorage.setItem('switch_best',best)}catch(e){}}
+        ball.color=Math.floor(Math.random()*4)};
+      }
+    }
+  }
+  obstacles=obstacles.filter(o=>o.y-cameraY<H+100);
+  const lastO=obstacles[obstacles.length-1];
+  if(!lastO||lastO.y-cameraY<H-200)spawnObstacle(lastO?lastO.y-120:H-200+cameraY);
+  if(ball.y-cameraY>H+50){state='dead';endGame()}
+}
+function endGame(){
+  state='over';ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.font='bold 26px sans-serif';ctx.textAlign='center';
+  ctx.fillText('GAME OVER',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillText(`得分: ${score}  点击重来`,W/2,H/2+20);
+}
+function draw(){
+  ctx.fillStyle='#111';ctx.fillRect(0,0,W,H);
+  obstacles.forEach(o=>{
+    const py=o.y-cameraY;if(py<-100||py>H+100)return;
+    const r=130;
+    for(let i=0;i<4;i++){
+      const a=rotation+i*Math.PI/2;
+      const x=W/2+Math.cos(a)*r;
+      ctx.fillStyle=COLORS[i];ctx.globalAlpha=0.3;
+      ctx.beginPath();ctx.arc(x,py,40,0,Math.PI*2);ctx.fill();
+      ctx.globalAlpha=1;
+    }
+    ctx.strokeStyle='#999';ctx.lineWidth=2;ctx.beginPath();ctx.arc(W/2,py,110,0,Math.PI*2);ctx.stroke();
+  });
+  const by=ball.y-cameraY;
+  ctx.fillStyle=COLORS[ball.color];ctx.shadowColor=COLORS[ball.color];ctx.shadowBlur=12;
+  ctx.beginPath();ctx.arc(W/2,by,ball.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();ctx.arc(W/2-4,by-4,4,0,Math.PI*2);ctx.fill();
+}
+c.addEventListener('click',()=>{
+  if(state==='over'){restart();return}
+  if(state==='idle'){state='playing';return}
+  if(!ball.jumping){ball.jumping=true;ball.vy=-13;ball.targetY=ball.y-100}
+});
+c.addEventListener('touchstart',e=>{e.preventDefault();if(state==='over'){restart();return};if(state==='idle'){state='playing';return};if(!ball.jumping){ball.jumping=true;ball.vy=-13;ball.targetY=ball.y-100}});
+function restart(){score=0;cameraY=0;rotation=0;ball={x:W/2,y:H*0.7,vy:0,r:16,color:0,jumping:false};obstacles=[];state='idle';document.getElementById('score').textContent='0';for(let i=0;i<5;i++)spawnObstacle(-120+i*-120)}
+function loop(){update();draw();requestAnimationFrame(loop)}
+for(let i=0;i<5;i++)spawnObstacle(-120+i*-120);loop();
+</script>
+</body>
+</html>

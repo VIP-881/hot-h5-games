@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" version="1.0" utf-8="true">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🪓 砍木头达人 - 热门H5游戏</title>
+<meta name="description" content="砍木头达人H5休闲游戏，快速点击左右切换砍木头别碰到树枝，考验反应速度和节奏感，免费在线">
+<meta property="og:title" content="🪓 砍木头达人 - 热门H5游戏">
+<meta property="og:description" content="快速切换方向砍木头，避开树枝">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"砍木头达人","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#2d5016,#1a3a0a);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+h1{font-size:1.8em;margin:4px 0}
+.stats{display:flex;gap:12px;margin:6px 0 8px}
+.stats span{background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:20px;font-size:0.95em;font-weight:600}
+canvas{display:block;border-radius:10px;max-width:96vw;box-shadow:0 4px 24px rgba(0,0,0,0.3)}
+</style>
+</head>
+<body>
+<h1>🪓 砍木头达人</h1>
+<div class="stats"><span>🪓 <b id="chops">0</b></span><span>🏆 <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="520"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=360,H=520,CX=W/2;
+let tree=[],playerX=0,chops=0,best=0,gameTimer=0,state='idle',speed=2,frame=0;
+try{best=parseInt(localStorage.getItem('timber_best'))||0;document.getElementById('best').textContent=best}catch(e){}
+
+function init(){
+  tree=[];
+  let y=H-100;
+  while(y>-80){
+    const side=Math.random()>.5?'left':'right';
+    const branchW=30+Math.random()*50;
+    tree.push({y,side,branchW});
+    y-=60;
+  }
+  playerX=0;chops=0;speed=2;state='playing';frame=0;
+  document.getElementById('chops').textContent='0'
+}
+function chop(tx){
+  if(state!=='playing')return;
+  const ps=playerX+(tx>CX?20:-20);
+  const headY=H-150;
+  let hit=false;
+  for(const t of tree){
+    if(Math.abs(t.y-headY)<30){
+      if((t.side==='right'&&ps>CX)||(t.side==='left'&&ps<CX)){state='dead';endGame();return}
+      hit=true;break;
+    }
+  }
+  playerX=tx>CX?20:-20;chops++;
+  document.getElementById('chops').textContent=chops;
+  speed=2+chops/15;
+  if(chops>best){best=chops;document.getElementById('best').textContent=best;try{localStorage.setItem('timber_best',best)}catch(e){}}
+}
+function update(){
+  if(state!=='playing')return;frame++;
+  tree.forEach(t=>t.y+=speed);
+  if(tree[tree.length-1].y>0){
+    const side=Math.random()>.5?'left':'right';
+    const branchW=30+Math.random()*50;
+    tree.unshift({y:tree[0].y-60,side,branchW});
+  }
+  tree=tree.filter(t=>t.y<H+100);
+}
+function endGame(){
+  state='dead';ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#ff4757';ctx.font='bold 28px sans-serif';ctx.textAlign='center';
+  ctx.fillText('💀 砍到树枝了!',W/2,H/2-15);ctx.font='16px sans-serif';ctx.fillStyle='#fff';ctx.fillText(`砍了 ${chops} 下  点击重新开始`,W/2,H/2+20);
+}
+function draw(){
+  ctx.fillStyle='#2d5016';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#8B4513';ctx.fillRect(CX-15,0,30,H);
+  ctx.fillStyle='#A0522D';ctx.fillRect(CX-10,0,20,H);
+  tree.forEach(t=>{
+    const bx=t.side==='right'?CX:0,bw=t.side==='right'?W/2:W/2;
+    ctx.fillStyle='#228B22';ctx.beginPath();ctx.roundRect(bx,t.y-6,bw-t.branchW/2,12,4);ctx.fill();
+    ctx.fillStyle='#006400';ctx.fillRect(bx+bw-t.branchW/2-15,t.y-8,15,8);
+  });
+  ctx.fillStyle='#DEB887';ctx.beginPath();ctx.arc(W/2+playerX,H-130,22,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#f5cba7';ctx.beginPath();ctx.arc(W/2+playerX-3,H-133,6,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#333';ctx.beginPath();ctx.arc(W/2+playerX-3,H-133,3,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#ff4757';ctx.fillRect(W/2+playerX-3,H-118,6,2);
+  ctx.fillStyle='#654321';ctx.fillRect(W/2+playerX-12,H-145,4,18);
+  ctx.fillStyle='#888';ctx.beginPath();ctx.moveTo(W/2+playerX+8,H-160);ctx.lineTo(W/2+playerX+20,H-148);ctx.lineTo(W/2+playerX+16,H-145);ctx.closePath();ctx.fill();
+}
+c.addEventListener('touchstart',e=>{e.preventDefault();const r=c.getBoundingClientRect();chop(e.touches[0].clientX-r.left)});
+c.addEventListener('mousedown',e=>{const r=c.getBoundingClientRect();chop(e.clientX-r.left)});
+c.addEventListener('click',()=>{if(state==='dead')init()});
+function loop(){update();draw();requestAnimationFrame(loop)}
+init();loop();
+</script>
+</body>
+</html>
