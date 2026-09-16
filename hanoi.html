@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🗼 汉诺塔 - 热门H5游戏</title>
+<meta name="description" content="经典汉诺塔递归益智游戏，将全部圆盘从A柱移到C柱，每次只能移动一个且大盘不能压小盘免费在线">
+<meta property="og:title" content="🗼 汉诺塔 - 热门H5游戏"><meta property="og:description" content="经典汉诺塔益智游戏"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"汉诺塔"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.4em;margin:4px 0}.stats{display:flex;gap:16px;margin:4px 0;font-size:0.85em}canvas{display:block;border:1px solid #334;border-radius:6px;max-width:98vw;background:#1a1a2e;cursor:pointer}.btn{margin:4px;padding:4px 14px;border:1px solid #557;border-radius:4px;background:#2a2a4e;color:#8af;cursor:pointer;font-size:12px}.btn:hover{background:#3a3a6e}</style>
+</head>
+<body>
+<h1>🗼 汉诺塔</h1>
+<div class="stats"><span>🌀 <b id="hanoi-moves">0</b></span><span>📐 <b id="hanoi-min">0</b></span><span>🏆 <b id="hanoi-best">0</b></span></div>
+<canvas id="c" width="480" height="300"></canvas>
+<div><button class="btn" onclick="resetGame(3)">3 层</button><button class="btn" onclick="resetGame(4)">4 层</button><button class="btn" onclick="resetGame(5)">5 层</button><button class="btn" onclick="resetGame(6)">6 层</button><button class="btn" onclick="resetGame(7)">7 层</button></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=480,H=300;
+let pegs=[[],[],[]],disks=5,moves=0,minMoves=0,selected=-1,best={},gameover=false,animating=false;
+try{const d=JSON.parse(localStorage.getItem('hanoi_best')||'{}');best=typeof d==='object'?d:{}}catch(e){}
+function resetGame(n){disks=n;pegs=[[],[],[]];moves=0;selected=-1;gameover=false;animating=false;minMoves=Math.pow(2,n)-1;for(let i=n;i>0;i--)pegs[0].push(i);render();document.getElementById('hanoi-moves').textContent='0';document.getElementById('hanoi-min').textContent=minMoves;document.getElementById('hanoi-best').textContent=best[disks]||'-'}
+function moveDisk(from,to){if(from===to||pegs[from].length===0)return false;if(pegs[to].length>0&&pegs[from][pegs[from].length-1]>pegs[to][pegs[to].length-1])return false;pegs[to].push(pegs[from].pop());moves++;document.getElementById('hanoi-moves').textContent=moves;if(pegs[2].length===disks){gameover=true;if(!best[disks]||moves<best[disks]){best[disks]=moves;try{localStorage.setItem('hanoi_best',JSON.stringify(best))}catch(e)}document.getElementById('hanoi-best').textContent=best[disks];setTimeout(()=>alert(`🎉 完成！${moves}步 (最优${minMoves}步)`),100)}return true}
+
+cv.addEventListener('click',e=>{if(gameover||animating)return;const r=cv.getBoundingClientRect(),x=e.clientX-r.left;const peg=Math.floor(x/(W/3));if(peg<0||peg>2)return;if(selected===-1){if(pegs[peg].length>0){selected=peg;render()}return}
+  if(selected===peg){selected=-1;render();return}
+  moveDisk(selected,peg);selected=-1;render()});
+
+function render(){ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  const pegX=[W/6,W/2,5*W/6];const baseY=220,pegH=180,maxW=80;
+  // Base & pegs
+  ctx.fillStyle='#554';ctx.fillRect(30,baseY+2,W-60,10);
+  for(let i=0;i<3;i++){ctx.fillStyle=selected===i?'#8af':'#665';ctx.fillRect(pegX[i]-4,baseY-pegH,8,pegH+2)}
+  // Disks
+  for(let p=0;p<3;p++){const stack=pegs[p];for(let d=0;d<stack.length;d++){const sz=stack[d];const w=(sz/disks)*maxW;const x=pegX[p]-w/2,y=baseY-15*(d+1);
+      ctx.fillStyle=p===selected&&d===stack.length-1?'#fa4':'#f84';
+      if(p===selected&&d===stack.length-1){ctx.shadowColor='#fa4';ctx.shadowBlur=10}
+      ctx.beginPath();ctx.roundRect(x,y,w,14,4);ctx.fill();ctx.shadowBlur=0;
+      ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(x+4,y+2,w-8,4)}}
+  // Labels
+  ctx.fillStyle='#668';ctx.font='13px monospace';ctx.textAlign='center';['A','B','C'].forEach((l,i)=>{ctx.fillText(l,pegX[i],baseY+30)});
+  // Selected indicator
+  if(selected>=0){ctx.fillStyle='#fa4';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText('⚡已选中',pegX[selected],baseY+48)}
+  if(gameover){ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#4f4';ctx.font='bold 20px monospace';ctx.textAlign='center';ctx.fillText('🎉 完成!',W/2,H/2-5)}}
+resetGame(5);
+</script>
+</body>
+</html>
