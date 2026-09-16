@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🍋 柠檬水摊 - 热门H5游戏</title>
+<meta name="description" content="经营柠檬水摊位，进货定价根据天气预报调整，最大化一周利润模拟经营游戏免费在线">
+<meta property="og:title" content="🍋 柠檬水摊 - 热门H5游戏"><meta property="og:description" content="模拟经营柠檬水摊位"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"柠檬水摊"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a2a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#8f8;font-family:monospace;user-select:none;touch-action:none;padding:10px}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0;flex-wrap:wrap;justify-content:center}#weather{font-size:1.1em;margin:4px;color:#ff0}#info{font-size:0.85em;margin:2px 0;color:#8af}.ctrl{display:flex;gap:8px;margin:4px;flex-wrap:wrap;justify-content:center}.ctrl-btn{padding:4px 14px;border:2px solid #2a5a2a;border-radius:6px;background:#1a4a1a;color:#8f8;cursor:pointer;font-size:12px}.ctrl-btn:hover{background:#2a5a2a}.ctrl-btn:disabled{opacity:0.4;pointer-events:none}#log{font-size:0.75em;color:#668;max-width:340px;text-align:center;margin:4px;height:40px}.btn{margin:4px;padding:4px 14px;border:1px solid #446;border-radius:4px;background:#162a4a;color:#8af;cursor:pointer}</style>
+</head>
+<body>
+<h1>🍋 柠檬水摊</h1>
+<div class="stats"><span>💰 <b id="lem-money">$20</b></span><span>📅 第<b id="lem-day">1</b>/7天</span></div>
+<div id="weather">☀️ 晴 35°C</div>
+<div id="info">存货: <b id="lem-inv">0</b>杯</div>
+<div class="ctrl">
+  <button class="ctrl-btn" id="lem-buy1">进货 1杯 ($1)</button>
+  <button class="ctrl-btn" id="lem-buy5">进货 5杯 ($5)</button>
+  <button class="ctrl-btn" id="lem-buy10">进货 10杯 ($10)</button>
+</div>
+<div class="ctrl">
+  <button class="ctrl-btn" id="lem-price2">定价 $2</button>
+  <button class="ctrl-btn" id="lem-price3">定价 $3</button>
+  <button class="ctrl-btn" id="lem-price4">定价 $4</button>
+  <button class="ctrl-btn" id="lem-price5">定价 $5</button>
+</div>
+<div class="ctrl"><button class="ctrl-btn" id="lem-sell">☀️ 开张营业</button></div>
+<div id="log">准备好开始你的柠檬水生意!</div>
+<div><button class="btn" onclick="resetLem()">🔄 新的一周</button></div>
+<script>
+let money=20,inv=0,day=1,totalDays=7,price=3,gameover=false,log='';
+const WEATHERS=[{n:'☀️ 晴',t:35,m:1.5},{n:'⛅ 多云',t:28,m:1.0},{n:'🌤️ 晴',t:32,m:1.3},{n:'🌧️ 雨',t:22,m:0.4},{n:'🌡️ 热',t:38,m:1.8},{n:'🌥️ 阴',t:25,m:0.7},{n:'☀️ 晴',t:33,m:1.4}];
+let todayW=Math.floor(Math.random()*WEATHERS.length);
+updateUI();
+
+function updateUI(){document.getElementById('lem-money').textContent='$'+money;
+  document.getElementById('lem-day').textContent=day;
+  document.getElementById('lem-inv').textContent=inv;
+  document.getElementById('weather').textContent=`${WEATHERS[todayW].n} ${WEATHERS[todayW].t}°C`;
+  document.getElementById('lem-buy1').disabled=gameover||day>totalDays||money<1;
+  document.getElementById('lem-buy5').disabled=gameover||day>totalDays||money<5;
+  document.getElementById('lem-buy10').disabled=gameover||day>totalDays||money<10;
+  document.querySelectorAll('[id^="lem-price"]').forEach(b=>{b.style.borderColor=parseInt(b.textContent.match(/\$(\d)/)[1])===price?'#ff0':'#2a5a2a'});
+  document.getElementById('lem-sell').disabled=gameover||day>totalDays||inv<=0}
+function log(msg){document.getElementById('log').textContent=msg}
+
+document.getElementById('lem-buy1').addEventListener('click',()=>{if(money<1)return;money-=1;inv+=1;updateUI();log('💰 进货 1杯')});
+document.getElementById('lem-buy5').addEventListener('click',()=>{if(money<5)return;money-=5;inv+=10;updateUI();log('💰 进货 10杯')});
+document.getElementById('lem-buy10').addEventListener('click',()=>{if(money<10)return;money-=10;inv+=25;updateUI();log('💰 进货 25杯(批发优惠)')});
+document.querySelectorAll('[id^="lem-price"]').forEach(b=>{b.addEventListener('click',()=>{price=parseInt(b.textContent.match(/\$(\d)/)[1]);updateUI();log(`📋 定价 $${price}/杯`)})});
+document.getElementById('lem-sell').addEventListener('click',sellDay);
+
+function sellDay(){if(gameover||day>totalDays||inv<=0)return;
+  const w=WEATHERS[todayW];const baseDemand=10*w.m;
+  const priceFactor=Math.max(0.2,1.2-price*0.15);
+  let demand=Math.floor(baseDemand*priceFactor*(0.8+Math.random()*0.4));
+  const sold=Math.min(demand,inv);
+  const revenue=sold*price;money+=revenue;inv-=sold;
+  const lost=inv;inv=0;
+  log(`📊 售出 ${sold}杯 | 收入 $${revenue} | 浪费 ${lost}杯 | 存货清空`);
+  day++;todayW=Math.floor(Math.random()*WEATHERS.length);
+  if(day>totalDays){gameover=true;log(`🎉 一周结束! 最终资金: $${money} 利润: $${money-20}`);if(money>60){log(`🌟 优秀! 资金翻了3倍+`)}else if(money>40){log(`👍 不错的经营!`)}else{log(`📉 还需要多练习!`)}}
+  updateUI()}
+
+function resetLem(){money=20;inv=0;day=1;price=3;gameover=false;todayW=Math.floor(Math.random()*WEATHERS.length);log('🔄 重新开始!');updateUI()}
+</script>
+</body>
+</html>
