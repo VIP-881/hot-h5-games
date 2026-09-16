@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>📯 赛马 - 热门H5游戏</title>
+<meta name="description" content="经典赛马赌马游戏，选择马匹下注，随机赛跑竞争激烈，赢取奖金走向富豪之路免费在线">
+<meta property="og:title" content="📯 赛马 - 热门H5游戏"><meta property="og:description" content="经典赌马赛马竞速游戏"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"赛马"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a2a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0}canvas{display:block;border:1px solid #2a4a2a;border-radius:6px;max-width:98vw;background:#1a2a1a}.horses{display:flex;gap:6px;margin:4px;flex-wrap:wrap;justify-content:center}.hbtn{padding:4px 12px;border:2px solid #2a5a2a;border-radius:6px;background:#1a4a1a;color:#8f8;cursor:pointer;font-size:12px;text-align:center;min-width:70px}.hbtn:hover{border-color:#8f8}.hbtn.active{border-color:#ff0;background:#2a5a2a}.hbtn.racing{opacity:0.5;pointer-events:none}#msg{font-size:0.8em;color:#ff0;margin:4px;text-align:center}.btn{margin:4px;padding:4px 14px;border:1px solid #446;border-radius:4px;background:#162a4a;color:#8af;cursor:pointer}</style>
+</head>
+<body>
+<h1>📯 赛马</h1>
+<div class="stats"><span>💰 <b id="horse-money">$100</b></span><span>🏆 <b id="horse-best">0</b></span></div>
+<canvas id="c" width="400" height="400"></canvas>
+<div class="horses" id="horses"></div>
+<div id="msg">选择一匹马下注!</div>
+<div><button class="btn" onclick="resetHorse()">🔄 重来</button></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=400,H=400;
+const HORSE_NAMES=['🏇 赤兔','🏇 闪电','🏇 旋风','🏇 追风','🏇 烈焰','🏇 流星'];
+const HORSE_COLORS=['#f44','#fa0','#4f4','#44f','#c4f','#4af'];
+let horses=[],money=100,best=0,selected=-1,racing=false,winner=-1;
+try{best=parseInt(localStorage.getItem('horse_best'))||0;document.getElementById('horse-best').textContent=best}catch(e){}
+
+function resetHorse(){money=100;selected=-1;racing=false;winner=-1;
+  document.getElementById('horse-money').textContent='$'+money;initRace();renderHorses()}
+
+function initRace(){horses=HORSE_NAMES.map((n,i)=>({name:n,color:HORSE_COLORS[i],x:0,speed:0,accel:0,finished:false}));
+  document.getElementById('msg').textContent='💰 选择一匹马下注!'}
+function renderHorses(){const el=document.getElementById('horses');el.innerHTML='';
+  horses.forEach((h,i)=>{const btn=document.createElement('div');btn.className='hbtn'+(selected===i?' active':'')+(racing?' racing':'');
+    btn.textContent=`${h.name}`;btn.addEventListener('click',()=>{if(racing||money<10)return;selected=i;renderHorses();document.getElementById('msg').textContent=`${h.name} 已下注 $10!`});
+    el.appendChild(btn)})}
+function startRace(){if(selected<0||racing||money<10){document.getElementById('msg').textContent='💰 先选一匹马!';return}
+  money-=10;racing=true;winner=-1;horses.forEach(h=>{h.x=0;h.speed=0;h.finished=false});
+  document.getElementById('horse-money').textContent='$'+money;document.getElementById('msg').textContent='🏇 比赛进行中...';renderHorses()}
+
+cv.addEventListener('click',()=>{if(!racing&&selected>=0&&money>=10)startRace()});
+cv.addEventListener('contextmenu',e=>{e.preventDefault();if(!racing)initRace()});
+
+function updateRace(){let allDone=true;let furthest=-1,furthestIdx=-1;
+  horses.forEach((h,i)=>{if(h.finished)return;allDone=false;
+    h.accel=(Math.random()-0.48)*0.3+0.06;const obstacle=Math.sin(i*2+Date.now()/300)*0.02;
+    h.speed=Math.max(0.1,Math.min(3,h.speed+h.accel+obstacle));h.x+=h.speed*1.5;
+    if(h.x>W-50){h.x=W-50;h.finished=true;if(furthest<h.x){furthest=h.x;furthestIdx=i}}
+    if(h.x>furthest){furthest=h.x;furthestIdx=i}});
+  // Check for winner
+  if(horses.some(h=>h.finished)){const f=horses.filter(h=>h.finished);if(f.length===1||allDone){
+      winner=horses.findIndex(h=>h.finished&&h.x>=W-50);if(winner<0)winner=f.reduce((a,b)=>a.x>b.x?a:b);
+      if(winner===selected){money+=30;if(money>best){best=money;document.getElementById('horse-best').textContent=money;try{localStorage.setItem('horse_best',money)}catch(e)}
+        document.getElementById('msg').textContent=`🎉 你的马赢了! +$30 (总$${money})`}
+      else{document.getElementById('msg').textContent=`😢 ${horses[winner].name} 赢了`}
+      document.getElementById('horse-money').textContent='$'+money;racing=false;renderHorses()}}}
+
+function render(){ctx.fillStyle='#1a2a1a';ctx.fillRect(0,0,W,H);
+  // Track
+  for(let i=0;i<horses.length;i++){const y=20+i*60;ctx.fillStyle=i%2===0?'#1d321d':'#1a2a1a';ctx.fillRect(0,y,W,50);
+    ctx.strokeStyle='#2a4a2a';ctx.lineWidth=1;ctx.setLineDash([8,8]);ctx.beginPath();ctx.moveTo(0,y+50);ctx.lineTo(W,y+50);ctx.stroke();ctx.setLineDash([]);
+    // Finish line
+    ctx.fillStyle='#fff';ctx.fillRect(W-50,y,2,50);ctx.fillStyle='#000';ctx.fillRect(W-48,y,2,50);ctx.fillStyle='#fff';ctx.fillRect(W-46,y,2,50);}
+  // Horses
+  horses.forEach((h,i)=>{const y=35+i*60;ctx.fillStyle=h.color;
+    // Horse body
+    ctx.beginPath();ctx.ellipse(h.x+12,y-2,18,8,0,0,Math.PI*2);ctx.fill();
+    // Head
+    ctx.beginPath();ctx.arc(h.x+30,y-6,8,0,Math.PI*2);ctx.fill();
+    // Legs
+    ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(h.x+4,y+4,4,10);ctx.fillRect(h.x+12,y+4,4,10);
+    ctx.fillRect(h.x+16,y+4,4,10);ctx.fillRect(h.x+22,y+4,4,10);
+    // Name
+    ctx.fillStyle='#fff';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.fillText(`${i+1}号`,h.x+15,y-18)});
+  // Bet indicator
+  if(selected>=0&&!racing){ctx.fillStyle='rgba(255,255,0,0.15)';ctx.fillRect(0,20+selected*60,W,50)}
+  // Start hint
+  if(!racing&&selected>=0){ctx.fillStyle='rgba(255,255,255,0.2)';ctx.font='16px monospace';ctx.textAlign='center';ctx.fillText('点击画布开赛!',W/2,H-20)}}
+initRace();function loop(){if(racing)updateRace();render();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
