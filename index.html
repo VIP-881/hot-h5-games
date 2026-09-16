@@ -2,6 +2,9 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<link rel="dns-prefetch" href="//fonts.loli.net">
+<link rel="preconnect" href="https://fonts.loli.net" crossorigin>
+
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>🎮 灵犀游戏大厅 · 165款免费H5游戏 | 在线小游戏合集·离线·多语言·云同步</title>
 <meta name="description" content="165款免费H5小游戏合集：含2048、扫雷、打砖块、Flappy Bird、数独、推箱子等经典，以及RPG、卡牌、塔防、打字竞速等创意玩法。支持登录云同步、中英多语言、PWA离线。全品类覆盖，手机+PC双端。">
@@ -198,13 +201,42 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ft .lk a:hover{border-color:var(--accent);color:var(--accent2)}
 @media(max-width:480px){.gr{grid-template-columns:repeat(3,1fr);gap:3px}.cc{height:55px;font-size:1.8em}.cb2 h3{font-size:.64em}}
 </style>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "灵犀游戏大厅", "item": "https://vip-881.github.io/hot-h5-games/"},
+    {"@type": "ListItem", "position": 2, "name": "免费H5在线小游戏合集", "item": "https://vip-881.github.io/hot-h5-games/"}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "这些游戏真的免费吗？", "acceptedAnswer": {"@type": "Answer", "text": "是的，所有165款游戏完全免费，无内购、无广告强制、无会员墙。游戏代码托管在GitHub开源社区。"}},
+    {"@type": "Question", "name": "需要下载或安装什么吗？", "acceptedAnswer": {"@type": "Answer", "text": "不需要。所有游戏均为纯HTML5网页游戏，直接在浏览器中运行。打开链接即玩，无需下载App或注册账号。"}},
+    {"@type": "Question", "name": "手机上能玩吗？", "acceptedAnswer": {"@type": "Answer", "text": "可以。全部165款游戏均已适配移动端触屏操作，支持iOS Safari和Android Chrome，可添加至手机桌面作为PWA快捷方式实现离线访问。"}},
+    {"@type": "Question", "name": "有哪些类型的游戏？", "acceptedAnswer": {"@type": "Answer", "text": "涵盖10+品类：益智解谜（2048、扫雷、数独）、动作竞技（Flappy Bird、打砖块）、经典街机（贪吃蛇、吃豆人）、体育模拟（台球、篮球）、棋牌策略（21点、海战棋）、打字教育（代码打字王、正则挑战）、音乐节奏、休闲创意等。"}},
+    {"@type": "Question", "name": "如何保存游戏进度？", "acceptedAnswer": {"@type": "Answer", "text": "登录后游戏进度和最高分自动保存在浏览器localStorage中，支持数据导出和跨设备导入。"}},
+    {"@type": "Question", "name": "支持多人模式吗？", "acceptedAnswer": {"@type": "Answer", "text": "部分游戏支持热座模式（Hot Seat），两人在同一设备上轮流对战。支持的多人游戏包括乒乓球Pong、桌上冰球等。"}}
+  ]
+}
+</script>
+
 </head>
 <body>
-<header class="header">
+<a href="#grid" class="skip-link" style="position:absolute;top:-100px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:9999;border-radius:0 0 8px 0;transition:top .2s;text-decoration:none;font-size:14px" onfocus="this.style.top='0'" onblur="this.style.top='-100px'">跳转到主内容</a>
+
+<header class="header" role="banner">
   <h1>🎮 灵犀游戏大厅</h1>
   <p class="sub">165 款免费 H5 游戏 · 即点即玩</p>
   <div class="stat-bar"><span class="si">🎮 <b>165</b></span><span class="si">🪙 <b class="coin">0</b></span></div>
 </header>
+<main id="main-content" role="main" aria-label="游戏列表">
 <div class="tbar">
   <input class="sbox" placeholder="搜索游戏..." oninput="onSearch()">
   <button class="act" onclick="randomGame()">🎲</button>
@@ -227,7 +259,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 <script>
 
-<script>
+<script defer>
 // ===== I18N =====
 var I18N={
   zh:{ttl:'🎮 灵犀游戏大厅',sub:'165款免费H5 · 登录同步 · 多语言 · 离线',all:'全部',srch:'搜索游戏...',rnd:'🎲 随机',rk:'🔥 排行',fav:'⭐ 收藏',
@@ -767,7 +799,49 @@ render();
 
 </script>
 
-<footer style="background:var(--bg2);border-top:1px solid var(--border);padding:20px 10px;margin-top:30px;font-size:12px;color:var(--text3);text-align:center;">
+<section aria-labelledby="about-heading" style="max-width:900px;margin:30px auto 0;padding:20px 16px;background:var(--bg2);border-radius:16px;border:1px solid var(--border);font-size:14px;line-height:1.9;color:var(--text2)">
+<h2 id="about-heading" style="font-size:18px;color:var(--accent2);margin-bottom:12px;text-align:center">🎮 灵犀游戏大厅 — 165款免费H5在线小游戏合集</h2>
+<p style="margin-bottom:10px">灵犀游戏大厅是一个包含 <strong>165 款</strong>免费 H5 网页游戏的在线平台，涵盖<strong>益智解谜</strong>（2048、扫雷、数独、推箱子）、<strong>动作竞技</strong>（Flappy Bird、打砖块、Doodle Jump、恐龙快跑）、<strong>经典街机</strong>（贪吃蛇、吃豆人、太空侵略者、俄罗斯方块）、<strong>体育模拟</strong>（台球、高尔夫、篮球、冰壶）、<strong>棋牌策略</strong>（21点、海战棋、黑白棋、四子棋）等十余个品类。所有游戏均为纯 HTML/CSS/JavaScript 开发，<strong>无需下载安装</strong>，浏览器即点即玩，支持 <strong>手机触屏和 PC 键盘</strong>双端操作。</p>
+<p style="margin-bottom:10px">平台支持<strong>用户登录与云同步</strong>，可保存游戏进度、最高分和收藏列表。内置<strong>中英文双语切换</strong>，通过 PWA 技术支持 <strong>离线游玩</strong>——即使没有网络也能畅玩已加载的游戏。每款游戏以独立 HTML 文件发布，加载快速，零外部依赖。</p>
+<p>适合场景：休闲娱乐、办公室解压、编程休息、通勤消遣、亲子互动、朋友聚会热座对战。</p>
+</section>
+
+<section aria-labelledby="faq-heading" style="max-width:900px;margin:20px auto 0;padding:20px 16px;background:var(--bg2);border-radius:16px;border:1px solid var(--border);font-size:14px;line-height:1.9;color:var(--text2)">
+<h2 id="faq-heading" style="font-size:18px;color:var(--accent2);margin-bottom:16px;text-align:center">❓ 常见问题</h2>
+
+<article aria-labelledby="q1" style="margin-bottom:16px">
+<h3 id="q1" style="font-size:15px;color:var(--text);margin-bottom:4px">这些游戏真的免费吗？</h3>
+<p>是的，所有 165 款游戏<strong>完全免费</strong>，无内购、无广告强制、无会员墙。游戏代码通过开源社区方式发布在 GitHub。</p>
+</article>
+
+<article aria-labelledby="q2" style="margin-bottom:16px">
+<h3 id="q2" style="font-size:15px;color:var(--text);margin-bottom:4px">需要下载或安装什么吗？</h3>
+<p>不需要。所有游戏均为纯 HTML5 网页游戏，直接在浏览器中运行。打开链接即玩，无需下载App、安装插件或注册账号。</p>
+</article>
+
+<article aria-labelledby="q3" style="margin-bottom:16px">
+<h3 id="q3" style="font-size:15px;color:var(--text);margin-bottom:4px">手机上能玩吗？</h3>
+<p>可以。全部 165 款游戏均已适配移动端触屏操作，支持 iOS Safari 和 Android Chrome。可添加到手机桌面作为 PWA 快捷方式实现离线访问。</p>
+</article>
+
+<article aria-labelledby="q4" style="margin-bottom:16px">
+<h3 id="q4" style="font-size:15px;color:var(--text);margin-bottom:4px">有哪些类型的游戏？</h3>
+<p>涵盖 <strong>10+ 品类</strong>：益智解谜（2048、扫雷、数独、推箱子、拼图）、动作竞技（Flappy Bird、打砖块、Doodle Jump、恐龙快跑、切水果）、经典街机（贪吃蛇、吃豆人、俄罗斯方块、Pong、太空侵略者）、体育模拟（台球、保龄球、篮球、高尔夫、冰壶）、棋牌策略（21点、海战棋、四子棋、黑白棋、井字棋）、打字教育（代码打字王、Debug侦探、正则挑战、猜单词）、音乐节奏（钢琴、节奏游戏）、休闲创意（合成大西瓜、涂色、电子宠物）等。</p>
+</article>
+
+<article aria-labelledby="q5" style="margin-bottom:16px">
+<h3 id="q5" style="font-size:15px;color:var(--text);margin-bottom:4px">如何保存游戏进度？</h3>
+<p>点击页面顶部的用户头像登录后，游戏进度、最高分和收藏列表会自动保存在浏览器的本地存储（localStorage）中。同时支持数据导出和跨设备导入。</p>
+</article>
+
+<article aria-labelledby="q6" style="margin-bottom:0">
+<h3 id="q6" style="font-size:15px;color:var(--text);margin-bottom:4px">支持多人模式吗？</h3>
+<p>部分游戏支持<strong>热座模式（Hot Seat）</strong>——两人在同一设备上轮流操作对战。支持的多人游戏包括乒乓球 Pong、桌上冰球等。可通过分享链接邀请好友挑战。</p>
+</article>
+</section>
+
+</main>
+<footer role="contentinfo" style="background:var(--bg2);border-top:1px solid var(--border);padding:20px 10px;margin-top:30px;font-size:12px;color:var(--text3);text-align:center;">
   <div style="max-width:900px;margin:0 auto;">
     <details style="margin-bottom:10px;">
       <summary style="cursor:pointer;color:var(--text2);font-weight:600;font-size:14px;padding:8px 0;">
