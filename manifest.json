@@ -1,0 +1,14 @@
+{
+  "name": "灵犀游戏大厅",
+  "short_name": "游戏大厅",
+  "description": "165款免费H5小游戏合集，支持离线游玩",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0a0a1a",
+  "theme_color": "#0a0a1a",
+  "orientation": "any",
+  "icons": [
+    {"src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%230a0a1a'/><text x='96' y='140' font-size='120' text-anchor='middle'>🎮</text></svg>", "sizes": "192x192", "type": "image/svg+xml"},
+    {"src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='64' fill='%230a0a1a'/><text x='256' y='360' font-size='280' text-anchor='middle'>🎮</text></svg>", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}
