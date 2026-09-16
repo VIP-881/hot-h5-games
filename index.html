@@ -131,12 +131,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </head>
 <body>
 <header class="header">
-  <h1></h1>
-  <p class="sub"></p>
+  <h1>🎮 灵犀游戏大厅</h1>
+  <p class="sub">165 款免费 H5 游戏 · 即点即玩</p>
   <div class="stat-bar"><span class="si">🎮 <b>165</b></span><span class="si">🪙 <b class="coin">0</b></span></div>
 </header>
 <div class="tbar">
-  <input class="sbox" oninput="onSearch()">
+  <input class="sbox" placeholder="搜索游戏..." oninput="onSearch()">
   <button class="act" onclick="randomGame()">🎲</button>
   <button class="act" onclick="showRanking()">🔥</button>
   <button class="act" id="favBtn" onclick="toggleFavFilter()">⭐ <b id="favCnt">0</b></button>
@@ -186,7 +186,15 @@ function applyLang(){
   }
 }
 
-// ===== INIT =====
+// ===== INIT - With error fallbacks
+function safeSet(id, fn){try{fn(id);}catch(e){console.warn('Element not found:',id);}}
+safeSet('catBar',function(el){document.getElementById(el).innerHTML=buildCatsStr();});
+try{document.querySelector('.sbox').placeholder=t('srch');}catch(e){}
+try{document.querySelector('.sub').innerHTML=t('sub');}catch(e){}
+try{document.querySelector('h1').innerHTML=t('ttl');}catch(e){}
+updateProfile();
+render();
+ =====
 var FAVS={},BEST={},TCNT={},PLAYS={},USER={};
 (function(){
   try{FAVS=JSON.parse(localStorage.getItem('favs'))||{};}catch(e){}
@@ -589,12 +597,16 @@ function startChallenge(){
   } else {prompt('复制链接发给好友：',url);}
 }
 
-// ===== INIT =====
-document.getElementById('catBar').innerHTML=buildCatsStr();
-document.querySelector('.sbox').placeholder=t('srch');
-document.querySelector('.sub').innerHTML=t('sub');
+// ===== INIT - With error fallbacks
+function safeSet(id, fn){try{fn(id);}catch(e){console.warn('Element not found:',id);}}
+safeSet('catBar',function(el){document.getElementById(el).innerHTML=buildCatsStr();});
+try{document.querySelector('.sbox').placeholder=t('srch');}catch(e){}
+try{document.querySelector('.sub').innerHTML=t('sub');}catch(e){}
+try{document.querySelector('h1').innerHTML=t('ttl');}catch(e){}
 updateProfile();
 render();
+ =====
+
 </script>
 </body>
 </html>
