@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🧊 物理沙盒 - 热门H5游戏</title>
+<meta name="description" content="物理沙盒Physics Sandbox，点击生成方块/球体，重力碰撞自由落体模拟物理效果免费在线">
+<meta property="og:title" content="🧊 物理沙盒 - 热门H5游戏"><meta property="og:description" content="自由落体碰撞物理模拟"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"物理沙盒"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0}canvas{display:block;border:1px solid #333;border-radius:6px;max-width:98vw;background:#111;cursor:crosshair}.btn{margin:3px;padding:4px 12px;border:1px solid #446;border-radius:4px;background:#2a2a4e;color:#8af;cursor:pointer;font-size:11px}</style>
+</head>
+<body>
+<h1>🧊 物理沙盒</h1>
+<div class="stats"><span>🧊 <b id="sand-n">0</b>个物体</span></div>
+<canvas id="c" width="500" height="400"></canvas>
+<div><button class="btn" onclick="addClump()">💥 批量生成</button><button class="btn" onclick="clearSand()">🗑️ 清空</button><span style="font-size:0.7em;color:#666;margin-left:6px">点击画布生成方块 · 右键球体</span></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=500,H=400,G=0.4;
+let bodies=[],dragging=null;
+
+function addClump(){for(let i=0;i<15;i++){bodies.push({x:W/2+(Math.random()-0.5)*100,y:50+Math.random()*30,w:10+Math.random()*18,h:10+Math.random()*18,vx:(Math.random()-0.5)*3,vy:Math.random()*2-3,c:`hsl(${Math.random()*360},70%,55%)`,circ:Math.random()<0.3})}document.getElementById('sand-n').textContent=bodies.length}
+function clearSand(){bodies=[];document.getElementById('sand-n').textContent='0'}
+
+cv.addEventListener('contextmenu',e=>{e.preventDefault();
+  const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+  bodies.push({x,y,w:16+Math.random()*20,h:16+Math.random()*20,vx:(Math.random()-0.5)*2,vy:-5,c:`hsl(${Math.random()*360},70%,55%)`,circ:true});
+  document.getElementById('sand-n').textContent=bodies.length});
+cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+  bodies.push({x,y,w:12+Math.random()*20,h:12+Math.random()*20,vx:(Math.random()-0.5)*2,vy:-3,c:`hsl(${Math.random()*360},70%,55%)`,circ:false});
+  document.getElementById('sand-n').textContent=bodies.length});
+cv.addEventListener('mousedown',e=>{if(e.button!==0)return;const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  for(const b of bodies){if(Math.abs(b.x-mx)<b.w/2+5&&Math.abs(b.y-my)<b.h/2+5){dragging=b;break}}});
+cv.addEventListener('mousemove',e=>{if(!dragging)return;const r=cv.getBoundingClientRect();dragging.x=e.clientX-r.left;dragging.y=e.clientY-r.top;dragging.vx=0;dragging.vy=0});
+cv.addEventListener('mouseup',()=>{dragging=null});
+
+function update(){for(let i=0;i<bodies.length;i++){const a=bodies[i];
+    a.vy+=G;a.vx*=0.99;a.x+=a.vx;a.y+=a.vy;
+    if(a.y+a.h>H){a.y=H-a.h;a.vy*=-0.4;a.vx*=0.8}
+    if(a.y<0){a.y=0;a.vy*=-0.4}
+    if(a.x<0){a.x=0;a.vx*=-0.5}
+    if(a.x+a.w>W){a.x=W-a.w;a.vx*=-0.5}
+    // Collisions
+    for(let j=i+1;j<bodies.length;j++){const b=bodies[j];const dx=a.x+a.w/2-b.x-b.w/2,dy=a.y+a.h/2-b.y-b.h/2;
+      const dist=Math.sqrt(dx*dx+dy*dy),minDist=(a.w+a.w)/2*0.7;if(dist<minDist&&dist>0.1){const overlap=minDist-dist;
+        const nx=dx/dist,ny=dy/dist;a.x+=nx*overlap*0.5;a.y+=ny*overlap*0.5;b.x-=nx*overlap*0.5;b.y-=ny*overlap*0.5;
+        const relVx=a.vx-b.vx,relVy=a.vy-b.vy,relVn=relVx*nx+relVy*ny;if(relVn<0){a.vx-=relVn*nx*0.5;a.vy-=relVn*ny*0.5;b.vx+=relVn*nx*0.5;b.vy+=relVn*ny*0.5}}}}}
+
+function render(){ctx.fillStyle='#111';ctx.fillRect(0,0,W,H);
+  // Ground
+  ctx.fillStyle='#222';ctx.fillRect(0,H-2,W,2);
+  for(const b of bodies){ctx.fillStyle=b.c;
+    if(b.circ){ctx.beginPath();ctx.arc(b.x,b.y,b.w/2,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.stroke()}
+    else{ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,2);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fillRect(b.x+2,b.y+2,b.w/2,b.h/4)}}
+  if(bodies.length===0){ctx.fillStyle='#555';ctx.font='14px monospace';ctx.textAlign='center';ctx.fillText('🖱️ 点击生成方块 | 右键生成球体',W/2,H/2)}}
+clearSand();function loop(){update();render();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
