@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🫧 泡泡龙 - 热门H5游戏</title>
+<meta name="description" content="经典泡泡龙Bubble Shooter射击游戏，瞄准发射泡泡击落同色三连，消除全部过关免费在线">
+<meta property="og:title" content="🫧 泡泡龙 - 热门H5游戏"><meta property="og:description" content="经典泡泡龙射击消除"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"泡泡龙"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0a1628;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#8af;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0}canvas{display:block;border:1px solid #234;border-radius:6px;max-width:98vw;background:#0a1628;cursor:crosshair}.btn{margin:4px;padding:4px 14px;border:1px solid #446;border-radius:4px;background:#162a4a;color:#8af;cursor:pointer;font-size:12px}#next{width:24px;height:24px;border-radius:50%;display:inline-block;vertical-align:middle;margin-left:4px;border:1px solid #557}</style>
+</head>
+<body>
+<h1>🫧 泡泡龙</h1>
+<div class="stats"><span>🎯 <b id="bub-score">0</b></span><span>💥 <b id="bub-left">0</b></span><span>🏆 <b id="bub-best">0</b></span></div>
+<canvas id="c" width="340" height="440"></canvas>
+<div><button class="btn" onclick="initBubbles()">🔄 重开</button><span> 下一个: </span><span id="next" style="display:inline-block"></span></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=340,H=440,R=13,GAP=3,COLS=11,COLORS=['#f44','#f80','#fd0','#0d0','#44f','#c4f'];
+let bubbles=[],nextColor=0,shooter={x:W/2,y:H-25},angle=-Math.PI/2,ball=null,score=0,gameover=false,best=0;
+try{best=parseInt(localStorage.getItem('bubble_best'))||0;document.getElementById('bub-best').textContent=best}catch(e){}
+
+function initBubbles(){bubbles=[];score=0;gameover=false;ball=null;document.getElementById('bub-score').textContent='0';
+  const rows=5+Math.floor(Math.random()*2);for(let r=0;r<rows;r++){const offset=r%2===0?0:R+2;const cols=r%2===0?COLS:COLS-1;
+    for(let c=0;c<cols;c++){bubbles.push({x:offset+c*(R*2+GAP)+R,y:20+r*(R*2+GAP)+R,r:R,color:Math.floor(Math.random()*COLORS.length)})}}
+  nextColor=Math.floor(Math.random()*COLORS.length);document.getElementById('bub-left').textContent=bubbles.length;render()}
+
+function spawnBall(){ball={x:shooter.x,y:shooter.y,dx:Math.cos(angle)*6,dy:Math.sin(angle)*6,color:nextColor,r:R};
+  nextColor=Math.floor(Math.random()*COLORS.length);updateNext()}
+function updateNext(){document.getElementById('next').style.background=COLORS[nextColor]}
+
+function snapToGrid(b){const row=Math.floor((b.y-20-R)/(R*2+GAP));const offset=row%2===0?0:R+2;const col=Math.floor((b.x-offset-R)/(R*2+GAP));
+  const r=R*0.7;let minDist=r,minB=null;for(const bb of bubbles){const d=Math.hypot(b.x-bb.x,b.y-bb.y);if(d<minDist){minDist=d;minB=bb}}
+  if(minB){b.x=minB.x+(b.x-minB.x)*r/minDist;b.y=minB.y+(b.y-minB.y)*r/minDist;return}
+  // Snap to grid position
+  const nr=Math.round((b.y-20-R)/(R*2+GAP));if(nr<0)return;const no=nr%2===0?0:R+2;const nc=Math.round((b.x-no-R)/(R*2+GAP));
+  if(nc>=(nr%2===0?COLS:COLS-1)||nc<0)return;b.x=no+nc*(R*2+GAP)+R;b.y=20+nr*(R*2+GAP)+R}
+
+function findMatches(b,color,visited){if(!b||b.color!==color||visited.has(b))return[];visited.add(b);let match=[b];
+  for(const bb of bubbles){if(Math.hypot(b.x-bb.x,b.y-bb.y)<R*2+GAP+2){match=match.concat(findMatches(bb,color,visited))}}
+  return match}
+function removeFloating(){const top=bubbles.filter(b=>b.y<40);const connected=new Set(top);
+  let changed=true;while(changed){changed=false;for(const b of bubbles){if(connected.has(b))continue;for(const c of connected){if(Math.hypot(b.x-c.x,b.y-c.y)<R*2+GAP+2){connected.add(b);changed=true;break}}}}
+  const removed=bubbles.filter(b=>!connected.has(b));bubbles=bubbles.filter(b=>connected.has(b));return removed}
+
+cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;
+  angle=Math.atan2(my-shooter.y,mx-shooter.x);if(angle>-0.2||angle<-Math.PI+0.2)angle=Math.max(-Math.PI+0.2,Math.min(-0.2,angle));render()});
+cv.addEventListener('click',e=>{if(gameover){initBubbles();return}if(!ball)spawnBall();render()});
+
+function update(){if(!ball)return;ball.x+=ball.dx;ball.y+=ball.dy;
+  if(ball.x<R||ball.x>W-R){ball.dx=-ball.dx;ball.x=Math.max(R,Math.min(W-R,ball.x))}
+  if(ball.y<R){snapToGrid(ball);const i=bubbles.indexOf(ball);if(i<0){ball.r=R;bubbles.push({x:ball.x,y:ball.y,r:R,color:ball.color})}
+    const matches=findMatches(ball,ball.color,new Set());if(matches.length>=3){const bonus=matches.length===3?30:matches.length*20;score+=bonus;document.getElementById('bub-score').textContent=score;
+      matches.forEach(m=>{const i=bubbles.indexOf(m);if(i>=0)bubbles.splice(i,1)});const floating=removeFloating();if(floating.length>0){score+=floating.length*15;document.getElementById('bub-score').textContent=score}}
+    ball=null;document.getElementById('bub-left').textContent=bubbles.length;if(bubbles.length===0){gameover=true;if(score>best){best=score;document.getElementById('bub-best').textContent=best;try{localStorage.setItem('bubble_best',best)}catch(e)}}else if(bubbles.some(b=>b.y>H-60)){gameover=true}render();if(gameover)setTimeout(()=>{},500);return}
+  // Wall bounce
+  if(ball.y>shooter.y+10&&ball.dy>0){ball=null;return}}
+
+function render(){ctx.fillStyle='#0a1628';ctx.fillRect(0,0,W,H);
+  // Top area
+  ctx.fillStyle='rgba(255,255,255,0.03)';ctx.fillRect(0,0,W,50);
+  // Bubbles
+  for(const b of bubbles){const grad=ctx.createRadialGradient(b.x-4,b.y-4,2,b.x,b.y,R);grad.addColorStop(0,'rgba(255,255,255,0.4)');grad.addColorStop(1,COLORS[b.color]);
+    ctx.beginPath();ctx.arc(b.x,b.y,R,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill();ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=1;ctx.stroke()}
+  // Shooter
+  ctx.save();ctx.translate(shooter.x,shooter.y);ctx.rotate(angle);
+  ctx.fillStyle='#446';ctx.beginPath();ctx.roundRect(-4,-3,30,6,3);ctx.fill();
+  ctx.fillStyle='#8af';ctx.beginPath();ctx.arc(32,0,4,0,Math.PI*2);ctx.fill();ctx.restore();
+  // Next ball indicator
+  ctx.fillStyle=COLORS[nextColor];ctx.beginPath();ctx.arc(shooter.x,shooter.y+30,R*0.6,0,Math.PI*2);ctx.fill();
+  // Flying ball
+  if(ball){const grad=ctx.createRadialGradient(ball.x-3,ball.y-3,2,ball.x,ball.y,R);grad.addColorStop(0,'rgba(255,255,255,0.4)');grad.addColorStop(1,COLORS[ball.color]);
+    ctx.beginPath();ctx.arc(ball.x,ball.y,R,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill()}
+  // Aim line (dotted)
+  ctx.setLineDash([3,6]);ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(shooter.x,shooter.y);ctx.lineTo(shooter.x+Math.cos(angle)*200,shooter.y+Math.sin(angle)*200);ctx.stroke();ctx.setLineDash([]);
+  if(gameover){ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#ff0';ctx.font='bold 22px monospace';ctx.textAlign='center';ctx.fillText('🎉 完成!',W/2,H/2-5);ctx.fillStyle='#8af';ctx.font='12px monospace';ctx.fillText(`得分: ${score}  点击继续`,W/2,H/2+18)}}
+initBubbles();
+</script>
+</body>
+</html>
