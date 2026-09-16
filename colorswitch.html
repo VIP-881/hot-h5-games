@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🌈 颜色切换 - 热门H5游戏</title>
+<meta name="description" content="反应类Color Switch游戏，控制小球穿过同色障碍，切换颜色匹配障碍颜色闯关免费在线">
+<meta property="og:title" content="🌦️ 颜色切换 - 热门H5游戏"><meta property="og:description" content="经典颜色匹配穿越障碍"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"颜色切换"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0}canvas{display:block;border-radius:6px;max-width:98vw;background:#111;cursor:pointer}</style>
+</head>
+<body>
+<h1>🌈 颜色切换</h1>
+<div class="stats"><span>📏 <b id="cs-h">0</b></span><span>🎨 <b id="cs-color">🔴</b></span><span>🏆 <b id="cs-best">0</b></span></div>
+<canvas id="c" width="220" height="480"></canvas>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=220,H=480;
+const COLORS=['#f44','#44f','#4f4','#ff0']; // red, blue, green, yellow
+const COLOR_NAMES=['🔴','🔵','🟢','🟡'];
+let ball={x:W/2,y:400,r:12,color:0,vy:0},obstacles=[],height=0,score=0,best=0,gameover=false;
+try{best=parseInt(localStorage.getItem('cs_best'))||0;document.getElementById('cs-best').textContent=best}catch(e){}
+
+document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();if(gameover)resetCS();else switchColor()}});
+cv.addEventListener('click',()=>{if(gameover)resetCS();else switchColor()});
+function switchColor(){ball.color=(ball.color+1)%COLORS.length;document.getElementById('cs-color').textContent=COLOR_NAMES[ball.color]}
+
+function resetCS(){ball={x:W/2,y:400,r:12,color:0,vy:0};obstacles=[];height=0;score=0;gameover=false;document.getElementById('cs-h').textContent='0';document.getElementById('cs-color').textContent='🔴';spawnObstacle()}
+
+function spawnObstacle(){const y=40+Math.random()*80;const type=Math.floor(Math.random()*4);const c=Math.floor(Math.random()*4);
+  const gap=30+Math.random()*20;const left=Math.random()*40;
+  obstacles.push({y,type,c,gap,left,passed:false})}
+
+function updateCS(){if(gameover)return;
+  ball.vy+=0.3;ball.y+=ball.vy;
+  // Camera
+  if(ball.y<H/2+100){const diff=H/2+100-ball.y;ball.y+=diff;for(const o of obstacles)o.y+=diff;height+=diff;
+    score=Math.floor(height);document.getElementById('cs-h').textContent=score}
+  // Obstacles
+  const top=obstacles.length>0?Math.min(...obstacles.map(o=>o.y)):Infinity;
+  if(top>100)spawnObstacle();
+  for(let i=obstacles.length-1;i>=0;i--){const o=obstacles[i];
+    // Collision - different types
+    const bx=ball.x,by=ball.y,br=ball.r,c=ball.color;
+    if(by+br>o.y-5&&by-br<o.y+5){
+      // Type: 0=horizontal bar, 1=two blocks, 2=circle, 3=full color barrier
+      if(o.type===0){// horizontal bar with gap
+        if(bx>o.gap+o.left&&bx<o.gap+o.left+40){if(c!==o.c){gameover=true;endCS()}return}
+        else if(bx<o.left||bx>o.left+180){if(c!==(o.c+1)%4){gameover=true;endCS()}return}
+      }else if(o.type===1){// two blocks
+        if(bx<W/2){if(c!==o.c){gameover=true;endCS()}return}
+        else{if(c!==(o.c+1)%4){gameover=true;endCS()}return}
+      }else if(o.type===2){// circle barrier
+        const dist=Math.hypot(bx-W/2,by-o.y);if(dist>30&&dist<45){if(c!==o.c){gameover=true;endCS()}return}
+      }else{// full width with color segments
+        const seg=Math.floor(bx/W*4);if(c!==(o.c+seg)%4){gameover=true;endCS()}return}
+    }
+    if(o.y>H+20)obstacles.splice(i,1)}
+}
+
+function endCS(){gameover=true;if(score>best){best=score;document.getElementById('cs-best').textContent=score;try{localStorage.setItem('cs_best',score)}catch(e)}}
+function render(){ctx.fillStyle='#111';ctx.fillRect(0,0,W,H);
+  // Ball
+  ctx.fillStyle=COLORS[ball.color];ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.2)';ctx.beginPath();ctx.arc(ball.x-3,ball.y-3,ball.r*0.4,0,Math.PI*2);ctx.fill();
+  // Obstacles
+  for(const o of obstacles){const y=o.y;
+    if(o.type===0){ctx.fillStyle=COLORS[o.c];ctx.fillRect(o.left,y,W/2-10,6);
+      ctx.fillStyle=COLORS[(o.c+1)%4];ctx.fillRect(o.left+W/2+10,y,W/2-20-o.left,6);
+      ctx.fillStyle='#222';ctx.fillRect(o.gap+o.left-20,y,40,6);
+      ctx.fillStyle=COLORS[o.c];ctx.fillRect(o.left,y-6,o.gap+o.left-40,6);
+    }else if(o.type===1){ctx.fillStyle=COLORS[o.c];ctx.fillRect(0,y,W/2,6);
+      ctx.fillStyle=COLORS[(o.c+1)%4];ctx.fillRect(W/2,y,W/2,6);
+    }else if(o.type===2){ctx.strokeStyle=COLORS[o.c];ctx.lineWidth=6;ctx.beginPath();ctx.arc(W/2,y,40,0,Math.PI*2);ctx.stroke();
+    }else{for(let i=0;i<4;i++){ctx.fillStyle=COLORS[(o.c+i)%4];ctx.fillRect(i*W/4,y,W/4,6)}}}
+  if(gameover){ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#ff0';ctx.font='bold 22px monospace';ctx.textAlign='center';
+    ctx.fillText('GAME OVER',W/2,H/2-5);ctx.fillStyle='#8af';ctx.font='12px monospace';ctx.fillText(`📏 ${score}  点击重来`,W/2,H/2+20)}}
+resetCS();function loop(){updateCS();render();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
