@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
-Sitemap: https://hot-h5-games.netlify.app/sitemap.xml
+Disallow: /assets/
 
-# Crawl-delay for polite bots
-Crawl-delay: 2
+Sitemap: https://vip-881.github.io/hot-h5-games/sitemap.xml
+
+# Crawl-delay: 1
