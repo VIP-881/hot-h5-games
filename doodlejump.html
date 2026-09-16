@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>✏️ 涂鸦跳跃 - 热门H5游戏</title>
+<meta name="description" content="经典涂鸦跳跃Doodle Jump，不断向上跳板攀升，躲避怪物突破最高分免费在线">
+<meta property="og:title" content="✏️ 涂鸦跳跃 - 热门H5游戏"><meta property="og:description" content="经典跳跃攀升躲避"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"涂鸦跳跃"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0}canvas{display:block;border:1px solid #334;border-radius:6px;max-width:98vw;background:#d4e8f4;cursor:pointer}</style>
+</head>
+<body>
+<h1>✏️ 涂鸦跳跃</h1>
+<div class="stats"><span>📏 <b id="dj-h">0</b></span><span>🏆 <b id="dj-best">0</b></span></div>
+<canvas id="c" width="300" height="500"></canvas>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=300,H=500;
+let player={x:W/2-12,y:400,w:24,h:24,vy:0},platforms=[],height=0,best=0,gameover=false,left=false,right=false,touchX=0;
+try{best=parseInt(localStorage.getItem('doodle_best'))||0;document.getElementById('dj-best').textContent=best}catch(e){}
+
+function initPlats(){platforms=[];
+  for(let i=0;i<12;i++){const y=H-60-i*60;let x;do{x=20+Math.random()*(W-80)}while(Math.abs(x-(i===0?W/2-40:x))<40);
+    platforms.push({x,y,w:60+Math.random()*40,m:0,broken:false,type:Math.random()<0.15?'moving':'normal'})}
+  platforms[0]={x:W/2-30,y:H-30,w:60,m:0,broken:false,type:'normal'}}
+
+function resetDJ(){player={x:W/2-12,y:400,w:24,h:24,vy:0};height=0;gameover=false;initPlats();document.getElementById('dj-h').textContent='0'}
+function jump(py){player.vy=-12+Math.random()*2}
+
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')left=true;if(e.key==='ArrowRight')right=true;if(e.key===' '&&gameover)resetDJ()});
+document.addEventListener('keyup',e=>{if(e.key==='ArrowLeft')left=false;if(e.key==='ArrowRight')right=false});
+cv.addEventListener('touchstart',e=>{e.preventDefault();touchX=e.touches[0].clientX});
+cv.addEventListener('touchmove',e=>{e.preventDefault();touchX=e.touches[0].clientX});
+cv.addEventListener('touchend',e=>{if(gameover)resetDJ()});
+cv.addEventListener('click',()=>{if(gameover)resetDJ()});
+
+function update(){if(gameover)return;
+  // Movement
+  if(left||touchX>0&&touchX<150)player.x-=4;if(right||touchX>250)player.x+=4;
+  if(player.x<-24)player.x=W;if(player.x>W)player.x=-24;
+  // Gravity
+  player.vy+=0.5;player.y+=player.vy;
+  // Platform collision
+  for(const p of platforms){if(p.broken)continue;
+    if(player.vy>0&&player.y+player.h>=p.y&&player.y+player.h<=p.y+12&&player.x+player.w>p.x&&player.x<p.x+p.w){
+      player.vy=-11;if(p.type==='moving'){p.m=p.m||1}
+      player.y=p.y-player.h}}
+  // Moving platforms
+  for(const p of platforms){if(p.type==='moving'&&!p.broken){p.x+=Math.sin(Date.now()/500)*1.5;p.x=Math.max(5,Math.min(W-p.w-5,p.x))}}
+  // Camera scroll
+  if(player.y<H/2){const diff=H/2-player.y;player.y+=diff;for(const p of platforms)p.y+=diff;height+=diff;document.getElementById('dj-h').textContent=Math.floor(height)}
+  // Game over
+  if(player.y>H+50){gameover=true;const s=Math.floor(height);if(s>best){best=s;document.getElementById('dj-best').textContent=s;try{localStorage.setItem('doodle_best',s)}catch(e)}}
+  // Generate platforms
+  const top=Math.min(...platforms.map(p=>p.y));if(top>20){const y=top-40-Math.random()*40;platforms.push({x:20+Math.random()*(W-80),w:55+Math.random()*45,y,m:0,broken:false,type:Math.random()<0.12?'moving':'normal'})}
+  // Remove offscreen
+  platforms=platforms.filter(p=>p.y<H+100);
+  // Random break
+  if(Math.random()<0.02){const p=platforms[Math.floor(Math.random()*platforms.length)];if(p&&p.y<H-200)p.broken=true}
+}
+
+function draw(){ctx.fillStyle='#d4e8f4';ctx.fillRect(0,0,W,H);
+  // Background hills
+  ctx.fillStyle='#b0d4b0';ctx.beginPath();ctx.arc(50,H,250,Math.PI,0);ctx.fill();ctx.beginPath();ctx.arc(250,H,200,Math.PI,0);ctx.fill();
+  // Clouds
+  ctx.fillStyle='rgba(255,255,255,0.6)';[[40,80],[200,60],[280,120]].forEach(([x,y])=>{ctx.beginPath();ctx.arc(x,y,15,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(x+18,y-5,12,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(x+10,y-10,10,0,Math.PI*2);ctx.fill()});
+  // Platforms
+  for(const p of platforms){if(p.broken){ctx.fillStyle='rgba(150,100,50,0.4)';ctx.fillRect(p.x+2,p.y+2,p.w-4,8);continue}
+    ctx.fillStyle=p.type==='moving'?'#f84':'#4a8';ctx.beginPath();ctx.roundRect(p.x,p.y,p.w,10,3);ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fillRect(p.x+3,p.y+2,p.w-6,3);ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(p.x+4,p.y+5,p.w-8,2)}
+  // Player
+  ctx.save();ctx.translate(player.x+12,player.y+12);
+  // Body
+  ctx.fillStyle='#44f';ctx.beginPath();ctx.roundRect(-10,-10,20,22,4);ctx.fill();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-4,-5,3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(4,-5,3,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#222';ctx.beginPath();ctx.arc(-5,-5,1.5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(3,-5,1.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#f84';ctx.beginPath();ctx.arc(0,2,5,0,Math.PI);ctx.fill();
+  // Eyes tilt
+  if(left){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-6,-7,2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#222';ctx.beginPath();ctx.arc(-7,-7,1,0,Math.PI*2);ctx.fill()}
+  if(right){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(6,-7,2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#222';ctx.beginPath();ctx.arc(5,-7,1,0,Math.PI*2);ctx.fill()}
+  ctx.restore();
+  if(gameover){ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#ff0';ctx.font='bold 22px monospace';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-5);ctx.fillStyle='#8af';ctx.font='12px monospace';ctx.fillText(`📏 ${Math.floor(height)}  点击重来`,W/2,H/2+20)}}
+resetDJ();function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
