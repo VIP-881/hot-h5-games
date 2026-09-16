@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>⛳ 推杆高尔夫 - 热门H5游戏</title>
+<meta name="description" content="2D推杆高尔夫游戏，控制力度和角度将球推进洞，计杆挑战最佳成绩免费在线">
+<meta property="og:title" content="⛳ 推杆高尔夫 - 热门H5游戏"><meta property="og:description" content="2D推杆高尔夫物理推杆"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"推杆高尔夫"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a2a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0}canvas{display:block;border:1px solid #2a4a2a;border-radius:6px;max-width:98vw;background:#1a2a1a;cursor:crosshair}.btn{margin:4px;padding:4px 14px;border:1px solid #446;border-radius:4px;background:#162a4a;color:#8af;cursor:pointer;font-size:12px}#pmsg{font-size:0.8em;color:#ff0;margin:2px}</style>
+</head>
+<body>
+<h1>⛳ 推杆高尔夫</h1>
+<div class="stats"><span>🏌️ <b id="golf-strokes">0</b></span><span>📍 洞 <b id="golf-hole">1</b>/9</span><span>🏆 <b id="golf-best">-</b></span></div>
+<canvas id="c" width="400" height="400"></canvas>
+<div id="pmsg">🎯 拖拽瞄准，松开击球!</div>
+<div><button class="btn" onclick="newGolfGame()">🔄 新局</button><button class="btn" onclick="resetHole()">📍 重打此洞</button></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=400,H=400;
+let ball={x:50,y:300,r:8,vx:0,vy:0},hole={x:350,y:60,r:12};
+let strokes=0,holeNum=1,moving=false,dragging=false,startX=0,startY=0,best=0,total=0;
+try{const d=JSON.parse(localStorage.getItem('golf_best')||'{}');best=typeof d==='object'?d:{}}catch(e){}
+document.getElementById('golf-best').textContent=best[9]||'-';
+
+function newGolfGame(){holeNum=1;strokes=0;total=0;moving=false;newHole();document.getElementById('golf-strokes').textContent='0';document.getElementById('golf-hole').textContent='1'}
+function resetHole(){if(!moving){ball.x=startBallX;ball.y=startBallY;ball.vx=0;ball.vy=0;moving=false;render()}}
+let startBallX=0,startBallY=0;
+function newHole(){const margin=50;ball={x:margin+Math.random()*(W-2*margin),y:margin+Math.random()*(H-2*margin),r:8,vx:0,vy:0};
+  startBallX=ball.x;startBallY=ball.y;
+  do{hole={x:margin+Math.random()*(W-2*margin),y:margin+Math.random()*(H-2*margin),r:14}}while(Math.hypot(ball.x-hole.x,ball.y-hole.y)<200);
+  moving=false;dragging=false;render();document.getElementById('pmsg').textContent='🎯 拖拽瞄准，松开击球!'}
+
+cv.addEventListener('mousedown',e=>{if(moving)return;const r=cv.getBoundingClientRect();startX=e.clientX-r.left;startY=e.clientY-r.top;dragging=true});
+cv.addEventListener('mousemove',e=>{if(!dragging)return;const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;render();drawAim(x,y)});
+cv.addEventListener('mouseup',e=>{if(!dragging)return;dragging=false;
+  const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  const dx=startX-mx,dy=startY-my,dist=Math.hypot(dx,dy);if(dist<10)return;
+  const power=Math.min(dist/20,8);
+  ball.vx=dx/dist*power;ball.vy=dy/dist*power;moving=true;strokes++;total++;
+  document.getElementById('golf-strokes').textContent=strokes;document.getElementById('pmsg').textContent='⏳ 球在滚动...'});
+cv.addEventListener('touchstart',e=>{e.preventDefault();if(moving)return;const t=e.touches[0],r=cv.getBoundingClientRect();startX=t.clientX-r.left;startY=t.clientY-r.top;dragging=true});
+cv.addEventListener('touchmove',e=>{e.preventDefault();if(!dragging)return;const t=e.touches[0],r=cv.getBoundingClientRect();render();drawAim(t.clientX-r.left,t.clientY-r.top)});
+cv.addEventListener('touchend',e=>{if(!dragging)return;dragging=false;const r=cv.getBoundingClientRect();
+  const mx=startX,my=startY;const dx=startX-mx,dy=startY-my;const dist=Math.hypot(dx,dy);if(dist<10)return;
+  const power=Math.min(dist/20,8);ball.vx=dx/dist*power;ball.vy=dy/dist*power;moving=true;strokes++;total++;
+  document.getElementById('golf-strokes').textContent=strokes;document.getElementById('pmsg').textContent='⏳ 球在滚动...'});
+
+function drawAim(mx,my){const dx=startX-mx,dy=startY-my,dist=Math.hypot(dx,dy);const power=Math.min(dist/20,8);
+  ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1;ctx.setLineDash([4,6]);
+  ctx.beginPath();ctx.moveTo(ball.x,ball.y);ctx.lineTo(ball.x+dx/dist*80,ball.y+dy/dist*80);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(255,100,0,0.2)';ctx.beginPath();ctx.arc(startX,startY,Math.min(dist,160),0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fa0';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText(`力度: ${(power*10).toFixed(0)}%`,startX,startY+30)}
+
+function update(){if(!moving)return;
+  ball.x+=ball.vx;ball.y+=ball.vy;ball.vx*=0.98;ball.vy*=0.98;
+  // Friction
+  ball.vx*=0.985;ball.vy*=0.985;
+  // Bounce
+  if(ball.x<ball.r){ball.x=ball.r;ball.vx*=-0.5}
+  if(ball.x>W-ball.r){ball.x=W-ball.r;ball.vx*=-0.5}
+  if(ball.y<ball.r){ball.y=ball.r;ball.vy*=-0.5}
+  if(ball.y>H-ball.r){ball.y=H-ball.r;ball.vy*=-0.5}
+  // Sand traps (slow zones)
+  const sandRegions=[[50,50,100,100],[280,280,80,80]];for(const[sx,sy,sw,sh]of sandRegions){
+    if(ball.x>sx&&ball.x<sx+sw&&ball.y>sy&&ball.y<sy+sh){ball.vx*=0.96;ball.vy*=0.96}}
+  // Stop
+  if(Math.abs(ball.vx)<0.05&&Math.abs(ball.vy)<0.05){ball.vx=0;ball.vy=0;moving=false;
+    // Check for hole
+    if(Math.hypot(ball.x-hole.x,ball.y-hole.y)<hole.r){document.getElementById('pmsg').textContent='🎉 进洞!';
+      if(holeNum>=9){const par=36;document.getElementById('pmsg').textContent=`🎉 比赛完成! 总杆${total} (标准杆${par})`;
+        if(!best[9]||total<best[9]){best[9]=total;document.getElementById('golf-best').textContent=total;try{localStorage.setItem('golf_best',JSON.stringify(best))}catch(e)}
+        setTimeout(()=>{if(confirm(`🏆 完成! 总杆${total}\n再来一轮?`))newGolfGame()},300)}
+      else{holeNum++;strokes=0;document.getElementById('golf-strokes').textContent='0';document.getElementById('golf-hole').textContent=holeNum;setTimeout(newHole,500)}}
+    else{document.getElementById('pmsg').textContent='🎯 再来一杆!'}}}
+
+function render(){ctx.fillStyle='#1a2a1a';ctx.fillRect(0,0,W,H);
+  // Green
+  ctx.fillStyle='#1d321d';ctx.beginPath();ctx.arc(W/2,H/2,200,0,Math.PI*2);ctx.fill();
+  // Sand traps
+  for(const[sx,sy,sw,sh]of[[50,50,100,100],[280,280,80,80]]){ctx.fillStyle='#d4c48a';ctx.beginPath();ctx.roundRect(sx,sy,sw,sh,6);ctx.fill();ctx.fillStyle='rgba(0,0,0,0.1)';ctx.beginPath();ctx.roundRect(sx+5,sy+5,sw-10,sh-10,4);ctx.fill()}
+  // Hole
+  ctx.fillStyle='#222';ctx.beginPath();ctx.arc(hole.x,hole.y,hole.r,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.arc(hole.x+2,hole.y+2,hole.r-2,0,Math.PI*2);ctx.fill();
+  // Flag
+  ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(hole.x,hole.y-14);ctx.lineTo(hole.x,hole.y-hole.r-10);ctx.stroke();
+  ctx.fillStyle='#f44';ctx.beginPath();ctx.moveTo(hole.x+2,hole.y-hole.r-20);ctx.lineTo(hole.x+16,hole.y-hole.r-15);ctx.lineTo(hole.x+2,hole.y-hole.r-10);ctx.closePath();ctx.fill();
+  // Ball
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(200,200,200,0.5)';ctx.beginPath();ctx.arc(ball.x-2,ball.y-2,4,0,Math.PI*2);ctx.fill();
+  // Stroke count
+  ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(W-80,10,70,24);ctx.fillStyle='#fff';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText(`🏌️ ${strokes}杆`,W-45,27)}
+newGolfGame();function loop(){update();render();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>
