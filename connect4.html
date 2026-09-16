@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🔴 四子棋 - 热门H5游戏</title>
+<meta name="description" content="经典Connect Four四子连珠棋，与AI在7x6棋盘对战，最先四子连线获胜免费在线">
+<meta property="og:title" content="🔴 四子棋 - 热门H5游戏"><meta property="og:description" content="经典四子连珠Connect Four"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"四子棋"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.4em;margin:4px 0}.stats{display:flex;gap:16px;margin:4px 0;font-size:0.85em}canvas{display:block;border:1px solid #334;border-radius:6px;max-width:98vw;background:#1a1a2e;cursor:pointer}.btn{margin:4px;padding:4px 12px;border:1px solid #557;border-radius:4px;background:#2a2a4e;color:#8af;cursor:pointer;font-size:12px}.btn:hover{background:#3a3a6e}#msg{font-size:0.8em;margin:2px;color:#ff0}</style>
+</head>
+<body>
+<h1>🔴 四子棋</h1>
+<div class="stats"><span>🔴 <b id="c4-p">0</b></span><span>🟡 <b id="c4-ai">0</b></span><span>🤝 <b id="c4-d">0</b></span></div>
+<canvas id="c" width="420" height="360"></canvas>
+<div><button class="btn" onclick="resetC4()">🔄 重来</button><span id="msg">🟡 你的回合(点击列)</span></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),COLS=7,ROWS=6,R=22,GAP=4,X=30,Y=30,W=420,H=360;
+let board=[],turn=1,gameover=false,pScore=0,aiScore=0,drawScore=0;
+function resetC4(){board=Array.from({length:ROWS},()=>Array(COLS).fill(0));turn=1;gameover=false;render();document.getElementById('msg').textContent='🟡 你的回合(点击列)'}
+function drop(col){for(let r=ROWS-1;r>=0;r--){if(board[r][col]===0){board[r][col]=turn;return r}}return-1}
+function check4(b,p){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+  if(b[r][c]!==p)continue;
+  const dirs=[[0,1],[1,0],[1,1],[1,-1]];
+  for(const [dr,dc]of dirs){let cnt=1;for(let s=1;s<4;s++){const nr=r+dr*s,nc=c+dc*s;if(nr<0||nr>=ROWS||nc<0||nc>=COLS||b[nr][nc]!==p)break;cnt++}if(cnt>=4)return true}}
+  return false}
+function aiMoveC4(){if(gameover)return;
+  // Check winning moves
+  for(let c=0;c<COLS;c++){const temp=board.map(r=>[...r]);const r=dropAt(temp,2,c);if(r>=0&&check4(temp,2)){board[r][c]=2;turn=1;checkEndC4();render();return}}
+  // Block player
+  for(let c=0;c<COLS;c++){const temp=board.map(r=>[...r]);const r=dropAt(temp,1,c);if(r>=0&&check4(temp,1)){board[r][c]=2;turn=1;checkEndC4();render();return}}
+  // Center preference
+  const order=[3,2,4,1,5,0,6];for(const c of order){const temp=board.map(r=>[...r]);const r=dropAt(temp,2,c);if(r>=0){board[r][c]=2;turn=1;checkEndC4();render();return}}}
+function dropAt(b,p,col){for(let r=ROWS-1;r>=0;r--){if(b[r][col]===0){b[r][col]=p;return r}}return-1}
+function checkEndC4(){if(check4(board,1)){pScore++;document.getElementById('c4-p').textContent=pScore;gameover=true;document.getElementById('msg').textContent='🎉 你赢了！'}else if(check4(board,2)){aiScore++;document.getElementById('c4-ai').textContent=aiScore;gameover=true;document.getElementById('msg').textContent='😢 AI赢了'}else if(board.every(r=>r.every(c=>c!==0))){drawScore++;document.getElementById('c4-d').textContent=drawScore;gameover=true;document.getElementById('msg').textContent='🤝 平局'}}
+
+cv.addEventListener('click',e=>{if(gameover||turn!==1)return;const r=cv.getBoundingClientRect(),col=Math.floor((e.clientX-r.left)/(W/COLS));if(col<0||col>=COLS)return;if(board[0][col]!==0)return;const row=drop(col);if(row<0)return;turn=2;checkEndC4();render();if(!gameover){document.getElementById('msg').textContent='🤖 AI思考中...';setTimeout(aiMoveC4,300)}else render()});
+
+function render(){ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  const cellW=W/COLS,cellH=H/ROWS;
+  // Board
+  ctx.fillStyle='#22a';ctx.beginPath();ctx.roundRect(5,5,W-10,H-10,8);ctx.fill();
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const x=c*cellW+cellW/2,y=r*cellH+cellH/2;
+    const v=board[r][c];ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);
+    ctx.fillStyle=v===0?'#0a0a2e':v===1?'#f44':'#fa0';ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;ctx.stroke()}
+  // Arrow indicator
+  if(!gameover&&turn===1){ctx.fillStyle='rgba(255,255,255,0.2)';ctx.font='24px sans-serif';ctx.textAlign='center';ctx.fillText('▼',W/2,22)}
+  if(gameover){ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#ff0';ctx.font='bold 22px monospace';ctx.textAlign='center';
+    const txt=pScore>aiScore?'🎉 你赢了！':pScore<aiScore?'😢 AI赢了':'🤝 平局';ctx.fillText(txt,W/2,H/2-5);ctx.fillStyle='#8af';ctx.font='12px monospace';ctx.fillText('点击重来',W/2,H/2+20)}}
+resetC4();
+</script>
+</body>
+</html>
