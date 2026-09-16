@@ -130,6 +130,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </style>
 </head>
 <body>
+<header class="header">
+  <h1></h1>
+  <p class="sub"></p>
+  <div class="stat-bar"><span class="si">🎮 <b>165</b></span><span class="si">🪙 <b class="coin">0</b></span></div>
+</header>
+<div class="tbar">
+  <input class="sbox" oninput="onSearch()">
+  <button class="act" onclick="randomGame()">🎲</button>
+  <button class="act" onclick="showRanking()">🔥</button>
+  <button class="act" id="favBtn" onclick="toggleFavFilter()">⭐ <b id="favCnt">0</b></button>
+  <button class="act" onclick="showStore()">🛒</button>
+  <button class="act" onclick="showLeaderboard()">🌐</button>
+  <button class="act" onclick="mpBtn()">👥</button>
+  <button class="tbtn" onclick="toggleTheme()">🌓</button>
+  <span id="profile"></span>
+</div>
+<div class="cats" id="catBar"></div>
+<div class="gr" id="grid"></div>
+<div class="ft"><div class="lk"><a href="https://github.com/VIP-881/hot-h5-games">⭐ GitHub</a><a href="/sitemap.xml">🗺️</a></div><p>© 2026</p></div>
+<div id="loginModal"></div>
+<div id="rk"></div>
+<div id="v">
+  <div class="vh"><button class="bk" onclick="closeGame()">←</button><span class="vt">🎮</span><span class="tm">🕒</span><span class="sh" id="vFavBtn" onclick="toFav(gameData[curIdx-1]?.id)">☆</span><span class="sh" onclick="shareWB()">🔁</span></div>
+  <div class="vb"><div class="ld"><div class="sp"></div></div><iframe id="gameFrame" onload="onFrameLoad()"></iframe></div>
+</div>
+<script>
 
 <script>
 // ===== I18N =====
