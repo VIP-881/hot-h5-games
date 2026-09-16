@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>💀 猜单词 - 热门H5游戏</title>
+<meta name="description" content="经典吊小人猜单词游戏，每次猜错增加一笔，猜对字母填充完成单词免费在线">
+<meta property="og:title" content="💀 猜单词 - 热门H5游戏"><meta property="og:description" content="经典吊小人猜单词游戏"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"猜单词"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.4em;margin:4px 0}.stats{display:flex;gap:12px;margin:4px 0;font-size:0.85em}canvas{display:block;border:1px solid #334;border-radius:6px;max-width:98vw;background:#1a1a2e}#word{font-size:2em;letter-spacing:8px;margin:4px 0;font-weight:bold}#keys{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:360px;margin:6px 0}.key{width:30px;height:30px;border:1px solid #557;border-radius:4px;background:#2a2a4e;color:#8af;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center}.key:hover{background:#3a3a6e}.key.used{opacity:0.3;pointer-events:none}.key.wrong{color:#f44;border-color:#f44}.key.right{color:#4f4;border-color:#4f4;background:#1a3a1a}</style>
+</head>
+<body>
+<h1>💀 猜单词</h1>
+<div class="stats"><span>🏆 <b id="hang-score">0</b></span><span>❌ <b id="hang-errors">0</b>/6</span></div>
+<div id="word">_ _ _ _ _</div>
+<canvas id="c" width="200" height="200"></canvas>
+<div id="keys"></div>
+<script>
+const words=['PYTHON','JAVASCRIPT','HTML','CSS','REACT','ALGORITHM','DATABASE','NETWORK','FUNCTION','VARIABLE','OBJECT','ARRAY','STRING','NUMBER','BOOLEAN','PROMISE','RUST','SWIFT','KOTLIN','TYPESCRIPT','SVELTE','ANGULAR','DJANGO','FLASK','RUBY','GOLANG','LINUX','DOCKER','GIT','API','JSON','RENDER','CLOSURE','CLASS','MODULE','PACKAGE','SERVER','CLIENT','ROUTER','CACHE','QUEUE','STACK','TREE','GRAPH','SORT','MERGE','QUERY','TOKEN','SOCKET','INPUT','LOOP'];
+let word='',display=[],guessed=new Set(),errors=0,score=0,gameover=false,gamesPlayed=0;
+const wordEl=document.getElementById('word'),keysEl=document.getElementById('keys'),scoreEl=document.getElementById('hang-score'),errEl=document.getElementById('hang-errors');
+const A=65;let best=0;try{best=parseInt(localStorage.getItem('hang_best'))||0}catch(e){}
+
+function newGame(){word=words[Math.floor(Math.random()*words.length)];display=Array(word.length).fill('_');guessed.clear();errors=0;gameover=false;renderKeys();updateDisplay();drawHangman()}
+function renderKeys(){keysEl.innerHTML='';for(let i=0;i<26;i++){const l=String.fromCharCode(A+i);const k=document.createElement('div');k.className='key';k.textContent=l;k.addEventListener('click',()=>guess(l));keysEl.appendChild(k)}}
+function guess(l){if(gameover||guessed.has(l))return;guessed.add(l);const k=document.querySelectorAll('.key');k[guessed.size-1]&&(k[guessed.size-1].className+=' used');
+  if(word.includes(l)){for(let i=0;i<word.length;i++)if(word[i]===l)display[i]=l;document.querySelectorAll('.key').forEach((k,i)=>{if(String.fromCharCode(A+i)===l)k.classList.add('right')});
+    if(!display.includes('_')){score+=10;scoreEl.textContent=score;gameover=true;gamesPlayed++;if(score>best){best=score;try{localStorage.setItem('hang_best',best)}catch(e)}}}else{errors++;errEl.textContent=errors;document.querySelectorAll('.key').forEach((k,i)=>{if(String.fromCharCode(A+i)===l)k.classList.add('wrong')});drawHangman();if(errors>=6){gameover=true;for(let i=0;i<word.length;i++)display[i]=word[i];gamesPlayed++}}
+  updateDisplay();if(gameover)setTimeout(()=>{if(confirm(`单词是: ${word}\n得分: ${score}\n再来一局?`))newGame()},300)}
+function updateDisplay(){wordEl.textContent=display.join(' ')}
+
+function drawHangman(){const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=200,H=200;ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#8af';ctx.lineWidth=2;
+  // Base
+  ctx.beginPath();ctx.moveTo(20,185);ctx.lineTo(180,185);ctx.stroke();ctx.beginPath();ctx.moveTo(50,185);ctx.lineTo(50,20);ctx.stroke();ctx.beginPath();ctx.moveTo(48,20);ctx.lineTo(120,20);ctx.stroke();ctx.beginPath();ctx.moveTo(118,20);ctx.lineTo(118,40);ctx.stroke();
+  // Hangman parts
+  ctx.strokeStyle='#ff8';
+  if(errors>=1){ctx.beginPath();ctx.arc(118,52,12,0,Math.PI*2);ctx.stroke()}
+  if(errors>=2){ctx.beginPath();ctx.moveTo(118,64);ctx.lineTo(118,110);ctx.stroke()}
+  if(errors>=3){ctx.beginPath();ctx.moveTo(118,75);ctx.lineTo(90,95);ctx.stroke()}
+  if(errors>=4){ctx.beginPath();ctx.moveTo(118,75);ctx.lineTo(146,95);ctx.stroke()}
+  if(errors>=5){ctx.beginPath();ctx.moveTo(118,110);ctx.lineTo(95,150);ctx.stroke()}
+  if(errors>=6){ctx.beginPath();ctx.moveTo(118,110);ctx.lineTo(141,150);ctx.stroke()
+    // Face
+    ctx.fillStyle='#f44';ctx.fillRect(112,48,4,4);ctx.fillRect(122,48,4,4);ctx.beginPath();ctx.arc(118,58,4,0,Math.PI);ctx.stroke()}
+}
+newGame();drawHangman();
+</script>
+</body>
+</html>
