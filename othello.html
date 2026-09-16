@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>⚫ 黑白棋 - 热门H5游戏</title>
+<meta name="description" content="经典奥赛罗黑白棋Reversi，与AI在8x8棋盘对战，翻转对手棋子占领棋盘免费在线">
+<meta property="og:title" content="⚫ 黑白棋 - 热门H5游戏"><meta property="og:description" content="经典奥赛罗翻转棋"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"黑白棋"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a3a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#8f8;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:16px;font-size:0.85em;margin:4px 0}canvas{display:block;border:2px solid #2a5a2a;border-radius:6px;max-width:98vw;background:#1a3a1a;cursor:pointer}.btn{margin:4px;padding:4px 14px;border:1px solid #2a5a2a;border-radius:4px;background:#1a4a1a;color:#8f8;cursor:pointer;font-size:12px}#msg{font-size:0.8em;color:#ff0;margin:2px}</style>
+</head>
+<body>
+<h1>⚫ 黑白棋</h1>
+<div class="stats"><span>⚪ <b id="oth-white">2</b></span><span>⚫ <b id="oth-black">2</b></span></div>
+<canvas id="c" width="400" height="400"></canvas>
+<div><span id="msg">⚪ 你的回合</span></div>
+<div><button class="btn" onclick="initOthello()">🔄 重开</button></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),N=8,T=50,W=400;
+let board=[],turn=1,gameover=false,pScore=0,aiScore=0;
+function initOthello(){board=Array.from({length:N},()=>Array(N).fill(0));
+  board[3][3]=board[4][4]=1;board[3][4]=board[4][3]=2;turn=1;gameover=false;updateStats();render();document.getElementById('msg').textContent='⚪ 你的回合'}
+function updateStats(){let w=0,b=0;board.forEach(r=>r.forEach(v=>{if(v===1)w++;if(v===2)b++}));
+  document.getElementById('oth-white').textContent=w;document.getElementById('oth-black').textContent=b;return[w,b]}
+
+function validMoves(b,p){const moves=[];const opp=p===1?2:1;const dirs=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){if(b[r][c]!==0)continue;
+    for(const[dr,dc]of dirs){let nr=r+dr,nc=c+dc,flip=false;while(nr>=0&&nr<N&&nc>=0&&nc<N&&b[nr][nc]===opp){nr+=dr;nc+=dc;flip=true}
+      if(flip&&nr>=0&&nr<N&&nc>=0&&nc<N&&b[nr][nc]===p){moves.push({r,c});break}}}return moves}
+
+function makeMove(b,p,r,c){b[r][c]=p;const opp=p===1?2:1;const dirs=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+  for(const[dr,dc]of dirs){let nr=r+dr,nc=c+dc;const toFlip=[];while(nr>=0&&nr<N&&nc>=0&&nc<N&&b[nr][nc]===opp){toFlip.push({r:nr,c:nc});nr+=dr;nc+=dc}
+    if(toFlip.length>0&&nr>=0&&nr<N&&nc>=0&&nc<N&&b[nr][nc]===p)toFlip.forEach(({r:fr,c:fc})=>b[fr][fc]=p)}return b}
+
+function aiMoveO(){if(gameover)return;const moves=validMoves(board,2);if(moves.length===0){const pm=validMoves(board,1);if(pm.length===0){gameover=true;endGame();return}turn=1;document.getElementById('msg').textContent='⚪ 你的回合';render();return}
+  // Prefer corners and edges
+  let bestMove=moves[0],bestScore=-99;
+  for(const m of moves){const b2=board.map(r=>[...r]);makeMove(b2,2,m.r,m.c);const opp=validMoves(b2,1).length;
+    let score=opp*2;if((m.r===0||m.r===7)&&(m.c===0||m.c===7))score+=50;else if(m.r===0||m.r===7||m.c===0||m.c===7)score+=10;if(score>bestScore){bestScore=score;bestMove=m}}
+  makeMove(board,2,bestMove.r,bestMove.c);const pm=validMoves(board,1);
+  if(pm.length===0){const am=validMoves(board,2);if(am.length===0){gameover=true;endGame();return}turn=2;document.getElementById('msg').textContent='🤖 AI继续';setTimeout(aiMoveO,300);render();return}
+  turn=1;document.getElementById('msg').textContent='⚪ 你的回合';updateStats();render()}
+
+function endGame(){const[w,b]=updateStats();document.getElementById('msg').textContent=w>b?'🎉 你赢了！':w<b?'😢 AI赢了':'🤝 平局';render()}
+
+cv.addEventListener('click',e=>{if(gameover||turn!==1)return;const r=cv.getBoundingClientRect(),col=Math.floor((e.clientX-r.left)/T),row=Math.floor((e.clientY-r.top)/T);if(row<0||row>=N||col<0||col>=N)return;
+  const moves=validMoves(board,1);if(!moves.some(m=>m.r===row&&m.c===col))return;
+  makeMove(board,1,row,col);const am=validMoves(board,2);
+  if(am.length===0){const pm=validMoves(board,1);if(pm.length===0){gameover=true;endGame();updateStats();render();return}turn=1;document.getElementById('msg').textContent='⚪ 无有效步，继续';setTimeout(()=>{render()},200);return}
+  turn=2;document.getElementById('msg').textContent='🤖 AI思考中...';updateStats();render();setTimeout(aiMoveO,300)});
+
+function render(){ctx.fillStyle='#1a3a1a';ctx.fillRect(0,0,W,W);
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){ctx.strokeStyle='#2a5a2a';ctx.strokeRect(c*T,r*T,T,T);
+    if(board[r][c]===1){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(c*T+T/2,r*T+T/2,16,0,Math.PI*2);ctx.fill()}else if(board[r][c]===2){ctx.fillStyle='#111';ctx.beginPath();ctx.arc(c*T+T/2,r*T+T/2,16,0,Math.PI*2);ctx.fill()}}
+  // Valid moves hint
+  if(!gameover&&turn===1){const moves=validMoves(board,1);for(const m of moves){ctx.fillStyle='rgba(255,255,255,0.15)';ctx.beginPath();ctx.arc(m.c*T+T/2,m.r*T+T/2,8,0,Math.PI*2);ctx.fill()}}
+  if(gameover){ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fillRect(0,0,W,W);ctx.fillStyle='#ff0';ctx.font='bold 22px monospace';ctx.textAlign='center';ctx.fillText('🎮 游戏结束',W/2,H/2-5);ctx.fillStyle='#8f8';ctx.font='12px monospace';ctx.fillText('点击重开',W/2,H/2+18)}}
+initOthello();
+</script>
+</body>
+</html>
