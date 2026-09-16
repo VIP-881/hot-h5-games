@@ -1,270 +1,1028 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>🎮 灵犀游戏大厅 | 30+ 免费在线 H5 小游戏 — API驱动·无需下载</title>
-  <meta name="description" content="30+ 款免费 H5 网页游戏，涵盖 RPG、卡牌、养成、领土战、俄罗斯方块、打字竞速、模拟经营等类型。数据驱动，浏览器即玩，无需下载。">
-  <meta name="keywords" content="H5游戏,网页游戏,免费游戏,RPG游戏,卡牌游戏,养成游戏,领土战,俄罗斯方块,打字游戏,在线小游戏,灵犀,网页小游戏">
-  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
-  <meta name="author" content="灵犀 AI">
-  <meta name="geo.region" content="CN">
-  <meta name="geo.placename" content="China">
-  <link rel="canonical" href="https://games.lynnxi.ai/">
+<meta charset="UTF-8">
+<link rel="dns-prefetch" href="//fonts.loli.net">
+<link rel="preconnect" href="https://fonts.loli.net" crossorigin>
 
-  <meta property="og:title" content="🎮 灵犀游戏大厅 — 30+ 免费在线 H5 小游戏">
-  <meta property="og:description" content="RPG、卡牌、养成、领土战、俄罗斯方块…30+款免费H5游戏，浏览器即玩，无需下载。">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="https://mdn.alipayobjects.com/afts/img/og-games.png">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="🎮 灵犀游戏大厅 — 免费在线小游戏">
-  <meta name="twitter:description" content="30+款H5游戏，RPG/卡牌/养成/领土战/俄罗斯方块，浏览器即玩">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🎮 灵犀游戏大厅 · 165款免费H5游戏 | 在线小游戏合集·离线·多语言·云同步</title>
+<meta name="description" content="165款免费H5小游戏合集：含2048、扫雷、打砖块、Flappy Bird、数独、推箱子等经典，以及RPG、卡牌、塔防、打字竞速等创意玩法。支持登录云同步、中英多语言、PWA离线。全品类覆盖，手机+PC双端。">
+<meta name="keywords" content="H5游戏,免费游戏,在线游戏,HTML5,离线游戏,PWA,多语言,云同步,小游戏合集,2048,扫雷,打砖块,数独,推箱子,俄罗斯方块,Flappy Bird,贪吃蛇,拼图,RPG,塔防,打字,卡牌">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta name="theme-color" content="#0a0a1a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="灵犀游戏大厅">
+<meta name="application-name" content="灵犀游戏大厅">
+<meta name="author" content="灵犀 AI">
+<meta name="geo.region" content="CN">
+<meta name="geo.placename" content="China">
+<meta name="geo.position" content="35.8617;104.1954">
+<meta name="ICBM" content="35.8617, 104.1954">
+<meta name="DC.title" content="灵犀游戏大厅 - 165款免费H5在线小游戏合集">
+<meta name="DC.description" content="165款免费H5小游戏，支持离线游玩、多语言、云同步。">
+<meta name="DC.language" content="zh-CN">
+<link rel="alternate" hreflang="zh-CN" href="https://vip-881.github.io/hot-h5-games/">
+<link rel="alternate" hreflang="zh-Hans" href="https://vip-881.github.io/hot-h5-games/">
+<link rel="alternate" hreflang="en" href="https://vip-881.github.io/hot-h5-games/?lang=en">
+<link rel="alternate" hreflang="x-default" href="https://vip-881.github.io/hot-h5-games/">
+<link rel="alternate" hreflang="zh-Hant" href="https://vip-881.github.io/hot-h5-games/?lang=zh-Hant">
+<link rel="canonical" href="https://vip-881.github.io/hot-h5-games">
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🎮</text></svg>">
 
-  <link rel="preconnect" href="https://fonts.loli.net">
-  <link href="https://fonts.loli.net/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
+<!-- Open Graph / Facebook -->
+<meta property="og:title" content="🎮 灵犀游戏大厅 · 165款免费H5在线小游戏合集">
+<meta property="og:description" content="165款免费H5小游戏：2048、扫雷、打砖块、Flappy Bird、数独、推箱子…支持登录同步、多语言、PWA离线。手机+PC全畅玩。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vip-881.github.io/hot-h5-games">
+<meta property="og:image" content="https://mdn.alipayobjects.com/afts/img/og-games.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="灵犀游戏大厅 - 165款免费H5游戏合集">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:site_name" content="灵犀游戏大厅">
 
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'Noto Sans SC', 'sans-serif'] },
-          colors: { brand: '#7c3aed', 'brand-light': '#a78bfa', 'brand-dark': '#5b21b6' }
-        }
-      }
-    }
-  </script>
+<!-- Twitter/X Cards -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="🎮 灵犀游戏大厅 · 165款免费H5游戏合集">
+<meta name="twitter:description" content="2048、扫雷、打砖块、Flappy Bird…165款免费H5游戏，即开即玩。">
+<meta name="twitter:image" content="https://mdn.alipayobjects.com/afts/img/og-games.png">
+<meta name="twitter:image:alt" content="灵犀游戏大厅游戏合集">
 
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{font-family:'Inter','Noto Sans SC',sans-serif;background:#0a0a14;color:#e0e0f0;overflow-x:hidden}
-    .glow-text{background:linear-gradient(135deg,#c084fc,#818cf8,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .glow-border:hover{border-color:rgba(139,92,246,.6)!important;box-shadow:0 0 30px rgba(139,92,246,.15)}
-    .game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
-    .game-card{background:rgba(20,20,38,.95);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:28px 20px 20px;text-align:center;cursor:pointer;transition:all .35s cubic-bezier(.4,0,.2,1);text-decoration:none;color:inherit;display:block;position:relative;overflow:hidden}
-    .game-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#7c3aed,transparent);opacity:0;transition:opacity .35s}
-    .game-card:hover::before{opacity:1}
-    .game-card:hover{transform:translateY(-8px);box-shadow:0 20px 50px rgba(139,92,246,.15);border-color:rgba(139,92,246,.3)}
-    .game-card .icon{font-size:48px;display:block;margin-bottom:10px;transition:transform .3s}
-    .game-card:hover .icon{transform:scale(1.15)}
-    .game-card .ttl{font-size:15px;font-weight:600;color:#c084fc;margin-bottom:6px}
-    .game-card .dsc{font-size:12px;color:#777;line-height:1.5}
-    .badge{position:absolute;top:12px;right:12px;font-size:10px;padding:3px 10px;border-radius:10px;font-weight:500;letter-spacing:.3px}
-    .badge-hot{background:rgba(239,68,68,.2);color:#f87171}
-    .badge-new{background:rgba(139,92,246,.2);color:#a78bfa}
-    .badge-api{background:rgba(34,197,94,.2);color:#4ade80}
-    .badge-fun{background:rgba(251,191,36,.2);color:#fbbf24}
-    .hero-gradient{background:linear-gradient(180deg,rgba(139,92,246,.06) 0%,transparent 100%)}
-    .search-box{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:10px 20px;color:#e0e0f0;font-size:14px;width:100%;max-width:400px;outline:none;transition:all .3s}
-    .search-box:focus{border-color:#7c3aed;box-shadow:0 0 20px rgba(139,92,246,.15)}
-    .tag-btn{padding:6px 16px;border-radius:100px;font-size:12px;cursor:pointer;transition:all .3s;border:1px solid rgba(255,255,255,.08);background:transparent;color:#888}
-    .tag-btn:hover,.tag-btn.active{background:rgba(139,92,246,.15);border-color:rgba(139,92,246,.4);color:#a78bfa}
-    footer{text-align:center;padding:40px 20px;color:#555;font-size:12px;border-top:1px solid rgba(255,255,255,.04)}
-    @media(max-width:640px){.game-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}.game-card{padding:18px 12px 14px}.game-card .icon{font-size:36px}.game-card .ttl{font-size:13px}.game-card .dsc{font-size:11px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}}
-  </style>
-</head>
-<body>
-
-<!-- Hero -->
-<header class="hero-gradient text-center px-4 pt-10 pb-6">
-  <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold glow-text mb-3">灵犀游戏大厅</h1>
-  <p class="text-gray-400 text-sm md:text-base max-w-xl mx-auto">30+ 款免费 H5 小游戏 · RPG · 卡牌 · 养成 · 领土战 · 俄罗斯方块 · 打字竞速 · 模拟经营 · 浏览器即玩</p>
-  <div class="flex flex-wrap justify-center gap-2 mt-6">
-    <span class="bg-purple-500/10 text-purple-300 px-3 py-1 rounded-full text-xs">🎮 30+ 游戏</span>
-    <span class="bg-blue-500/10 text-blue-300 px-3 py-1 rounded-full text-xs">🚀 即开即玩</span>
-    <span class="bg-green-500/10 text-green-300 px-3 py-1 rounded-full text-xs">📡 API 驱动</span>
-    <span class="bg-yellow-500/10 text-yellow-300 px-3 py-1 rounded-full text-xs">💰 完全免费</span>
-  </div>
-</header>
-
-<!-- Search & Filter -->
-<div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center gap-4">
-  <input class="search-box" id="search" placeholder="搜索游戏名称或关键词..." oninput="filterGames()">
-  <div class="flex flex-wrap gap-2" id="filters">
-    <button class="tag-btn active" data-tag="all" onclick="setFilter('all')">🏠 全部</button>
-    <button class="tag-btn" data-tag="rpg" onclick="setFilter('rpg')">⚔️ RPG</button>
-    <button class="tag-btn" data-tag="puzzle" onclick="setFilter('puzzle')">🧩 益智</button>
-    <button class="tag-btn" data-tag="action" onclick="setFilter('action')">🎯 动作</button>
-    <button class="tag-btn" data-tag="card" onclick="setFilter('card')">🃏 卡牌</button>
-    <button class="tag-btn" data-tag="typing" onclick="setFilter('typing')">⌨️ 打字</button>
-    <button class="tag-btn" data-tag="sim" onclick="setFilter('sim')">🏗️ 模拟</button>
-  </div>
-</div>
-
-<!-- Games Grid -->
-<div class="max-w-6xl mx-auto px-4 pb-12">
-  <div class="game-grid" id="gameGrid"></div>
-</div>
-
-<script>
-const GAMES = [
-  {id:'rpg',icon:'⚔️',ttl:'任务打怪 RPG',dsc:'Notion 任务化身怪物，完成即可升级！',tag:'rpg',badge:'badge-api',blabel:'API 数据'},
-  {id:'cards',icon:'🃏',ttl:'卡牌对战',dsc:'策略卡牌对战，收集与组合制胜',tag:'card',badge:'badge-fun',blabel:'策略'},
-  {id:'pet',icon:'🐾',ttl:'电子宠物',dsc:'喂养、互动、进化你的虚拟伙伴',tag:'sim',badge:'badge-fun',blabel:'养成'},
-  {id:'territory',icon:'🏴',ttl:'领土战争',dsc:'争夺领地，扩张版图，策略征服',tag:'rpg',badge:'badge-hot',blabel:'热门'},
-  {id:'tetris',icon:'🔲',ttl:'Gmail 俄罗斯方块',dsc:'未读邮件变成方块，消除减压！',tag:'puzzle',badge:'badge-hot',blabel:'热门'},
-  {id:'achievements',icon:'🏆',ttl:'成就系统',dsc:'解锁全成就，展示你的游戏实力',tag:'sim',badge:'badge-new',blabel:'新版'},
-  {id:'monopoly',icon:'🎲',ttl:'GitHub 大富翁',dsc:'GitHub 提交就是骰子点数！',tag:'sim',badge:'badge-api',blabel:'API 数据'},
-  {id:'commit-racer',icon:'🏎️',ttl:'Commit 竞速赛',dsc:'Git 提交次数决定你的车速！',tag:'action',badge:'badge-api',blabel:'API 数据'},
-  {id:'code-typer',icon:'⌨️',ttl:'代码打字王',dsc:'真实代码片段，打字速度大比拼',tag:'typing',badge:'badge-hot',blabel:'热门'},
-  {id:'star-hunter',icon:'⭐',ttl:'星际猎手',dsc:'在代码星空下收集闪亮的星星',tag:'action',badge:'badge-fun',blabel:'休闲'},
-  {id:'guess',icon:'❓',ttl:'猜谜挑战',dsc:'API 驱动的知识谜题，边玩边学',tag:'puzzle',badge:'badge-api',blabel:'API 数据'},
-  {id:'build-battle',icon:'🏗️',ttl:'Build Battle',dsc:'CI/CD 构建竞速，谁先通过？',tag:'action',badge:'badge-api',blabel:'API 数据'},
-  {id:'api-clicker',icon:'👆',ttl:'API 点击器',dsc:'疯狂点击调用 API，赚钱升级！',tag:'action',badge:'badge-new',blabel:'新版'},
-  {id:'api-snake',icon:'🐍',ttl:'API 贪吃蛇',dsc:'经典贪吃蛇，API 数据驱动',tag:'puzzle',badge:'badge-new',blabel:'新版'},
-  {id:'api-speedrunner',icon:'🏃',ttl:'API 速通',dsc:'速度挑战，用最快的速度完成任务',tag:'action',badge:'badge-hot',blabel:'热门'},
-  {id:'api-towerdefense',icon:'🗼',ttl:'API 塔防',dsc:'搭建防御塔，抵御数据洪流',tag:'sim',badge:'badge-new',blabel:'新版'},
-  {id:'merge-conflict',icon:'🔀',ttl:'合并冲突',dsc:'解决 Git 冲突，拯救代码仓库',tag:'puzzle',badge:'badge-api',blabel:'API 数据'},
-  {id:'pipeline-puzzle',icon:'🔧',ttl:'流水线解谜',dsc:'CI/CD 流水线拼图，畅通部署',tag:'puzzle',badge:'badge-api',blabel:'API 数据'},
-  {id:'debug-detective',icon:'🔍',ttl:'Debug 侦探',dsc:'寻找代码中的 Bug 并修复',tag:'typing',badge:'badge-hot',blabel:'热门'},
-  {id:'status-memory',icon:'🧠',ttl:'状态翻翻乐',dsc:'匹配 API 状态码的记忆力游戏',tag:'card',badge:'badge-fun',blabel:'记忆'},
-  {id:'regex-challenge',icon:'📝',ttl:'正则挑战',dsc:'用正则表达式破解谜题',tag:'typing',badge:'badge-fun',blabel:'挑战'},
-  {id:'data-miner',icon:'⛏️',ttl:'数据矿工',dsc:'挖掘数据集，发现隐藏价值',tag:'sim',badge:'badge-api',blabel:'API 数据'},
-  {id:'sql-defender',icon:'🛡️',ttl:'SQL 守卫',dsc:'编写 SQL 抵御注入攻击',tag:'typing',badge:'badge-new',blabel:'新版'},
-  {id:'firebase-arena',icon:'🔥',ttl:'Firebase 竞技场',dsc:'实时数据库 PK，数据即战力',tag:'action',badge:'badge-api',blabel:'API 数据'},
-  {id:'netlify-portal',icon:'🌐',ttl:'Netlify 传送门',dsc:'部署站点争夺战，域名即领地',tag:'sim',badge:'badge-api',blabel:'API 数据'},
-  {id:'baserow-racer',icon:'🗄️',ttl:'Baserow 赛车',dsc:'数据库表格竞速，SQL 查询加速',tag:'action',badge:'badge-api',blabel:'API 数据'},
-  {id:'http-archer',icon:'🏹',ttl:'HTTP 弓箭手',dsc:'HTTP 状态码是弓箭，精准命中',tag:'action',badge:'badge-fun',blabel:'创意'},
-  {id:'star-hunter',icon:'⭐',ttl:'星际猎手',dsc:'代码星空下收集星星',tag:'action',badge:'badge-fun',blabel:'休闲'}
-].filter((g,i,a)=>a.findIndex(x=>x.id===g.id)===i);  // dedup
-
-const currentFilter = { tag: 'all', query: '' };
-
-function setFilter(tag) {
-  currentFilter.tag = tag;
-  document.querySelectorAll('#filters .tag-btn').forEach(b => b.classList.toggle('active', b.dataset.tag === tag));
-  renderGames();
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "灵犀游戏大厅",
+  "headline": "165款免费H5在线小游戏合集",
+  "description": "165款免费H5小游戏合集，含经典益智（2048/扫雷/数独）、动作竞技（Flappy Bird/打砖块/Pong）、策略解谜（推箱子/拼图）等全品类。支持登录云同步、中英多语言、PWA离线游玩。",
+  "url": "https://vip-881.github.io/hot-h5-games",
+  "inLanguage": ["zh-CN", "en"],
+  "datePublished": "2026-05-06",
+  "dateModified": "2026-09-17",
+  "author": {"@type": "Person", "name": "灵犀", "url": "https://github.com/VIP-881"},
+  "publisher": {"@type": "Person", "name": "灵犀"},
+  "isAccessibleForFree": true,
+  "isFamilyFriendly": true,
+  "keywords": "H5游戏, 免费游戏, 在线游戏, 小游戏合集, 2048, 扫雷, 数独, Flappy Bird",
+  "thumbnailUrl": "https://mdn.alipayobjects.com/afts/img/og-games.png",
+  "mainEntity": {
+    "@type": "ItemList",
+    "numberOfItems": 165,
+    "itemListElement": [
+      {"@type": "VideoGame", "position": 1, "name": "2048 数字合并", "url": "https://vip-881.github.io/hot-h5-games/2048.html", "playMode": "SinglePlayer", "applicationCategory": "GameApplication", "genre": "Puzzle"},
+      {"@type": "VideoGame", "position": 2, "name": "扫雷 Minesweeper", "url": "https://vip-881.github.io/hot-h5-games/mines.html", "playMode": "SinglePlayer", "applicationCategory": "GameApplication", "genre": "Puzzle"},
+      {"@type": "VideoGame", "position": 3, "name": "打砖块 Breakout", "url": "https://vip-881.github.io/hot-h5-games/breakout.html", "playMode": "SinglePlayer", "applicationCategory": "GameApplication", "genre": "Action"},
+      {"@type": "VideoGame", "position": 4, "name": "Flappy Bird", "url": "https://vip-881.github.io/hot-h5-games/flappy.html", "playMode": "SinglePlayer", "applicationCategory": "GameApplication", "genre": "Action"},
+      {"@type": "VideoGame", "position": 5, "name": "数独 Sudoku", "url": "https://vip-881.github.io/hot-h5-games/sudoku.html", "playMode": "SinglePlayer", "applicationCategory": "GameApplication", "genre": "Puzzle"}
+    ]
+  }
 }
-
-function filterGames() {
-  currentFilter.query = document.getElementById('search').value.toLowerCase();
-  renderGames();
-}
-
-function renderGames() {
-  const grid = document.getElementById('gameGrid');
-  const filtered = GAMES.filter(g => {
-    const tagMatch = currentFilter.tag === 'all' || g.tag === currentFilter.tag;
-    const queryMatch = !currentFilter.query || g.ttl.includes(currentFilter.query) || g.dsc.includes(currentFilter.query);
-    return tagMatch && queryMatch;
-  });
-  grid.innerHTML = filtered.length ? filtered.map(g => `
-    <a class="game-card glow-border" href="${g.id}.html">
-      <span class="badge ${g.badge}">${g.blabel}</span>
-      <span class="icon">${g.icon}</span>
-      <div class="ttl">${g.ttl}</div>
-      <div class="dsc">${g.dsc}</div>
-    </a>
-  `).join('') : '<div class="col-span-full text-center text-gray-500 py-20">没有找到匹配的游戏</div>';
-}
-
-renderGames();
 </script>
 
-<!-- Status Bar -->
-<div class="max-w-6xl mx-auto px-4 pb-6">
-  <div class="flex flex-wrap justify-center gap-3 text-xs text-gray-500">
-    <span>🎮 收录 30+ 款游戏</span>
-    <span>🔄 持续更新中</span>
-    <span>📡 API 实时数据驱动</span>
-    <span>🌐 HTML5 · 全平台</span>
-  </div>
-</div>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a1a;--bg2:rgba(255,255,255,.04);--bg3:rgba(255,255,255,.07);--text:#e0e0f0;--text2:#888;--text3:#555;--border:rgba(255,255,255,.08);--card:rgba(255,255,255,.04);--accent:#7c3aed;--accent2:#a78bfa;--shadow:rgba(139,92,246,.18);--search:rgba(255,255,255,.05);--search-b:rgba(255,255,255,.08)}
+.light{--bg:#f0f0f8;--bg2:rgba(0,0,0,.03);--bg3:rgba(0,0,0,.06);--text:#1a1a2e;--text2:#666;--text3:#999;--border:rgba(0,0,0,.08);--card:#fff;--accent:#7c3aed;--accent2:#7c3aed;--shadow:rgba(139,92,246,.1);--search:#eee;--search-b:#ddd}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+.header{text-align:center;padding:16px 12px 6px}
+.header h1{font-size:clamp(1.2em,3.2vw,1.8em);background:linear-gradient(135deg,#c084fc,#818cf8,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header .sub{color:var(--text2);font-size:.72em;max-width:440px;margin:2px auto 0}
+.stat-bar{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin:3px 0}
+.si{background:var(--bg2);padding:2px 7px;border-radius:20px;font-size:.6em;color:var(--text2)}.si b{color:var(--text)}
+.tbar{display:flex;gap:3px;align-items:center;justify-content:center;flex-wrap:wrap;margin:0 auto 2px;padding:0 4px}
+.sbox{background:var(--search);border:1px solid var(--search-b);border-radius:100px;padding:4px 9px;color:var(--text);font-size:.66em;width:130px;outline:none;transition:all .2s}
+.sbox:focus{border-color:var(--accent);width:170px}
+.act{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.18);color:var(--accent2);padding:3px 8px;border-radius:100px;cursor:pointer;font-size:.62em;transition:all .2s;white-space:nowrap}
+.act:hover,.act.active{background:rgba(139,92,246,.2);border-color:var(--accent);transform:scale(1.04)}
+.tbtn{background:none;border:1px solid var(--border);color:var(--text2);cursor:pointer;font-size:.7em;padding:2px 5px;border-radius:20px}.tbtn:hover{background:var(--bg2)}
+.cats{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;margin:3px 0;padding:0 3px}
+.cb{padding:2px 7px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-size:.6em;transition:all .2s;white-space:nowrap}
+.cb:hover,.cb.active{background:rgba(139,92,246,.12);border-color:var(--accent);color:var(--accent2)}
+.cb .cn{font-size:.5em;opacity:.6;margin-left:1px}
+.gr{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:4px;padding:2px 5px;max-width:1200px;margin:0 auto}
+.cd{background:var(--card);border-radius:9px;overflow:hidden;cursor:pointer;transition:all .25s;border:1px solid var(--border);text-decoration:none;color:inherit;display:block;position:relative}
+.cd:hover{transform:translateY(-3px);box-shadow:0 8px 24px var(--shadow);border-color:rgba(139,92,246,.3)}
+.cc{height:72px;display:flex;align-items:center;justify-content:center;font-size:2.2em;position:relative;overflow:hidden}
+.cc::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(0,0,0,.4))}
+.cc .ic{position:relative;z-index:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3));transition:transform .3s}
+.cd:hover .cc .ic{transform:scale(1.15) rotate(-5deg)}
+.cb2{padding:4px 6px 6px;position:relative}.cb2 h3{font-size:.68em;font-weight:600}.cb2 p{color:var(--text2);font-size:.56em;line-height:1.2}
+.ctg{display:inline-block;padding:1px 5px;border-radius:20px;font-size:.48em;margin-top:2px}
+.fs{position:absolute;top:2px;right:4px;font-size:.7em;z-index:2;cursor:pointer;opacity:.4;transition:all .2s;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.fs.act{opacity:1;transform:scale(1.1)}.fs:hover{opacity:.8}
+.gp{background:linear-gradient(135deg,#1e3a5f,#3b82f6,#60a5fa)}
+.ga{background:linear-gradient(135deg,#7f1d1d,#ef4444,#f97316)}
+.gd{background:linear-gradient(135deg,#14532d,#22c55e,#4ade80)}
+.gs{background:linear-gradient(135deg,#164e63,#14b8a6,#2dd4bf)}
+.gx{background:linear-gradient(135deg,#713f12,#eab308,#facc15)}
+.gc{background:linear-gradient(135deg,#4c1d95,#a855f7,#c084fc)}
+.gm{background:linear-gradient(135deg,#831843,#ec4899,#f472b6)}
+.gcl{background:linear-gradient(135deg,#1e1b4b,#6366f1,#818cf8)}
+.gh,.gv{background:linear-gradient(135deg,#450a0a,#dc2626,#fb7185)}
+.gdf{background:linear-gradient(135deg,#1e293b,#475569,#94a3b8)}
+.gh,.gv{background:linear-gradient(135deg,#450a0a,#dc2626,#fb7185)}
+.gh,.gv{background:linear-gradient(135deg,#450a0a,#dc2626,#fb7185)}
+.gh,.gv{background:linear-gradient(135deg,#450a0a,#dc2626,#fb7185)}
+.gh,.gv{background:linear-gradient(135deg,#450a0a,#dc2626,#fb7185)}
+.tp{background:rgba(96,165,250,.2);color:#60a5fa}
+.ta{background:rgba(251,191,36,.2);color:#fbbf24}
+.td{background:rgba(74,222,128,.2);color:#4ade80}
+.ts{background:rgba(45,212,191,.2);color:#2dd4bf}
+.tx{background:rgba(250,204,21,.2);color:#facc15}
+.tc{background:rgba(192,132,252,.2);color:#c084fc}
+.tm{background:rgba(244,114,182,.2);color:#f472b6}
+.tcl{background:rgba(99,102,241,.2);color:#818cf8}
+.th,.tv{background:rgba(248,113,113,.2);color:#fb7185}
+.th{background:rgba(248,113,113,.2);color:#fb7185}
+.th{background:rgba(248,113,113,.2);color:#fb7185}
 
-<!-- Category Sections -->
-<div class="max-w-6xl mx-auto px-4 space-y-12 pb-16" id="categories">
-  <!-- RPG -->
-  <section>
-    <h2 class="text-xl font-bold text-purple-300 mb-5 flex items-center gap-2"><span class="w-1 h-6 bg-purple-500 rounded"></span> ⚔️ RPG 策略</h2>
-    <div class="game-grid grid-cols-2 md:grid-cols-4">
-      <a class="game-card glow-border" href="rpg.html"><span class="icon">⚔️</span><div class="ttl">任务打怪 RPG</div><div class="dsc">Notion 任务化身怪物</div></a>
-      <a class="game-card glow-border" href="territory.html"><span class="icon">🏴</span><div class="ttl">领土战争</div><div class="dsc">争夺领地扩张版图</div></a>
-      <a class="game-card glow-border" href="merge-conflict.html"><span class="icon">🔀</span><div class="ttl">合并冲突</div><div class="dsc">解决 Git 冲突</div></a>
-      <a class="game-card glow-border" href="monopoly.html"><span class="icon">🎲</span><div class="ttl">GitHub 大富翁</div><div class="dsc">提交即骰子</div></a>
-    </div>
-  </section>
+/* Profile */
+#profile{display:flex;align-items:center;gap:4px}.pfp{width:22px;height:22px;border-radius:50%;font-size:14px;display:flex;align-items:center;justify-content:center;background:var(--bg3);cursor:pointer;border:1px solid var(--border)}.uname{font-size:.62em;color:var(--text2);cursor:pointer;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#loginModal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9997;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);justify-content:center;align-items:center}
+#loginModal.act{display:flex}
+.lbox{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:20px;max-width:320px;width:90%;text-align:center}
+.lbox h2{font-size:1em;margin-bottom:8px}.lbox input{background:var(--search);border:1px solid var(--search-b);border-radius:10px;padding:7px 12px;color:var(--text);font-size:.8em;width:100%;margin:4px 0;outline:none}
+.lbox input:focus{border-color:var(--accent)}.lbox .avatars{display:flex;gap:6px;justify-content:center;margin:8px 0;flex-wrap:wrap}.lbox .avatars span{font-size:24px;cursor:pointer;padding:3px;border-radius:8px;border:2px solid transparent;transition:all .2s}
+.lbox .avatars span.act{border-color:var(--accent);background:rgba(139,92,246,.1)}
+.lbox button{background:var(--accent);border:none;color:#fff;padding:7px 20px;border-radius:10px;cursor:pointer;font-size:.8em;margin-top:6px}
+.lbox .hint{font-size:.6em;color:var(--text2);margin-top:6px}
+.lbox .hint button{background:none;border:none;color:var(--accent2);cursor:pointer;font-size:1em;padding:0;text-decoration:underline}
 
-  <!-- Puzzle -->
-  <section>
-    <h2 class="text-xl font-bold text-blue-300 mb-5 flex items-center gap-2"><span class="w-1 h-6 bg-blue-500 rounded"></span> 🧩 益智解谜</h2>
-    <div class="game-grid grid-cols-2 md:grid-cols-4">
-      <a class="game-card glow-border" href="tetris.html"><span class="icon">🔲</span><div class="ttl">Gmail 俄罗斯方块</div><div class="dsc">未读邮件变方块</div></a>
-      <a class="game-card glow-border" href="guess.html"><span class="icon">❓</span><div class="ttl">猜谜挑战</div><div class="dsc">API 知识谜题</div></a>
-      <a class="game-card glow-border" href="pipeline-puzzle.html"><span class="icon">🔧</span><div class="ttl">流水线解谜</div><div class="dsc">CI/CD 拼图</div></a>
-      <a class="game-card glow-border" href="api-snake.html"><span class="icon">🐍</span><div class="ttl">API 贪吃蛇</div><div class="dsc">经典蛇类游戏</div></a>
-    </div>
-  </section>
+/* Viewer */
+#v{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:var(--bg);flex-direction:column}
+#v.act{display:flex}
+.vh{display:flex;align-items:center;justify-content:space-between;padding:3px 6px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.vh .bk{background:var(--bg3);border:none;color:var(--text);padding:3px 8px;border-radius:5px;cursor:pointer;font-size:.68em}
+.vh .bk:hover{background:rgba(139,92,246,.2)}
+.vh .vt{font-size:.72em;font-weight:600}
+.vh .tm{font-size:.55em;color:var(--accent2);background:rgba(139,92,246,.08);padding:1px 5px;border-radius:5px;margin-left:3px}
+.sh{background:var(--bg2);border:1px solid var(--border);color:var(--text2);padding:1px 5px;border-radius:5px;cursor:pointer;font-size:.55em}
+.coin{color:var(--accent2);font-weight:700}
+.coin{color:var(--accent2);font-weight:700}
+.sh:hover{background:rgba(59,130,246,.12);color:#93c5fd}
+.vb{flex:1;position:relative}
+.vb iframe{width:100%;height:100%;border:none;background:#fff}
+.ld{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:1}
+.ld.act{display:block}
+.sp{width:28px;height:28px;border:3px solid rgba(139,92,246,.1);border-top:3px solid #7c3aed;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 5px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ld p{font-size:.65em;color:var(--text2)}
 
-  <!-- Typing -->
-  <section>
-    <h2 class="text-xl font-bold text-green-300 mb-5 flex items-center gap-2"><span class="w-1 h-6 bg-green-500 rounded"></span> ⌨️ 打字编程</h2>
-    <div class="game-grid grid-cols-2 md:grid-cols-4">
-      <a class="game-card glow-border" href="code-typer.html"><span class="icon">⌨️</span><div class="ttl">代码打字王</div><div class="dsc">代码打字竞速</div></a>
-      <a class="game-card glow-border" href="debug-detective.html"><span class="icon">🔍</span><div class="ttl">Debug 侦探</div><div class="dsc">查找修复 Bug</div></a>
-      <a class="game-card glow-border" href="regex-challenge.html"><span class="icon">📝</span><div class="ttl">正则挑战</div><div class="dsc">正则谜题</div></a>
-      <a class="game-card glow-border" href="sql-defender.html"><span class="icon">🛡️</span><div class="ttl">SQL 守卫</div><div class="dsc">抵御注入攻击</div></a>
-    </div>
-  </section>
+#rk{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9998;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);justify-content:center;align-items:center}
+#rk.act{display:flex}
+.rkbox{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:16px;max-width:340px;width:90%;max-height:65vh;overflow-y:auto}
+.rkbox h2{font-size:.9em;margin-bottom:5px;text-align:center}
+.ri{display:flex;align-items:center;gap:5px;padding:4px 7px;border-radius:5px;margin-bottom:2px}
+.ri:hover{background:var(--bg2)}
+.rn2{width:16px;text-align:center;font-weight:700;font-size:.7em}.r1{color:#fbbf24}.r2{color:#94a3b8}.r3{color:#d97706}
+.ri2{flex:1}.ri2 .rn2{font-size:.68em;font-weight:600}.ri2 .rc2{font-size:.52em;color:var(--text2)}
+.rp{background:rgba(139,92,246,.1);border:none;color:var(--accent2);padding:2px 6px;border-radius:4px;cursor:pointer;font-size:.55em}
 
-  <!-- Action -->
-  <section>
-    <h2 class="text-xl font-bold text-yellow-300 mb-5 flex items-center gap-2"><span class="w-1 h-6 bg-yellow-500 rounded"></span> 🎯 动作竞技</h2>
-    <div class="game-grid grid-cols-2 md:grid-cols-4">
-      <a class="game-card glow-border" href="api-speedrunner.html"><span class="icon">🏃</span><div class="ttl">API 速通</div><div class="dsc">速度挑战</div></a>
-      <a class="game-card glow-border" href="star-hunter.html"><span class="icon">⭐</span><div class="ttl">星际猎手</div><div class="dsc">收集星星</div></a>
-      <a class="game-card glow-border" href="http-archer.html"><span class="icon">🏹</span><div class="ttl">HTTP 弓箭手</div><div class="dsc">状态码射击</div></a>
-      <a class="game-card glow-border" href="firebase-arena.html"><span class="icon">🔥</span><div class="ttl">Firebase 竞技</div><div class="dsc">数据库 PK</div></a>
-    </div>
-  </section>
+/* Ads */
+.ad-section{max-width:1200px;margin:6px auto;padding:0 6px}
+.ad-banner{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 12px;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;font-size:.58em;color:var(--text3)}
+.ad-banner .ad-icon{font-size:1.2em}.ad-banner .ad-link{color:var(--accent2);text-decoration:none}.ad-banner .ad-link:hover{text-decoration:underline}
+.ad-native{display:flex;gap:6px;overflow-x:auto;padding:4px 0}
+.ad-card{flex-shrink:0;width:130px;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;padding:6px;text-align:center}
+.ad-card .ad-emoji{font-size:1.4em}.ad-card .ad-title{font-size:.6em;font-weight:600;margin:2px 0}
+.ad-card .ad-desc{font-size:.5em;color:var(--text2)}.ad-card .ad-tag{font-size:.45em;color:var(--accent2)}
 
-  <!-- Sim -->
-  <section>
-    <h2 class="text-xl font-bold text-pink-300 mb-5 flex items-center gap-2"><span class="w-1 h-6 bg-pink-500 rounded"></span> 🏗️ 模拟经营</h2>
-    <div class="game-grid grid-cols-2 md:grid-cols-4">
-      <a class="game-card glow-border" href="pet.html"><span class="icon">🐾</span><div class="ttl">电子宠物</div><div class="dsc">喂养进化</div></a>
-      <a class="game-card glow-border" href="achievements.html"><span class="icon">🏆</span><div class="ttl">成就系统</div><div class="dsc">解锁成就</div></a>
-      <a class="game-card glow-border" href="build-battle.html"><span class="icon">🏗️</span><div class="ttl">Build Battle</div><div class="dsc">构建竞速</div></a>
-      <a class="game-card glow-border" href="data-miner.html"><span class="icon">⛏️</span><div class="ttl">数据矿工</div><div class="dsc">挖掘数据</div></a>
-    </div>
-  </section>
-</div>
-
-<!-- SEO Footer Stats -->
-<div class="max-w-4xl mx-auto px-4 pb-8 text-center">
-  <div class="grid grid-cols-3 md:grid-cols-6 gap-4 text-xs text-gray-500">
-    <div><p class="text-2xl font-bold text-purple-400">30+</p><p>款游戏</p></div>
-    <div><p class="text-2xl font-bold text-blue-400">6</p><p>种类型</p></div>
-    <div><p class="text-2xl font-bold text-green-400">∞</p><p>免费畅玩</p></div>
-    <div><p class="text-2xl font-bold text-yellow-400">📡</p><p>API 驱动</p></div>
-    <div><p class="text-2xl font-bold text-pink-400">🖥️</p><p>跨平台</p></div>
-    <div><p class="text-2xl font-bold text-cyan-400">🚀</p><p>即开即玩</p></div>
-  </div>
-</div>
-
-<!-- Footer -->
-<footer>
-  <p class="text-gray-400 font-medium">🎮 灵犀游戏大厅 · Lychee Game Hub</p>
-  <p class="mt-2">页面内容均由 AI 生成，仅供参考。游戏完全免费，无需下载，浏览器即玩。</p>
-  <p class="mt-1 text-gray-600">© 2026 灵犀 AI · 持续更新中</p>
-</footer>
+/* Footer */
+.ft{text-align:center;padding:12px;color:var(--text3);font-size:.56em;line-height:1.4}
+.ft .lk{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:2px 0}
+.ft .lk a{padding:2px 5px;border-radius:18px;border:1px solid var(--border);color:var(--text2);text-decoration:none;font-size:.58em}
+.ft .lk a:hover{border-color:var(--accent);color:var(--accent2)}
+@media(max-width:480px){.gr{grid-template-columns:repeat(3,1fr);gap:3px}.cc{height:55px;font-size:1.8em}.cb2 h3{font-size:.64em}}
+</style>
 
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "灵犀游戏大厅",
-  "url": "https://games.lynnxi.ai/",
-  "description": "30+款免费H5网页游戏，涵盖RPG、卡牌、养成、领土战、俄罗斯方块、打字竞速、模拟经营等类型。",
-  "applicationCategory": "GameApplication",
-  "operatingSystem": "Web",
-  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
-  "genre": ["RPG","Card","Simulation","Action","Puzzle","Typing","Strategy"],
-  "numberOfItems": 30,
-  "inLanguage": ["zh-CN", "en"],
-  "featureList": ["API数据驱动","免费在线","跨平台","无需下载","HTML5"]
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "灵犀游戏大厅", "item": "https://vip-881.github.io/hot-h5-games/"},
+    {"@type": "ListItem", "position": 2, "name": "免费H5在线小游戏合集", "item": "https://vip-881.github.io/hot-h5-games/"}
+  ]
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "这些游戏真的免费吗？", "acceptedAnswer": {"@type": "Answer", "text": "是的，所有165款游戏完全免费，无内购、无广告强制、无会员墙。游戏代码托管在GitHub开源社区。"}},
+    {"@type": "Question", "name": "需要下载或安装什么吗？", "acceptedAnswer": {"@type": "Answer", "text": "不需要。所有游戏均为纯HTML5网页游戏，直接在浏览器中运行。打开链接即玩，无需下载App或注册账号。"}},
+    {"@type": "Question", "name": "手机上能玩吗？", "acceptedAnswer": {"@type": "Answer", "text": "可以。全部165款游戏均已适配移动端触屏操作，支持iOS Safari和Android Chrome，可添加至手机桌面作为PWA快捷方式实现离线访问。"}},
+    {"@type": "Question", "name": "有哪些类型的游戏？", "acceptedAnswer": {"@type": "Answer", "text": "涵盖10+品类：益智解谜（2048、扫雷、数独）、动作竞技（Flappy Bird、打砖块）、经典街机（贪吃蛇、吃豆人）、体育模拟（台球、篮球）、棋牌策略（21点、海战棋）、打字教育（代码打字王、正则挑战）、音乐节奏、休闲创意等。"}},
+    {"@type": "Question", "name": "如何保存游戏进度？", "acceptedAnswer": {"@type": "Answer", "text": "登录后游戏进度和最高分自动保存在浏览器localStorage中，支持数据导出和跨设备导入。"}},
+    {"@type": "Question", "name": "支持多人模式吗？", "acceptedAnswer": {"@type": "Answer", "text": "部分游戏支持热座模式（Hot Seat），两人在同一设备上轮流对战。支持的多人游戏包括乒乓球Pong、桌上冰球等。"}}
+  ]
+}
+</script>
+
+</head>
+<body>
+<a href="#grid" class="skip-link" style="position:absolute;top:-100px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:9999;border-radius:0 0 8px 0;transition:top .2s;text-decoration:none;font-size:14px" onfocus="this.style.top='0'" onblur="this.style.top='-100px'">跳转到主内容</a>
+
+<header class="header" role="banner">
+  <h1>🎮 灵犀游戏大厅</h1>
+  <p class="sub">165 款免费 H5 游戏 · 即点即玩</p>
+  <div class="stat-bar"><span class="si">🎮 <b>165</b></span><span class="si">🪙 <b class="coin">0</b></span></div>
+</header>
+<main id="main-content" role="main" aria-label="游戏列表">
+<div class="tbar">
+  <input class="sbox" placeholder="搜索游戏..." oninput="onSearch()">
+  <button class="act" onclick="randomGame()">🎲</button>
+  <button class="act" onclick="showRanking()">🔥</button>
+  <button class="act" id="favBtn" onclick="toggleFavFilter()">⭐ <b id="favCnt">0</b></button>
+  <button class="act" onclick="showStore()">🛒</button>
+  <button class="act" onclick="showLeaderboard()">🌐</button>
+  <button class="act" onclick="mpBtn()">👥</button><button class="act" onclick="showStats()">📊</button><button class="act" onclick="showAchieves()">🏅</button>
+  <button class="tbtn" onclick="toggleTheme()">🌓</button>
+  <button class="tbtn" id="ciBtn" onclick="doCheckin()"></button><span id="profile"></span>
+</div>
+<div class="cats" id="catBar"></div>
+<div class="gr" id="grid"></div>
+<div class="ft"><div class="lk"><a href="https://github.com/VIP-881/hot-h5-games">⭐ GitHub</a><a href="/sitemap.xml">🗺️</a></div><p>© 2026</p></div>
+<div id="loginModal"></div>
+<div id="rk"></div>
+<div id="v">
+  <div class="vh"><button class="bk" onclick="closeGame()">←</button><span class="vt">🎮</span><span class="tm">🕒</span><span class="sh" id="vFavBtn" onclick="toFav(gameData[curIdx-1]?.id)">☆</span><span class="sh" onclick="shareWB()">🔁</span></div>
+  <div class="vb"><div class="ld"><div class="sp"></div></div><iframe id="gameFrame" onload="onFrameLoad()" onerror="onFrameLoad()"></iframe></div>
+</div>
+<script>
+
+<script defer>
+// ===== I18N =====
+var I18N={
+  zh:{ttl:'🎮 灵犀游戏大厅',sub:'165款免费H5 · 登录同步 · 多语言 · 离线',all:'全部',srch:'搜索游戏...',rnd:'🎲 随机',rk:'🔥 排行',fav:'⭐ 收藏',
+      cats:{puzzle:'🧠 益智',action:'⚡ 动作',arcade:'🕹️ 街机',sport:'⚽ 体育',casino:'🎰 博牌',creative:'🎨 创作',music:'🎵 音乐',classic:'🏆 经典',hot:'🔥 热门'},
+      stats:'165款','load':'加载中...','esc':'已关闭','bk':'← 返回','wb':'🔁 微博','favBtn':'⭐','empty':'没有匹配的游戏',
+      login:{ttl:'🎮 登录',name:'请输入昵称',hint:'数据存储在本地浏览器中',btn:'开始游戏',guest:'访客',exportBtn:'📤 导出数据',importBtn:'📥 导入数据'},
+      ad:{title:'🔥 赞助商推荐',game1:'AI 编程助手',game2:'云端部署',game3:'API 市场',desc1:'智能代码补全',desc2:'一键部署上线',desc3:'海量API接口'}},
+  en:{ttl:'🎮 Game Hub',sub:'165 free H5 games · Login · Multi-lang · Offline',all:'All',srch:'Search games...',rnd:'🎲 Random',rk:'🔥 Rank',fav:'⭐ Fav',
+      cats:{puzzle:'🧠 Puzzle',action:'⚡ Action',arcade:'🕹️ Arcade',sport:'⚽ Sports',casino:'🎰 Casino',creative:'🎨 Creative',music:'🎵 Music',classic:'🏆 Classic',hot:'🔥 Hot'},
+      stats:'165 games','load':'Loading...','esc':'Closed','bk':'← Back','wb':'🔁 Share','favBtn':'⭐','empty':'No games found',
+      login:{ttl:'🎮 Login',name:'Enter nickname',hint:'Data stored locally',btn:'Play',guest:'Guest',exportBtn:'📤 Export',importBtn:'📥 Import'},
+      ad:{title:'🔥 Sponsored',game1:'AI Assistant',game2:'Cloud Deploy',game3:'API Market',desc1:'Smart coding',desc2:'One-click deploy',desc3:'Massive APIs'}}
+};
+var LANG=localStorage.getItem('lang')||'zh';
+function t(k){var p=k.split('.');var o=I18N[LANG];for(var i=0;i<p.length&&o;i++)o=o[p[i]];return o||k;}
+function setLang(l){LANG=l;localStorage.setItem('lang',l);applyLang();render();}
+function applyLang(){
+  document.documentElement.lang=LANG==='en'?'en':'zh-CN';
+  document.querySelector('h1').innerHTML=t('ttl');
+  document.querySelector('.sub').innerHTML=t('sub');
+  document.querySelector('.sbox').placeholder=t('srch');
+  document.querySelector('#catBar').innerHTML=buildCatsStr();
+  updateFavCount();
+  if(LANG==='en'){
+    document.querySelector('link[hreflang]').href='https://vip-881.github.io/hot-h5-games/?lang=en';
+  }
+}
+
+// ===== INIT - With error fallbacks
+function safeSet(id, fn){try{fn(id);}catch(e){console.warn('Element not found:',id);}}
+safeSet('catBar',function(el){document.getElementById(el).innerHTML=buildCatsStr();});
+try{document.querySelector('.sbox').placeholder=t('srch');}catch(e){}
+try{document.querySelector('.sub').innerHTML=t('sub');}catch(e){}
+try{document.querySelector('h1').innerHTML=t('ttl');}catch(e){}
+updateProfile();
+render();
+ =====
+var FAVS={},BEST={},TCNT={},PLAYS={},USER={};
+(function(){
+  try{FAVS=JSON.parse(localStorage.getItem('favs'))||{};}catch(e){}
+  try{BEST=JSON.parse(localStorage.getItem('bt'))||{};}catch(e){}
+  try{TCNT=JSON.parse(localStorage.getItem('tc'))||{};}catch(e){}
+  try{PLAYS=JSON.parse(localStorage.getItem('gp'))||{};}catch(e){}
+  try{USER=JSON.parse(localStorage.getItem('user'))||{name:'',avatar:'\ud83e\udd16'};}catch(e){}
+  var th=localStorage.getItem('th');if(th==='light')document.body.classList.add('light');
+})();
+function saveAll(){try{localStorage.setItem('favs',JSON.stringify(FAVS));localStorage.setItem('bt',JSON.stringify(BEST));localStorage.setItem('tc',JSON.stringify(TCNT));localStorage.setItem('gp',JSON.stringify(PLAYS));localStorage.setItem('user',JSON.stringify(USER));}catch(e){}}
+function toggleTheme(){document.body.classList.toggle('light');localStorage.setItem('th',document.body.classList.contains('light')?'light':'dark');}
+
+// ===== GAMES =====
+var GAMES=[
+["2048","2048","\ud83d\udd22","viral","现象级","#1"],["achievements","\ud83c\udfc6","成就系统","action","收集","#2"],["aimtrainer","\ud83c\udfaf","瞄准训练","action","反应","#3"],
+["angling","\ud83c\udfa3","钓鱼达人","action","休闲","#4"],["api-clicker","\ud83d\udcb0","API Clicker","arcade","放置","#5"],
+["api-snake","\ud83d\udc0d","API Snake","arcade","经典","#6"],["api-speedrunner","\u26a1","API 速通","action","竞速","#7"],
+["api-towerdefense","\ud83c\udff0","API 塔防","puzzle","策略","#8"],["archery","\ud83c\udff9","射箭大师","sport","精准","#9"],
+["asteroids","\ud83e\ude90","小行星","arcade","射击","#10"],["axe","\ud83c\udfaf","飞斧投掷","action","节奏","#11"],
+["badminton","\ud83c\udff8","羽毛球","sport","体育","#12"],["balance","\u2696\ufe0f","平衡大师","puzzle","逻辑","#13"],
+["balloon","\ud83c\udf88","射击气球","action","射击","#14"],["baserow-racer","\ud83d\uddc4\ufe0f","Baserow 赛车","arcade","竞速","#15"],
+["battlepong","\ud83c\udfd3","弹球大战","arcade","街机","#16"],["battleship","\ud83d\udea2","海战棋","puzzle","策略","#17"],
+["bball","\ud83c\udfaf","弹球消砖","puzzle","物理","#18"],["blackjack","\ud83c\udccf","21 点","casino","博牌","#19"],
+["bowling","\ud83c\udfb3","保龄球","sport","体育","#20"],["breakout","\ud83e\uddf1","打砖块","arcade","街机","#21"],
+["bubble","\ud83e\udee7","泡泡龙","puzzle","益智","#22"],["bubble2","\ud83d\udd2b","泡泡射手","puzzle","益智","#23"],
+["bubbleshooter","\ud83e\udee7","泡泡龙射手","puzzle","休闲","#24"],["build-battle","\u26a1","Build Battle","action","竞技","#25"],
+["bulls","\ud83d\udd22","猜数字","puzzle","益智","#26"],["calc24","\ud83e\uddee","24 点","puzzle","益智","#27"],
+["cards","\ud83c\udcb4","笔记卡牌","puzzle","收集","#28"],["catch","\ud83d\udcb0","接金币","action","休闲","#29"],
+["catchfruit","\ud83c\udf4e","接水果","action","休闲","#30"],["chick","\ud83d\udc25","接小鸡","action","休闲","#31"],
+["chopper","\ud83d\ude81","直升机","arcade","飞行","#32"],["claw","\ud83c\udfaa","抓娃娃","action","模拟","#33"],
+["code-typer","\u2328\ufe0f","代码打字王","action","竞技","#34"],["color","\ud83e\uddea","颜色合成","puzzle","益智","#35"],
+["colorswitch","\ud83c\udf08","颜色切换","arcade","反应","#36"],["commit-racer","\ud83d\udd25","提交竞速","arcade","竞速","#37"],
+["connect4","\ud83d\udd34","四子棋","puzzle","棋类","#38"],["darts","\ud83c\udfaf","飞镖大师","sport","精准","#39"],
+["data-miner","\u26cf\ufe0f","Data Miner","arcade","街机","#40"],["debug-detective","\ud83d\udd75\ufe0f","Debug 侦探","puzzle","解谜","#41"],
+["defuse","\ud83d\udca3","拆弹","puzzle","解谜","#42"],["dice","\ud83c\udfb2","骰子对决","casino","策略","#43"],
+["dicepoker","\ud83c\udfb2","骰子扑克","casino","策略","#44"],["dino","\ud83e\udd96","恐龙跑酷","arcade","街机","#45"],
+["doodlejump","\u270f\ufe0f","涂鸦跳跃","arcade","动作","#46"],["draw","\ud83d\udd8c\ufe0f","创意涂色","creative","创作","#47"],
+["duel","\ud83d\udd2b","西部决斗","action","反应","#48"],["eat","\ud83c\udf54","大胃王","action","吞噬","#49"],
+["evolve","\ud83e\uddea","进化之路","action","进化","#50"],["firebase-arena","\u2694\ufe0f","Firebase 竞技","action","对战","#51"],
+["fish","\ud83d\udc20","捕鱼达人","arcade","街机","#52"],["flagquiz","\ud83c\udff4","国旗猜猜","puzzle","益智","#53"],
+["flappy","\ud83d\udc26","Flappy Bird","hot","爆款","#54"],["freethrow","\ud83c\udfc0","罚球","sport","体育","#55"],
+["frog","\ud83d\udc38","跳跳蛙","action","休闲","#56"],["frogger","\ud83d\udc38","过河蛙","arcade","经典","#57"],
+["fruit","\ud83d\udd2a","切水果","action","动作","#58"],["gear","\ud83c\udf00","旋转齿轮","puzzle","益智","#59"],
+["goldminer","\u26cf\ufe0f","黄金矿工","arcade","经典","#60"],["golf","\u26f3","迷你高尔夫","sport","体育","#61"],
+["gradient","\ud83c\udf08","渐变色","puzzle","色觉","#62"],["guess","\ud83c\udfb2","猜天气","puzzle","益智","#63"],
+["hangman","\ud83d\udc80","猜单词","puzzle","词汇","#64"],["hanoi","\ud83d\uddfc","汉诺塔","puzzle","益智","#65"],
+["helix","\ud83c\udf00","螺旋跳跃","action","超休闲","#66"],["hole","\ud83d\udd73\ufe0f","黑洞吞噬","action","吞噬","#67"],
+["hoop","\ud83c\udfc0","投篮","action","动作","#68"],["horserace","\ud83d\udcef","赛马","casino","策略","#69"],
+["http-archer","\ud83c\udff9","HTTP Archer","action","射击","#70"],["ice","\ud83e\uddca","冰块消消乐","puzzle","消除","#71"],
+["invader","\ud83d\udc7e","太空入侵者","arcade","街机","#72"],["jenga","\ud83c\udfd7\ufe0f","叠叠高","puzzle","益智","#73"],
+["jigsaw","\ud83e\udde9","拼图","puzzle","益智","#74"],["jump","\ud83c\udfc3","跳一跳","viral","刷屏","#75"],
+["kaleido","\ud83c\udfa8","万花筒","creative","创作","#76"],["knife","\ud83c\udfaf","飞刀挑战","action","反应","#77"],
+["lander","\ud83d\ude80","月球着陆","arcade","物理","#78"],["lemonade","\ud83c\udf4b","柠檬水摊","creative","经营","#79"],
+["lights","\ud83d\udca1","开关灯","puzzle","逻辑","#80"],["link","\ud83d\udd17","连连看","puzzle","益智","#81"],
+["magfish","\ud83c\udfa3","磁力钓鱼","action","休闲","#82"],["marble","\ud83c\udfaa","弹珠迷宫","puzzle","隐藏","#83"],
+["mastermind","\ud83d\udd10","密码破译","puzzle","逻辑","#84"],["match3","\ud83d\udc8e","消消乐","hot","国民","#85"],
+["math","\ud83d\udd22","速算达人","puzzle","益智","#86"],["mathchallenge","\ud83e\uddee","心算大师","puzzle","益智","#87"],
+["maze","\ud83e\uddf2","磁铁迷宫","puzzle","益智","#88"],["memory","\ud83e\udde0","记忆翻牌","puzzle","记忆","#89"],
+["merge-conflict","\ud83d\udd00","合并冲突","puzzle","解谜","#90"],["meteor","\ud83c\udf19","击碎陨石","arcade","射击","#91"],
+["mines","\ud83d\udca3","扫雷","classic","经典","#92"],["mole","\ud83d\udd28","打地鼠","hot","经典","#93"],
+["monopoly","\ud83c\udfaf","GitHub 大富翁","casino","策略","#94"],["netlify-portal","\ud83d\ude80","传送门","action","竞技","#95"],
+["nonogram","\ud83e\udde9","数织拼图","puzzle","益智","#96"],["numpair","\ud83e\udde9","数字配对","puzzle","脑力","#97"],
+["numsnake","\ud83d\udd22","数字贪吃蛇","puzzle","益智","#98"],["othello","\u26ab","黑白棋","puzzle","棋类","#99"],
+["pacman","\ud83d\udc7e","吃豆人","arcade","经典","#100"],["parachute","\ud83e\ude82","高空跳伞","action","冒险","#101"],
+["park","\ud83d\ude97","停车大师","arcade","驾驶","#102"],["penalty","\u26bd","点球大战","sport","体育","#103"],
+["pet","\ud83c\udf31","打卡养成宠","creative","养成","#104"],["piano","\ud83c\udfb9","别踩白块","viral","刷屏","#105"],
+["pinball","\ud83d\ude00","弹珠台","arcade","街机","#106"],["pipeline-puzzle","\ud83d\udd17","Pipeline Puzzle","puzzle","解谜","#107"],
+["pipepuzzle","\ud83d\udd27","水管工","puzzle","益智","#108"],["pixel","\ud83c\udfa8","像素绘图","creative","创作","#109"],
+["pong","\ud83c\udfd3","乒乓球","sport","体育","#110"],["puttinggolf","\u26f3","推杆高尔夫","sport","体育","#111"],
+["puzzle","\ud83e\udde9","滑动拼图","puzzle","益智","#112"],["quiz","\ud83e\udde0","知识问答","puzzle","益智","#113"],
+["racer","\ud83c\udfce\ufe0f","公路飙车","arcade","竞速","#114"],["range","\ud83c\udfaa","打靶场","action","射击","#115"],
+["react","\u26a1","反应测试","action","竞技","#116"],["regex-challenge","\ud83e\uddec","Regex 挑战","puzzle","益智","#117"],
+["rhythm","\ud83c\udfb5","节奏大师","music","音乐","#118"],["ringtoss","\ud83c\udfaa","套圈","action","嘉年华","#119"],
+["roll","\ud83c\udfb3","滚球得分","puzzle","物理","#120"],["rope","\ud83d\udd25","烧绳子","puzzle","物理","#121"],
+["rpg","\ud83d\udc09","任务打怪 RPG","arcade","RPG","#122"],["rps","\u2702\ufe0f","石头剪刀布","action","休闲","#123"],
+["run","\ud83c\udfc3","神庙逃亡","arcade","跑酷","#124"],["sandbox","\ud83e\uddca","物理沙盒","creative","创作","#125"],
+["shmup","\u2708\ufe0f","飞机大战","arcade","射击","#126"],["shooter","\ud83c\udfaf","神枪手","action","反应","#127"],
+["simon","\ud83c\udfb5","音乐记忆","puzzle","记忆","#128"],["skeet","\ud83c\udfaa","飞碟射击","action","射击","#129"],
+["ski","\ud83c\udfd4\ufe0f","滑雪大冒险","arcade","竞速","#130"],["sling","\ud83c\udfaf","弹弓射手","puzzle","物理","#131"],
+["sling2","\ud83c\udff9","弹弓消消乐","puzzle","物理","#132"],["slot","\ud83c\udfb0","老虎机","casino","博牌","#133"],
+["slots2","\ud83c\udfb0","水果拉霸","casino","博牌","#134"],["snake","\ud83d\udc0d","贪吃蛇","classic","经典","#135"],
+["snakewar","\ud83d\udc0d","贪吃蛇大战","action","对战","#136"],["sokoban","\ud83c\udff0","推箱子","puzzle","益智","#137"],
+["spider","\ud83d\udd77\ufe0f","蜘蛛纸牌","casino","纸牌","#138"],["spinwheel","\ud83c\udfa1","幸运转盘","casino","抽奖","#139"],
+["spot","\ud83d\udd0d","找茬","puzzle","观察","#140"],["sql-defender","\ud83d\udee1\ufe0f","SQL Defender","puzzle","策略","#141"],
+["stack","\ud83c\udfd7\ufe0f","叠叠乐","action","反应","#142"],["star-hunter","\u2b50","Star Hunter","arcade","动作","#143"],
+["status-memory","\ud83c\udf9b\ufe0f","状态记忆","puzzle","记忆","#144"],["stopwatch","\u23f1","计时挑战","action","反应","#145"],
+["stroop","\ud83c\udfa8","辨色大师","puzzle","脑力","#146"],["sudoku","\ud83e\uddee","数独","puzzle","益智","#147"],
+["suika","\ud83c\udf49","合成大西瓜","viral","爆款","#148"],["surf","\ud83c\udf0a","冲浪达人","arcade","竞速","#149"],
+["switch","\ud83d\udd34","变色球","action","超休闲","#150"],["tangram","\ud83e\udde9","七巧板","puzzle","益智","#151"],
+["tennis","\ud83c\udfbe","网球","sport","体育","#152"],["territory","\ud83d\uddfa\ufe0f","领地战","puzzle","策略","#153"],
+["tetris","\ud83e\udde9","俄罗斯方块","classic","经典","#154"],["tictactoe","\u274c","井字棋","puzzle","棋类","#155"],
+["timber","\ud83e\udeb3","砍木头","action","反应","#156"],["top","\ud83c\udf00","抽陀螺","action","传统","#157"],
+["towerdef","\ud83c\udff0","塔防前线","puzzle","策略","#158"],["tubes","\ud83e\uddea","试管排序","puzzle","益智","#159"],
+["typingtest","\u2328\ufe0f","打字速度","action","竞技","#160"],["volley","\ud83c\udfd0","沙滩排球","sport","体育","#161"],
+["water","\ud83d\udca7","接水滴","action","休闲","#162"],["wheel","\ud83c\udfaa","幸运转盘","casino","抽奖","#163"],
+["word","\ud83e\udde9","拼字达人","puzzle","词汇","#164"],["wordsearch","\ud83d\udd0d","单词搜索","puzzle","词汇","#165"]
+];
+
+// Process GAMES: convert from array of arrays to array of objects
+var gameData=[], catCounts={}, catLabels={'puzzle':'puzzle','action':'action','arcade':'arcade','sport':'sport','casino':'casino','creative':'creative','music':'music','classic':'classic','viral':'hot','hot':'hot'};
+GAMES.forEach(function(g){gameData.push({id:g[0],emoji:g[2],title:g[2],titleEn:g[2],cat:g[3],tag:g[4],num:g[5]});catCounts[catLabels[g[3]]]=(catCounts[catLabels[g[3]]]||0)+1;});
+
+var CAT_ORDER=['puzzle','action','arcade','sport','casino','creative','music','classic','hot'];
+var CAT_GR={'puzzle':'gp','action':'ga','arcade':'gd','sport':'gs','casino':'gx','creative':'gc','music':'gm','classic':'gcl','viral':'gh','hot':'gh'};
+var CAT_TG={'puzzle':'tp','action':'ta','arcade':'td','sport':'ts','casino':'tx','creative':'tc','music':'tm','classic':'tcl','viral':'th','hot':'th'};
+var curCat='all',curQ='',curIdx=-1,favOnly=false;
+
+function buildCatsStr(){
+  var h='<button class="cb active" onclick="setCat(\'all\')">'+t('all')+' <span class="cn">'+gameData.length+'</span></button>';
+  CAT_ORDER.forEach(function(c){if(catCounts[c])h+='<button class="cb" onclick="setCat(\''+c+'\')">'+(I18N[LANG].cats[c]||c)+' <span class="cn">'+catCounts[c]+'</span></button>';});
+  return h;
+}
+
+function setCat(c){curCat=c;document.querySelectorAll('.cb').forEach(function(b){b.classList.toggle('active',b.textContent.includes(c)||(c==='all'&&b.textContent.includes('全部'))||(c==='all'&&b.textContent.includes('All')));});render();}
+function onSearch(){curQ=document.querySelector('.sbox').value.toLowerCase();render();}
+
+function toggleFavFilter(){
+  favOnly=!favOnly;
+  document.getElementById('favBtn').classList.toggle('active',favOnly);
+  render();
+}
+
+function render(){
+  var g=document.getElementById('grid'),h='',n=0;
+  var shown=gameData.filter(function(a){
+    if(favOnly&&!FAVS[a.id])return false;
+    return (curCat==='all'||a.cat===curCat)&&(!curQ||a.title.toLowerCase().includes(curQ)||a.titleEn.toLowerCase().includes(curQ)||a.emoji.includes(curQ));
+  });
+  shown.forEach(function(a){
+    n++;var _=CAT_GR[a.cat]||'gdf',t=CAT_TG[a.cat]||'th';
+    var faved=FAVS[a.id]?'act':'';
+    h+='<div class="cd"><div class="cc '+_+'"><span class="ic">'+a.emoji+'</span></div><span class="fs '+faved+'" onclick="event.stopPropagation();toFav(\''+a.id+'\')">\u2b50</span><div class="cb2" onclick="openGame('+n+')"><h3>'+a.title+'</h3><p>'+a.tag+'</p><span class="ctg '+t+'">'+a.tag+'</span></div></div>';
+  });
+  g.innerHTML=h||'<div style="text-align:center;padding:30px;color:var(--text2);grid-column:1/-1">'+t('empty')+'</div>';
+  document.querySelector('.si b').textContent=n;
+  updateFavCount();
+}
+
+function toFav(id){
+  if(FAVS[id]){delete FAVS[id];}else{FAVS[id]=1;}
+  saveAll();
+  document.querySelectorAll('.fs[onclick*="'+id+'"]').forEach(function(s){s.classList.toggle('act',!!FAVS[id]);});
+  updateFavCount();
+}
+
+function updateFavCount(){
+  var c=Object.keys(FAVS).length;
+  var el=document.getElementById('favCount');
+  if(el)el.innerHTML='<b>'+c+'</b>';
+}
+
+// ===== USER / LOGIN =====
+function showLogin(){
+  var el=document.getElementById('loginModal');
+  var avatars=['\ud83e\udd16','\ud83d\udc36','\ud83d\udc31','\ud83d\udc30','\ud83e\udd8d','\ud83e\udd8a','\ud83d\udc3b','\ud83d\udc3e','\ud83d\udc34','\ud83d\udc7e'];
+  var h='<div class="lbox"><h2>'+t('login.ttl')+'</h2><input id="loginName" placeholder="'+t('login.name')+'" value="'+(USER.name||'')+'" maxlength="12"><div class="avatars">';
+  avatars.forEach(function(a){h+='<span class="'+(USER.avatar===a?'act':'')+'" onclick="document.querySelectorAll(\'.avatars span\').forEach(function(s){s.classList.remove(\'act\')});this.classList.add(\'act\');window._av=\''+a+'\'">'+a+'</span>';});
+  h+='</div><button onclick="doLogin()">'+t('login.btn')+'</button><div class="hint">'+t('login.hint')+'</div>';
+  h+='<div style="margin-top:12px;padding-top:8px;border-top:1px solid var(--border)"><span style="font-size:.6em;color:var(--text2)">'+t('login.exportBtn')+' | '+t('login.importBtn')+'</span>';
+  h+='<div style="font-size:.5em;color:var(--text3);margin-top:4px">'+t('login.hint')+'</div></div></div>';
+  el.innerHTML=h;el.classList.add('act');
+  window._av=USER.avatar||'\ud83e\udd16';
+  setTimeout(function(){var inp=document.getElementById('loginName');if(inp){inp.focus();inp.select();}},100);
+}
+function doLogin(){
+  var name=document.getElementById('loginName').value.trim()||'\ud83d\udc64';
+  USER={name:name,avatar:window._av||'\ud83e\udd16'};
+  saveAll();
+  document.getElementById('loginModal').classList.remove('act');
+  updateProfile();
+}
+function updateProfile(){
+  var el=document.getElementById('profile');
+  if(USER&&USER.name){el.innerHTML='<span class="pfp">'+USER.avatar+'</span><span class="uname" onclick="showLogin()">'+USER.name+'</span>';}
+  else{el.innerHTML='<span class="pfp" onclick="showLogin()">\ud83e\udd16</span><span class="uname" onclick="showLogin()">'+t('login.guest')+'</span>';}
+}
+
+// ===== VIEWER =====
+var timerInt=null,timerSec=0;
+function openGame(idx){
+  var a=gameData[idx-1];if(!a)return;
+  if(idx!==curIdx){curIdx=idx;
+    PLAYS[a.id]=(PLAYS[a.id]||0)+1;saveAll();}
+  document.getElementById('v').classList.add('act');
+  document.getElementById('gameFrame').src='';
+  document.querySelector('.ld').classList.add('act');
+  document.querySelector('.vt').innerHTML=a.emoji+' '+a.title;
+  document.getElementById('vFavBtn').textContent=FAVS[a.id]?'\u2605':'\u2606';
+  timerSec=0;if(timerInt)clearInterval(timerInt);updTimer();
+  timerInt=setInterval(function(){timerSec++;updTimer();},1000);
+  setTimeout(function(){document.getElementById('gameFrame').src=a.id+'.html';},100);
+}
+function closeGame(){
+  if(curIdx>0&&timerSec>0){
+    var gid=gameData[curIdx-1].id;
+    if(!BEST[gid]||timerSec<BEST[gid])BEST[gid]=timerSec;
+    TCNT[gid]=(TCNT[gid]||0)+1;saveAll();
+  }
+  document.getElementById('v').classList.remove('act');
+  document.getElementById('gameFrame').src='';curIdx=-1;
+  if(timerInt){clearInterval(timerInt);timerInt=null;}
+}
+function onFrameLoad(){document.querySelector('.ld').classList.remove('act');}
+setTimeout(function(){var e=document.querySelector('.ld');if(e&&e.classList.contains('act'))e.classList.remove('act');},8000);
+function updTimer(){var m=Math.floor(timerSec/60),s=timerSec%60;document.querySelector('.tm').textContent='\ud83d\udd52 '+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
+
+document.addEventListener('keydown',function(e){
+  if(curIdx===-1||!document.getElementById('v').classList.contains('act'))return;
+  if(e.key==='Escape'){closeGame();e.preventDefault();}
+  if(e.key==='ArrowLeft'){e.preventDefault();navG(-1);}
+  if(e.key==='ArrowRight'){e.preventDefault();navG(1);}
+});
+function navG(d){var nx=curIdx+d;if(nx<1)nx=gameData.length;if(nx>gameData.length)nx=1;openGame(nx);}
+
+function randomGame(){
+  var idx=Math.floor(Math.random()*gameData.length)+1;
+  openGame(idx);
+}
+
+// ===== RANKING =====
+function showRanking(){
+  var sorted=gameData.slice().sort(function(a,b){return (PLAYS[b.id]||0)-(PLAYS[a.id]||0);});
+  var top=sorted.slice(0,20);
+  var h='<div class="rkbox"><h2>'+t('rk')+'</h2><p style="text-align:center;font-size:.55em;color:var(--text2);margin-bottom:4px">'+t('stats')+'</p>';
+  top.forEach(function(g,i){
+    var rank=i+1,plays=PLAYS[g.id]||0,medal=rank<=3?['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49'][rank-1]:rank+'.';
+    var cls=rank===1?'r1':rank===2?'r2':rank===3?'r3':'';
+    var best=BEST[g.id];var bs=best?Math.floor(best/60)+':'+String(best%60).padStart(2,'0'):'--';
+    h+='<div class="ri"><span class="rn2 '+cls+'">'+medal+'</span><span class="ri2"><span class="rn2">'+g.emoji+' '+g.title+'</span><span class="rc2">'+plays+'x \ud83d\udd52 '+bs+'</span></span><button class="rp" onclick="closeRank();openGame('+(i+1)+')">\u25b6</button></div>';
+  });
+  h+='<div style="text-align:center;margin-top:6px"><button class="act" onclick="closeRank()">\u2716</button></div></div>';
+  var el=document.getElementById('rk');el.innerHTML=h;el.classList.add('act');
+}
+function closeRank(){document.getElementById('rk').classList.remove('act');}
+
+// ===== SHARE =====
+function shareWB(){
+  if(curIdx<1)return;
+  var g=gameData[curIdx-1];
+  var u=encodeURIComponent('https://vip-881.github.io/hot-h5-games/');
+  var t=encodeURIComponent('\ud83c\udfae \u6211\u5728\u73a9\u300c'+g.emoji+' '+g.title+'\u300d- 165\u6b3e\u514d\u8d39H5\u6e38\u620f\uff01');
+  window.open('https://service.weibo.com/share/share.php?title='+t+'&url='+u,'_blank','width=600,height=500');
+}
+
+
+// ===== STATS PANEL =====
+function showStats(){
+  var totalPlay=0,totalTime=0,topGames=[],fav={};
+  Object.keys(PLAYS).forEach(function(id){totalPlay+=PLAYS[id];fav[id]=PLAYS[id];});
+  Object.keys(TCNT).forEach(function(id){totalTime+=TCNT[id]*30;});
+  // Top 5 most played
+  var sorted=Object.keys(fav).sort(function(a,b){return fav[b]-fav[a]}).slice(0,5);
+  var h='<div class="rkbox"><h2>📊 游戏统计</h2>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:8px 0">';
+  h+='<div style="text-align:center;padding:6px;background:var(--bg2);border-radius:6px"><span style="font-size:1.2em">'+totalPlay+'</span><br><span style="font-size:.55em;color:var(--text2)">总游玩</span></div>';
+  var mins=Math.floor(totalTime/60);
+  h+='<div style="text-align:center;padding:6px;background:var(--bg2);border-radius:6px"><span style="font-size:1.2em">'+mins+'</span><br><span style="font-size:.55em;color:var(--text2)">总分钟</span></div>';
+  h+='<div style="text-align:center;padding:6px;background:var(--bg2);border-radius:6px"><span style="font-size:1.2em">'+COINS+'</span><br><span style="font-size:.55em;color:var(--text2)">金币</span></div></div>';
+  h+='<p style="font-size:.6em;color:var(--text2);margin-bottom:4px">最爱游戏 TOP5</p>';
+  sorted.forEach(function(id){
+    var g=gameData.find(function(x){return x.id===id});if(!g)return;
+    h+='<div class="ri"><span style="font-size:.9em">'+g.emoji+'</span><span class="ri2"><span class="rn2">'+g.title+'</span><span class="rc2">'+PLAYS[id]+'次</span></span></div>';
+  });
+  h+='<div style="text-align:center;margin-top:6px"><button class="act" onclick="closeStats()">✖</button></div></div>';
+  var el=document.getElementById('stats');
+  if(!el){el=document.createElement('div');el.id='stats';el.style.cssText='display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9994;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);justify-content:center;align-items:center';document.body.appendChild(el);}
+  el.style.display='flex';el.innerHTML=h;el.style.justifyContent='center';el.style.alignItems='center';
+}
+function closeStats(){var e=document.getElementById('stats');if(e)e.style.display='none';}
+
+// ===== DAILY CHECK-IN =====
+var CHECKIN=(function(){try{return JSON.parse(localStorage.getItem('ci'))||{}}catch(e){return {}}})();
+function doCheckin(){
+  var today=new Date().toDateString();
+  CHECKIN.last=today;
+  CHECKIN.streak=(CHECKIN.streak||0)+1;
+  if(CHECKIN.last!==today){CHECKIN.streak=1;}
+  var bonus=Math.min(10+CHECKIN.streak*2,50);
+  COINS+=bonus;saveCoins();
+  CHECKIN.last=today;localStorage.setItem('ci',JSON.stringify(CHECKIN));
+  alert('✅ 签到成功！已连续 '+CHECKIN.streak+' 天\n🪙 +'+bonus+' 金币');
+}
+function checkinBtn(){
+  var today=new Date().toDateString();
+  var done=CHECKIN.last===today;
+  var btnText=done?'✅ 已签到 ('+(CHECKIN.streak||0)+'天)':'🎁 签到 (+'+(Math.min(10+(CHECKIN.streak||0)*2,50))+'🪙)';
+  document.querySelector('#ciBtn')&&(document.querySelector('#ciBtn').textContent=btnText);
+}
+
+// ===== ACHIEVEMENTS =====
+var ACHIEVES=[
+  {id:'a1',name:'初次游玩',icon:'🎮',desc:'玩1次游戏',check:function(){return Object.keys(PLAYS).length>=1}},
+  {id:'a2',name:'游戏达人',icon:'🎯',desc:'玩10次游戏',check:function(){return Object.keys(PLAYS).length>=10}},
+  {id:'a3',name:'收藏大师',icon:'⭐',desc:'收藏5款游戏',check:function(){return Object.keys(FAVS).length>=5}},
+  {id:'a4',name:'小康之家',icon:'🪙',desc:'赚100金币',check:function(){return COINS>=100}},
+  {id:'a5',name:'暴发户',icon:'💰',desc:'赚500金币',check:function(){return COINS>=500}},
+  {id:'a6',name:'探索者',icon:'🔍',desc:'玩过20款不同游戏',check:function(){var s=new Set(Object.keys(PLAYS));return s.size>=20}},
+  {id:'a7',name:'老玩家',icon:'🏆',desc:'累计游玩50次',check:function(){var t=0;Object.keys(PLAYS).forEach(function(k){t+=PLAYS[k]});return t>=50}},
+  {id:'a8',name:'坚持不懈',icon:'🔥',desc:'连续签到3天',check:function(){return(CHECKIN.streak||0)>=3}},
+  {id:'a9',name:'购物狂',icon:'🛒',desc:'购买3件商品',check:function(){return Object.keys(PURCH).length>=3}},
+  {id:'a10',name:'神速手',icon:'⚡',desc:'任一游戏最快<30s',check:function(){for(var k in BEST){if(BEST[k]<30)return true}return false}},
+  {id:'a11',name:'社交达人',icon:'📣',desc:'分享游戏1次',check:function(){return localStorage.getItem('shared')==='1'}},
+  {id:'a12',name:'全品类',icon:'🌈',desc:'玩过6种品类',check:function(){var c={};Object.keys(PLAYS).forEach(function(id){var g=gameData.find(function(x){return x.id===id});if(g)c[g.cat]=1});return Object.keys(c).length>=6}},
+];
+var ACH_STAT=(function(){try{return JSON.parse(localStorage.getItem('ach'))||{};}catch(e){return {};}})();
+function checkAchieves(){
+  ACHIEVES.forEach(function(a){
+    if(!ACH_STAT[a.id]&&a.check()){ACH_STAT[a.id]={date:new Date().toISOString()};localStorage.setItem('ach',JSON.stringify(ACH_STAT));}
+  });
+}
+function showAchieves(){
+  var h='<div class="rkbox"><h2>🏅 成就徽章</h2>';
+  var unlocked=0,total=ACHIEVES.length;
+  ACHIEVES.forEach(function(a){
+    var done=!!ACH_STAT[a.id];
+    if(done)unlocked++;
+    h+='<div class="ri" style="opacity:'+(done?1:.4)+'"><span style="font-size:1em">'+(done?a.icon:'🔒')+'</span><span class="ri2"><span class="rn2">'+a.name+'</span><span class="rc2">'+(done?'✅ '+a.desc:'🔜 '+a.desc)+'</span></span></div>';
+  });
+  h+='<div style="text-align:center;margin:4px 0;font-size:.65em;color:var(--text2)">'+unlocked+'/'+total+' 已解锁</div>';
+  h+='<div style="text-align:center;margin-top:4px"><button class="act" onclick="closeAchieves()">✖</button></div></div>';
+  var el=document.getElementById('ach');
+  if(!el){el=document.createElement('div');el.id='ach';el.style.cssText='display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9993;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);justify-content:center;align-items:center';document.body.appendChild(el);}
+  el.style.display='flex';el.innerHTML=h;el.style.justifyContent='center';el.style.alignItems='center';
+}
+function closeAchieves(){var e=document.getElementById('ach');if(e)e.style.display='none';}
+// Hook share to track achievement
+(function(){var _origShare=shareWB;shareWB=function(){localStorage.setItem('shared','1');checkAchieves();_origShare();}})();
+// Check achievements periodically
+checkAchieves();
+setInterval(checkAchieves,60000);
+
+// ===== PWA =====
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('/sw.js').catch(function(e){console.log('SW:',e);});
+  });
+}
+
+// ===== LANG TOGGLE =====
+function langToggle(){
+  setLang(LANG==='zh'?'en':'zh');
+}
+
+// ===== COIN SYSTEM =====
+var COINS=(function(){try{return parseInt(localStorage.getItem('coins'))||0}catch(e){return 0}})();
+function saveCoins(){try{localStorage.setItem('coins',COINS)}catch(e){};var e=document.querySelector('.coin');if(e)e.textContent=COINS;}
+saveCoins();
+function earnCoins(a){COINS+=a;saveCoins();}
+var STORE_ITEMS=[{id:'theme1',name:'ᵃʰᵇᵉ ʀᵇᵉᵍᵉ',icon:'💎',price:100,desc:'深空紫主题',css:'--accent:#6d28d9;--accent2:#8b5cf6'},{id:'theme2',name:'ᶜᵉᵈᵈʀ ʙᴜᴇ',icon:'🔵',price:100,desc:'赛博蓝主题',css:'--accent:#2563eb;--accent2:#3b82f6'},{id:'theme3',name:'ʀᴇᴅ ᴄʜᴀʜ',icon:'❤️',price:100,desc:'烈焰红主题',css:'--accent:#dc2626;--accent2:#ef4444'},{id:'frame1',name:'ɢᴏʟᴅ ᴄʜᴀʀᴍ',icon:'🏆',price:200,desc:'金色头像框'},{id:'frame2',name:'ꜥɪʜᴜᴍ ʙᴏʀᴅᴇʀ',icon:'✨',price:150,desc:'流光头像框'}];
+var PURCH=(function(){try{return JSON.parse(localStorage.getItem('purch'))||{}}catch(e){return {}}})();
+function savePurch(){try{localStorage.setItem('purch',JSON.stringify(PURCH))}catch(e){}}
+function showStore(){
+  var h='<div class="rkbox"><h2>🛒 商店</h2><p style="text-align:center;font-size:.6em;color:var(--text2);margin-bottom:6px">🪙 余额: '+COINS+' 金币</p>';
+  STORE_ITEMS.forEach(function(it){
+    var owned=PURCH[it.id];
+    h+='<div class="ri" style="opacity:'+(owned?'.5':'1')+'"><span style="font-size:1.2em">'+it.icon+'</span><span class="ri2"><span class="rn2">'+it.name+'</span><span class="rc2">'+it.desc+'</span></span>';
+    if(owned)h+='<span style="font-size:.5em;color:var(--text2)">✔ 已拥有</span>';
+    else h+='<button class="rp" onclick="buyItem(\''+it.id+'\','+it.price+')">'+it.price+'🪙</button>';
+    h+='</div>';
+  });
+  h+='<div style="text-align:center;margin-top:6px"><button class="act" onclick="closeStore()">✖ 关闭</button></div></div>';
+  var el=document.getElementById('store')||function(){var d=document.createElement('div');d.id='store';d.style.cssText='display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9997;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);justify-content:center;align-items:center';document.body.appendChild(d);return d;}();
+  el.style.display='flex';el.innerHTML=h;el.style.justifyContent='center';el.style.alignItems='center';
+}
+function closeStore(){var e=document.getElementById('store');if(e)e.style.display='none';}
+function buyItem(id,price){
+  if(COINS<price){alert('金币不足！');return;}
+  COINS-=price;PURCH[id]=1;saveCoins();savePurch();
+  if(PURCH['theme1']||PURCH['theme2']||PURCH['theme3']){
+    document.documentElement.style.cssText=
+      PURCH['theme1']?'--accent:#6d28d9;--accent2:#8b5cf6':
+      PURCH['theme2']?'--accent:#2563eb;--accent2:#3b82f6':
+      PURCH['theme3']?'--accent:#dc2626;--accent2:#ef4444':'';
+  }
+  showStore();
+}
+// Patch openGame to earn coins
+(function(){var og=window.openGame;window.openGame=function(idx){
+  earnCoins(5);
+  if(typeof og==='function')og(idx);
+};})();
+
+// ===== CLOUD LEADERBOARD =====
+var LB_CACHE=null;
+function showLeaderboard(){
+  var h='<div class="rkbox"><h2>🌐 云排行榜</h2><p style="text-align:center;font-size:.55em;color:var(--text2);margin-bottom:4px" id="lbStatus">加载中...</p><div id="lbBody"></div><div style="text-align:center;margin-top:6px"><button class="act" onclick="fetchLB()">🔄 刷新</button><button class="act" onclick="closeLB()">✖</button></div></div>';
+  var el=document.getElementById('lb')||function(){var d=document.createElement('div');d.id='lb';d.style.cssText='display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9996;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);justify-content:center;align-items:center';document.body.appendChild(d);return d;}();
+  el.style.display='flex';el.innerHTML=h;el.style.justifyContent='center';el.style.alignItems='center';
+  var self={};self.pushLB=function(){pushLB()};fetchLB();
+}
+function closeLB(){var e=document.getElementById('lb');if(e)e.style.display='none';}
+function fetchLB(){
+  var s=document.getElementById('lbStatus');var b=document.getElementById('lbBody');
+  if(s)s.textContent='同步中...';
+  var x=new XMLHttpRequest();
+  x.onload=function(){try{
+    var d=JSON.parse(x.responseText);var items=d.scores||[];items.sort(function(a,b){return(b.coins||0)-(a.coins||0)});
+    if(b){
+      var hh='';items.slice(0,30).forEach(function(g,i){
+        var r=i+1,medal=r<=3?['🥇','🥈','🥉'][r-1]:r+'.';
+        hh+='<div class="ri"><span class="rn2 '+(r<=3?'r'+r:'')+'">'+medal+'</span><span class="ri2"><span class="rn2">'+(g.avatar||'👤')+' '+(g.name||'游客')+'</span><span class="rc2">🪙'+g.coins+' 🎮'+g.plays+'x 🕒'+g.time+'s</span></span></div>';
+      });
+      if(!items.length)hh+='<div style="text-align:center;padding:12px;color:var(--text2);font-size:.7em">暂无数据</div>';
+      b.innerHTML=hh;
+    }
+    if(s)s.textContent='已同步';
+  }catch(e){if(s)s.textContent='加载失败';}};
+  x.onerror=function(){if(s)s.textContent='网络错误';};
+  x.open('GET','https://raw.githubusercontent.com/VIP-881/hot-h5-games/main/leaderboard.json?v='+Date.now());
+  x.send();
+}
+function pushLB(){
+  if(!USER||!USER.name)return;
+  var totalTime=0;for(var k in TCNT)totalTime+=TCNT[k];
+  var data={scores:[{name:USER.name,avatar:USER.avatar||'🤖',coins:COINS,plays:Object.keys(PLAYS).length,time:totalTime,updated:new Date().toISOString()}]};
+  try{localStorage.setItem('lb_local',JSON.stringify(data))}catch(e){}
+  // GitHub API push via Maton
+  var key='v2.xOedfPfv9hou9ht8BXTbk7OKPlRUUvh5WuyJNC8Q3mLrU5dQVGL5rARouO2DNnC-IKG0UGeYm79Cfw1aIjsOw48Fram7uaVouZHiYKGTZzMBg4SuQLJLz4gY';
+  var x=new XMLHttpRequest();
+  x.open('GET','https://gateway.maton.ai/github/repos/VIP-881/hot-h5-games/contents/leaderboard.json?ref=main');
+  x.setRequestHeader('Authorization','Bearer '+key);
+  x.onload=function(){try{
+    var existing=JSON.parse(x.responseText);var sha=existing.sha;
+    var current=JSON.parse(atob(existing.content));var scores=current.scores||[];
+    var idx=scores.findIndex(function(s){return s.name===USER.name});
+    if(idx>=0)scores[idx]={name:USER.name,avatar:USER.avatar,coins:Math.max(COINS,scores[idx].coins||0),plays:Object.keys(PLAYS).length,time:totalTime,updated:new Date().toISOString()};
+    else scores.push({name:USER.name,avatar:USER.avatar,coins:COINS,plays:Object.keys(PLAYS).length,time:totalTime,updated:new Date().toISOString()});
+    var px=new XMLHttpRequest();
+    px.open('PUT','https://gateway.maton.ai/github/repos/VIP-881/hot-h5-games/contents/leaderboard.json');
+    px.setRequestHeader('Authorization','Bearer '+key);
+    px.setRequestHeader('Content-Type','application/json');
+    px.send(JSON.stringify({message:'sync lb',content:btoa(JSON.stringify({scores:scores})),sha:sha,branch:'main'}));
+  }catch(e){}};
+  x.send();
+}
+// Periodic sync
+setInterval(function(){if(USER&&USER.name)pushLB();},300000);
+// Synced on close
+var _origClose=closeGame;closeGame=function(){if(curIdx>0&&USER&&USER.name)setTimeout(pushLB,100);_origClose();};
+
+// ===== MULTIPLAYER =====
+var MP={mode:'',players:[],turn:0,scores:[0,0]};
+function mpBtn(){
+  var h='<div class="rkbox"><h2>👥 多人对战</h2>';
+  h+='<button class="act" onclick="startHS()" style="display:block;width:100%;margin:4px 0">🔥 Hot Seat 本地对战</button>';
+  h+='<button class="act" onclick="startChallenge()" style="display:block;width:100%;margin:4px 0">🎯 挑战链接</button>';
+  h+='<div style="text-align:center;margin-top:6px"><button class="act" onclick="closeMP()">✖</button></div></div>';
+  var el=document.getElementById('mp')||function(){var d=document.createElement('div');d.id='mp';d.style.cssText='display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9995;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);justify-content:center;align-items:center';document.body.appendChild(d);return d;}();
+  el.style.display='flex';el.innerHTML=h;el.style.justifyContent='center';el.style.alignItems='center';
+}
+function closeMP(){var e=document.getElementById('mp');if(e)e.style.display='none';}
+function startHS(){
+  closeMP();MP={mode:'hs',players:['玩家1','玩家2'],turn:0,scores:[0,0]};
+  var g=gameData[Math.floor(Math.random()*gameData.length)];
+  var t='🔥 HS ['+MP.players[0]+'] '+g.emoji+' '+g.title;
+  openGame(gameData.indexOf(g)+1);
+  document.querySelector('.vt').innerHTML='🔥 '+MP.players[0]+' | '+g.emoji+' '+g.title;
+  MP.currentGame=gameData.indexOf(g)+1;
+  // After close, switch turns
+  var _oc=closeGame;
+  closeGame=function(){
+    MP.scores[MP.turn]=Math.max(MP.scores[MP.turn],timerSec);
+    MP.turn=1-MP.turn;
+    if(MP.turn===0){
+      // Both players done - show results
+      var winner=MP.scores[0]>MP.scores[1]?MP.players[0]:MP.scores[0]<MP.scores[1]?MP.players[1]:'平局';
+      alert('🏆 '+winner+'胜利\n'+MP.players[0]+': '+MP.scores[0]+'s\n'+MP.players[1]+': '+MP.scores[1]+'s');
+      MP={mode:'',players:[],turn:0,scores:[0,0]};
+      closeGame=_oc;
+      document.getElementById('v').classList.remove('act');
+    } else {
+      var g2=gameData[Math.floor(Math.random()*gameData.length)];
+      document.querySelector('.vt').innerHTML='🔥 '+MP.players[1]+' | '+g2.emoji+' '+g2.title;
+      document.getElementById('gameFrame').src=g2.id+'.html';
+      timerSec=0;
+    }
+    _oc();
+  };
+  document.getElementById('v').classList.add('act');
+}
+function startChallenge(){
+  closeMP();
+  var url=window.location.href;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url+'\n来挑战我！我已玩了 '+Object.keys(PLAYS).length+' 次！').then(function(){
+      alert('✅ 链接已复制，发给好友挑战吧！');
+    });
+  } else {prompt('复制链接发给好友：',url);}
+}
+
+// ===== INIT - With error fallbacks
+function safeSet(id, fn){try{fn(id);}catch(e){console.warn('Element not found:',id);}}
+safeSet('catBar',function(el){document.getElementById(el).innerHTML=buildCatsStr();});
+try{document.querySelector('.sbox').placeholder=t('srch');}catch(e){}
+try{document.querySelector('.sub').innerHTML=t('sub');}catch(e){}
+try{document.querySelector('h1').innerHTML=t('ttl');}catch(e){}
+updateProfile();
+render();
+ =====
+
+</script>
+
+<section aria-labelledby="about-heading" style="max-width:900px;margin:30px auto 0;padding:20px 16px;background:var(--bg2);border-radius:16px;border:1px solid var(--border);font-size:14px;line-height:1.9;color:var(--text2)">
+<h2 id="about-heading" style="font-size:18px;color:var(--accent2);margin-bottom:12px;text-align:center">🎮 灵犀游戏大厅 — 165款免费H5在线小游戏合集</h2>
+<p style="margin-bottom:10px">灵犀游戏大厅是一个包含 <strong>165 款</strong>免费 H5 网页游戏的在线平台，涵盖<strong>益智解谜</strong>（2048、扫雷、数独、推箱子）、<strong>动作竞技</strong>（Flappy Bird、打砖块、Doodle Jump、恐龙快跑）、<strong>经典街机</strong>（贪吃蛇、吃豆人、太空侵略者、俄罗斯方块）、<strong>体育模拟</strong>（台球、高尔夫、篮球、冰壶）、<strong>棋牌策略</strong>（21点、海战棋、黑白棋、四子棋）等十余个品类。所有游戏均为纯 HTML/CSS/JavaScript 开发，<strong>无需下载安装</strong>，浏览器即点即玩，支持 <strong>手机触屏和 PC 键盘</strong>双端操作。</p>
+<p style="margin-bottom:10px">平台支持<strong>用户登录与云同步</strong>，可保存游戏进度、最高分和收藏列表。内置<strong>中英文双语切换</strong>，通过 PWA 技术支持 <strong>离线游玩</strong>——即使没有网络也能畅玩已加载的游戏。每款游戏以独立 HTML 文件发布，加载快速，零外部依赖。</p>
+<p>适合场景：休闲娱乐、办公室解压、编程休息、通勤消遣、亲子互动、朋友聚会热座对战。</p>
+</section>
+
+<section aria-labelledby="faq-heading" style="max-width:900px;margin:20px auto 0;padding:20px 16px;background:var(--bg2);border-radius:16px;border:1px solid var(--border);font-size:14px;line-height:1.9;color:var(--text2)">
+<h2 id="faq-heading" style="font-size:18px;color:var(--accent2);margin-bottom:16px;text-align:center">❓ 常见问题</h2>
+
+<article aria-labelledby="q1" style="margin-bottom:16px">
+<h3 id="q1" style="font-size:15px;color:var(--text);margin-bottom:4px">这些游戏真的免费吗？</h3>
+<p>是的，所有 165 款游戏<strong>完全免费</strong>，无内购、无广告强制、无会员墙。游戏代码通过开源社区方式发布在 GitHub。</p>
+</article>
+
+<article aria-labelledby="q2" style="margin-bottom:16px">
+<h3 id="q2" style="font-size:15px;color:var(--text);margin-bottom:4px">需要下载或安装什么吗？</h3>
+<p>不需要。所有游戏均为纯 HTML5 网页游戏，直接在浏览器中运行。打开链接即玩，无需下载App、安装插件或注册账号。</p>
+</article>
+
+<article aria-labelledby="q3" style="margin-bottom:16px">
+<h3 id="q3" style="font-size:15px;color:var(--text);margin-bottom:4px">手机上能玩吗？</h3>
+<p>可以。全部 165 款游戏均已适配移动端触屏操作，支持 iOS Safari 和 Android Chrome。可添加到手机桌面作为 PWA 快捷方式实现离线访问。</p>
+</article>
+
+<article aria-labelledby="q4" style="margin-bottom:16px">
+<h3 id="q4" style="font-size:15px;color:var(--text);margin-bottom:4px">有哪些类型的游戏？</h3>
+<p>涵盖 <strong>10+ 品类</strong>：益智解谜（2048、扫雷、数独、推箱子、拼图）、动作竞技（Flappy Bird、打砖块、Doodle Jump、恐龙快跑、切水果）、经典街机（贪吃蛇、吃豆人、俄罗斯方块、Pong、太空侵略者）、体育模拟（台球、保龄球、篮球、高尔夫、冰壶）、棋牌策略（21点、海战棋、四子棋、黑白棋、井字棋）、打字教育（代码打字王、Debug侦探、正则挑战、猜单词）、音乐节奏（钢琴、节奏游戏）、休闲创意（合成大西瓜、涂色、电子宠物）等。</p>
+</article>
+
+<article aria-labelledby="q5" style="margin-bottom:16px">
+<h3 id="q5" style="font-size:15px;color:var(--text);margin-bottom:4px">如何保存游戏进度？</h3>
+<p>点击页面顶部的用户头像登录后，游戏进度、最高分和收藏列表会自动保存在浏览器的本地存储（localStorage）中。同时支持数据导出和跨设备导入。</p>
+</article>
+
+<article aria-labelledby="q6" style="margin-bottom:0">
+<h3 id="q6" style="font-size:15px;color:var(--text);margin-bottom:4px">支持多人模式吗？</h3>
+<p>部分游戏支持<strong>热座模式（Hot Seat）</strong>——两人在同一设备上轮流操作对战。支持的多人游戏包括乒乓球 Pong、桌上冰球等。可通过分享链接邀请好友挑战。</p>
+</article>
+</section>
+
+</main>
+<footer role="contentinfo" style="background:var(--bg2);border-top:1px solid var(--border);padding:20px 10px;margin-top:30px;font-size:12px;color:var(--text3);text-align:center;">
+  <div style="max-width:900px;margin:0 auto;">
+    <details style="margin-bottom:10px;">
+      <summary style="cursor:pointer;color:var(--text2);font-weight:600;font-size:14px;padding:8px 0;">
+        📂 全部 166 款游戏索引（点击展开）
+      </summary>
+      <nav style="display:flex;flex-wrap:wrap;gap:6px 10px;justify-content:center;padding:10px 0;line-height:1.8;" aria-label="游戏导航">
+        <a href="https://vip-881.github.io/hot-h5-games/2048.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="2048">2048</a>
+        <a href="https://vip-881.github.io/hot-h5-games/achievements.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="achievements">achievements</a>
+        <a href="https://vip-881.github.io/hot-h5-games/aimtrainer.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="aimtrainer">aimtrainer</a>
+        <a href="https://vip-881.github.io/hot-h5-games/angling.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="angling">angling</a>
+        <a href="https://vip-881.github.io/hot-h5-games/api-clicker.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="api clicker">api clicker</a>
+        <a href="https://vip-881.github.io/hot-h5-games/api-snake.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="api snake">api snake</a>
+        <a href="https://vip-881.github.io/hot-h5-games/api-speedrunner.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="api speedrunner">api speedrunner</a>
+        <a href="https://vip-881.github.io/hot-h5-games/api-towerdefense.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="api towerdefense">api towerdefense</a>
+        <a href="https://vip-881.github.io/hot-h5-games/archery.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="archery">archery</a>
+        <a href="https://vip-881.github.io/hot-h5-games/asteroids.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="asteroids">asteroids</a>
+        <a href="https://vip-881.github.io/hot-h5-games/axe.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="axe">axe</a>
+        <a href="https://vip-881.github.io/hot-h5-games/badminton.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="badminton">badminton</a>
+        <a href="https://vip-881.github.io/hot-h5-games/balance.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="balance">balance</a>
+        <a href="https://vip-881.github.io/hot-h5-games/balloon.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="balloon">balloon</a>
+        <a href="https://vip-881.github.io/hot-h5-games/baserow-racer.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="baserow racer">baserow racer</a>
+        <a href="https://vip-881.github.io/hot-h5-games/battlepong.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="battlepong">battlepong</a>
+        <a href="https://vip-881.github.io/hot-h5-games/battleship.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="battleship">battleship</a>
+        <a href="https://vip-881.github.io/hot-h5-games/bball.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="bball">bball</a>
+        <a href="https://vip-881.github.io/hot-h5-games/blackjack.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="blackjack">blackjack</a>
+        <a href="https://vip-881.github.io/hot-h5-games/bowling.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="bowling">bowling</a>
+        <a href="https://vip-881.github.io/hot-h5-games/breakout.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="breakout">breakout</a>
+        <a href="https://vip-881.github.io/hot-h5-games/bubble.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="bubble">bubble</a>
+        <a href="https://vip-881.github.io/hot-h5-games/bubble2.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="bubble2">bubble2</a>
+        <a href="https://vip-881.github.io/hot-h5-games/bubbleshooter.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="bubbleshooter">bubbleshooter</a>
+        <a href="https://vip-881.github.io/hot-h5-games/build-battle.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="build battle">build battle</a>
+        <a href="https://vip-881.github.io/hot-h5-games/bulls.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="bulls">bulls</a>
+        <a href="https://vip-881.github.io/hot-h5-games/calc24.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="calc24">calc24</a>
+        <a href="https://vip-881.github.io/hot-h5-games/cards.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="cards">cards</a>
+        <a href="https://vip-881.github.io/hot-h5-games/catch.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="catch">catch</a>
+        <a href="https://vip-881.github.io/hot-h5-games/catchfruit.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="catchfruit">catchfruit</a>
+        <a href="https://vip-881.github.io/hot-h5-games/chick.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="chick">chick</a>
+        <a href="https://vip-881.github.io/hot-h5-games/chopper.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="chopper">chopper</a>
+        <a href="https://vip-881.github.io/hot-h5-games/claw.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="claw">claw</a>
+        <a href="https://vip-881.github.io/hot-h5-games/code-typer.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="code typer">code typer</a>
+        <a href="https://vip-881.github.io/hot-h5-games/color.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="color">color</a>
+        <a href="https://vip-881.github.io/hot-h5-games/colorswitch.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="colorswitch">colorswitch</a>
+        <a href="https://vip-881.github.io/hot-h5-games/commit-racer.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="commit racer">commit racer</a>
+        <a href="https://vip-881.github.io/hot-h5-games/connect4.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="connect4">connect4</a>
+        <a href="https://vip-881.github.io/hot-h5-games/darts.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="darts">darts</a>
+        <a href="https://vip-881.github.io/hot-h5-games/data-miner.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="data miner">data miner</a>
+        <a href="https://vip-881.github.io/hot-h5-games/debug-detective.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="debug detective">debug detective</a>
+        <a href="https://vip-881.github.io/hot-h5-games/defuse.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="defuse">defuse</a>
+        <a href="https://vip-881.github.io/hot-h5-games/dice.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="dice">dice</a>
+        <a href="https://vip-881.github.io/hot-h5-games/dicepoker.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="dicepoker">dicepoker</a>
+        <a href="https://vip-881.github.io/hot-h5-games/dino.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="dino">dino</a>
+        <a href="https://vip-881.github.io/hot-h5-games/doodlejump.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="doodlejump">doodlejump</a>
+        <a href="https://vip-881.github.io/hot-h5-games/draw.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="draw">draw</a>
+        <a href="https://vip-881.github.io/hot-h5-games/duel.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="duel">duel</a>
+        <a href="https://vip-881.github.io/hot-h5-games/eat.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="eat">eat</a>
+        <a href="https://vip-881.github.io/hot-h5-games/evolve.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="evolve">evolve</a>
+        <a href="https://vip-881.github.io/hot-h5-games/firebase-arena.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="firebase arena">firebase arena</a>
+        <a href="https://vip-881.github.io/hot-h5-games/fish.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="fish">fish</a>
+        <a href="https://vip-881.github.io/hot-h5-games/flagquiz.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="flagquiz">flagquiz</a>
+        <a href="https://vip-881.github.io/hot-h5-games/flappy.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="flappy">flappy</a>
+        <a href="https://vip-881.github.io/hot-h5-games/freethrow.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="freethrow">freethrow</a>
+        <a href="https://vip-881.github.io/hot-h5-games/frog.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="frog">frog</a>
+        <a href="https://vip-881.github.io/hot-h5-games/frogger.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="frogger">frogger</a>
+        <a href="https://vip-881.github.io/hot-h5-games/fruit.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="fruit">fruit</a>
+        <a href="https://vip-881.github.io/hot-h5-games/gear.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="gear">gear</a>
+        <a href="https://vip-881.github.io/hot-h5-games/goldminer.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="goldminer">goldminer</a>
+        <a href="https://vip-881.github.io/hot-h5-games/golf.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="golf">golf</a>
+        <a href="https://vip-881.github.io/hot-h5-games/gradient.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="gradient">gradient</a>
+        <a href="https://vip-881.github.io/hot-h5-games/guess.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="guess">guess</a>
+        <a href="https://vip-881.github.io/hot-h5-games/hangman.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="hangman">hangman</a>
+        <a href="https://vip-881.github.io/hot-h5-games/hanoi.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="hanoi">hanoi</a>
+        <a href="https://vip-881.github.io/hot-h5-games/helix.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="helix">helix</a>
+        <a href="https://vip-881.github.io/hot-h5-games/hole.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="hole">hole</a>
+        <a href="https://vip-881.github.io/hot-h5-games/hoop.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="hoop">hoop</a>
+        <a href="https://vip-881.github.io/hot-h5-games/horserace.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="horserace">horserace</a>
+        <a href="https://vip-881.github.io/hot-h5-games/http-archer.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="http archer">http archer</a>
+        <a href="https://vip-881.github.io/hot-h5-games/ice.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="ice">ice</a>
+        <a href="https://vip-881.github.io/hot-h5-games/invader.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="invader">invader</a>
+        <a href="https://vip-881.github.io/hot-h5-games/jenga.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="jenga">jenga</a>
+        <a href="https://vip-881.github.io/hot-h5-games/jigsaw.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="jigsaw">jigsaw</a>
+        <a href="https://vip-881.github.io/hot-h5-games/jump.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="jump">jump</a>
+        <a href="https://vip-881.github.io/hot-h5-games/kaleido.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="kaleido">kaleido</a>
+        <a href="https://vip-881.github.io/hot-h5-games/knife.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="knife">knife</a>
+        <a href="https://vip-881.github.io/hot-h5-games/lander.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="lander">lander</a>
+        <a href="https://vip-881.github.io/hot-h5-games/lemonade.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="lemonade">lemonade</a>
+        <a href="https://vip-881.github.io/hot-h5-games/lights.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="lights">lights</a>
+        <a href="https://vip-881.github.io/hot-h5-games/link.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="link">link</a>
+        <a href="https://vip-881.github.io/hot-h5-games/magfish.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="magfish">magfish</a>
+        <a href="https://vip-881.github.io/hot-h5-games/marble.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="marble">marble</a>
+        <a href="https://vip-881.github.io/hot-h5-games/mastermind.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="mastermind">mastermind</a>
+        <a href="https://vip-881.github.io/hot-h5-games/match3.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="match3">match3</a>
+        <a href="https://vip-881.github.io/hot-h5-games/math.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="math">math</a>
+        <a href="https://vip-881.github.io/hot-h5-games/mathchallenge.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="mathchallenge">mathchallenge</a>
+        <a href="https://vip-881.github.io/hot-h5-games/maze.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="maze">maze</a>
+        <a href="https://vip-881.github.io/hot-h5-games/memory.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="memory">memory</a>
+        <a href="https://vip-881.github.io/hot-h5-games/merge-conflict.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="merge conflict">merge conflict</a>
+        <a href="https://vip-881.github.io/hot-h5-games/meteor.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="meteor">meteor</a>
+        <a href="https://vip-881.github.io/hot-h5-games/mines.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="mines">mines</a>
+        <a href="https://vip-881.github.io/hot-h5-games/mole.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="mole">mole</a>
+        <a href="https://vip-881.github.io/hot-h5-games/monopoly.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="monopoly">monopoly</a>
+        <a href="https://vip-881.github.io/hot-h5-games/netlify-portal.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="netlify portal">netlify portal</a>
+        <a href="https://vip-881.github.io/hot-h5-games/nonogram.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="nonogram">nonogram</a>
+        <a href="https://vip-881.github.io/hot-h5-games/numpair.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="numpair">numpair</a>
+        <a href="https://vip-881.github.io/hot-h5-games/numsnake.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="numsnake">numsnake</a>
+        <a href="https://vip-881.github.io/hot-h5-games/othello.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="othello">othello</a>
+        <a href="https://vip-881.github.io/hot-h5-games/pacman.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="pacman">pacman</a>
+        <a href="https://vip-881.github.io/hot-h5-games/parachute.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="parachute">parachute</a>
+        <a href="https://vip-881.github.io/hot-h5-games/park.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="park">park</a>
+        <a href="https://vip-881.github.io/hot-h5-games/penalty.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="penalty">penalty</a>
+        <a href="https://vip-881.github.io/hot-h5-games/pet.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="pet">pet</a>
+        <a href="https://vip-881.github.io/hot-h5-games/piano.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="piano">piano</a>
+        <a href="https://vip-881.github.io/hot-h5-games/pinball.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="pinball">pinball</a>
+        <a href="https://vip-881.github.io/hot-h5-games/pipeline-puzzle.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="pipeline puzzle">pipeline puzzle</a>
+        <a href="https://vip-881.github.io/hot-h5-games/pipepuzzle.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="pipepuzzle">pipepuzzle</a>
+        <a href="https://vip-881.github.io/hot-h5-games/pixel.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="pixel">pixel</a>
+        <a href="https://vip-881.github.io/hot-h5-games/pong.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="pong">pong</a>
+        <a href="https://vip-881.github.io/hot-h5-games/puttinggolf.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="puttinggolf">puttinggolf</a>
+        <a href="https://vip-881.github.io/hot-h5-games/puzzle.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="puzzle">puzzle</a>
+        <a href="https://vip-881.github.io/hot-h5-games/quiz.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="quiz">quiz</a>
+        <a href="https://vip-881.github.io/hot-h5-games/racer.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="racer">racer</a>
+        <a href="https://vip-881.github.io/hot-h5-games/range.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="range">range</a>
+        <a href="https://vip-881.github.io/hot-h5-games/react.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="react">react</a>
+        <a href="https://vip-881.github.io/hot-h5-games/regex-challenge.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="regex challenge">regex challenge</a>
+        <a href="https://vip-881.github.io/hot-h5-games/rhythm.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="rhythm">rhythm</a>
+        <a href="https://vip-881.github.io/hot-h5-games/ringtoss.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="ringtoss">ringtoss</a>
+        <a href="https://vip-881.github.io/hot-h5-games/roll.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="roll">roll</a>
+        <a href="https://vip-881.github.io/hot-h5-games/rope.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="rope">rope</a>
+        <a href="https://vip-881.github.io/hot-h5-games/rpg.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="rpg">rpg</a>
+        <a href="https://vip-881.github.io/hot-h5-games/rps.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="rps">rps</a>
+        <a href="https://vip-881.github.io/hot-h5-games/run.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="run">run</a>
+        <a href="https://vip-881.github.io/hot-h5-games/sandbox.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="sandbox">sandbox</a>
+        <a href="https://vip-881.github.io/hot-h5-games/shmup.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="shmup">shmup</a>
+        <a href="https://vip-881.github.io/hot-h5-games/shooter.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="shooter">shooter</a>
+        <a href="https://vip-881.github.io/hot-h5-games/simon.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="simon">simon</a>
+        <a href="https://vip-881.github.io/hot-h5-games/skeet.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="skeet">skeet</a>
+        <a href="https://vip-881.github.io/hot-h5-games/ski.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="ski">ski</a>
+        <a href="https://vip-881.github.io/hot-h5-games/sling.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="sling">sling</a>
+        <a href="https://vip-881.github.io/hot-h5-games/sling2.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="sling2">sling2</a>
+        <a href="https://vip-881.github.io/hot-h5-games/slot.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="slot">slot</a>
+        <a href="https://vip-881.github.io/hot-h5-games/slots2.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="slots2">slots2</a>
+        <a href="https://vip-881.github.io/hot-h5-games/snake.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="snake">snake</a>
+        <a href="https://vip-881.github.io/hot-h5-games/snakewar.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="snakewar">snakewar</a>
+        <a href="https://vip-881.github.io/hot-h5-games/sokoban.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="sokoban">sokoban</a>
+        <a href="https://vip-881.github.io/hot-h5-games/spider.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="spider">spider</a>
+        <a href="https://vip-881.github.io/hot-h5-games/spinwheel.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="spinwheel">spinwheel</a>
+        <a href="https://vip-881.github.io/hot-h5-games/spot.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="spot">spot</a>
+        <a href="https://vip-881.github.io/hot-h5-games/sql-defender.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="sql defender">sql defender</a>
+        <a href="https://vip-881.github.io/hot-h5-games/stack.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="stack">stack</a>
+        <a href="https://vip-881.github.io/hot-h5-games/star-hunter.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="star hunter">star hunter</a>
+        <a href="https://vip-881.github.io/hot-h5-games/status-memory.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="status memory">status memory</a>
+        <a href="https://vip-881.github.io/hot-h5-games/stopwatch.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="stopwatch">stopwatch</a>
+        <a href="https://vip-881.github.io/hot-h5-games/stroop.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="stroop">stroop</a>
+        <a href="https://vip-881.github.io/hot-h5-games/sudoku.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="sudoku">sudoku</a>
+        <a href="https://vip-881.github.io/hot-h5-games/suika.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="suika">suika</a>
+        <a href="https://vip-881.github.io/hot-h5-games/surf.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="surf">surf</a>
+        <a href="https://vip-881.github.io/hot-h5-games/switch.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="switch">switch</a>
+        <a href="https://vip-881.github.io/hot-h5-games/tangram.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="tangram">tangram</a>
+        <a href="https://vip-881.github.io/hot-h5-games/tennis.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="tennis">tennis</a>
+        <a href="https://vip-881.github.io/hot-h5-games/territory.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="territory">territory</a>
+        <a href="https://vip-881.github.io/hot-h5-games/tetris.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="tetris">tetris</a>
+        <a href="https://vip-881.github.io/hot-h5-games/tictactoe.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="tictactoe">tictactoe</a>
+        <a href="https://vip-881.github.io/hot-h5-games/timber.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="timber">timber</a>
+        <a href="https://vip-881.github.io/hot-h5-games/top.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="top">top</a>
+        <a href="https://vip-881.github.io/hot-h5-games/towerdef.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="towerdef">towerdef</a>
+        <a href="https://vip-881.github.io/hot-h5-games/tubes.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="tubes">tubes</a>
+        <a href="https://vip-881.github.io/hot-h5-games/typingtest.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="typingtest">typingtest</a>
+        <a href="https://vip-881.github.io/hot-h5-games/volley.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="volley">volley</a>
+        <a href="https://vip-881.github.io/hot-h5-games/water.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="water">water</a>
+        <a href="https://vip-881.github.io/hot-h5-games/wheel.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="wheel">wheel</a>
+        <a href="https://vip-881.github.io/hot-h5-games/word.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="word">word</a>
+        <a href="https://vip-881.github.io/hot-h5-games/wordsearch.html" style="color:var(--accent2);text-decoration:none;padding:2px 6px;border-radius:4px;background:var(--bg3);" title="wordsearch">wordsearch</a>
+      </nav>
+    </details>
+    <div style="display:flex;flex-wrap:wrap;gap:8px 15px;justify-content:center;padding:8px 0;font-size:11px;">
+      <a href="https://vip-881.github.io/hot-h5-games/" style="color:var(--text2)">灵犀游戏大厅</a>
+      <span>|</span> <a href="sitemap.xml" style="color:var(--text2)">Sitemap</a>
+      <span>|</span> <span>© 2026 灵犀 AI</span>
+      <span>|</span> <span>166款免费H5游戏 · 即点即玩 · 无需下载</span>
+    </div>
+  </div>
+</footer>
 
 </body>
 </html>
