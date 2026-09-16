@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🧪 水排序谜题 — 灵犀游戏大厅</title>
+<meta name="description" content="将彩色液体倒入试管排序，每色一管即过关。经典水排序谜题，考验逻辑思维。灵犀游戏大厅收录，免费H5在线游戏。">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0f0;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+nav{position:sticky;top:0;z-index:100;width:100%;background:rgba(15,15,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(139,92,246,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#a78bfa;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(139,92,246,.1);transition:.3s}
+nav a:hover{background:rgba(139,92,246,.2)}
+.arena{max-width:500px;margin:20px auto;text-align:center}
+h1{font-size:22px;color:#c084fc;margin-bottom:4px}
+.info{font-size:12px;color:#888;margin-bottom:12px}
+.info span{margin:0 8px}
+.tubes{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:10px 0}
+.tube{width:48px;height:160px;background:rgba(255,255,255,.03);border:2px solid rgba(255,255,255,.1);border-radius:0 0 20px 20px;position:relative;cursor:pointer;transition:all .2s;display:flex;flex-direction:column-reverse;overflow:hidden}
+.tube:hover{border-color:rgba(139,92,246,.4);box-shadow:0 0 15px rgba(139,92,246,.15)}
+.tube.selected{border-color:#c084fc;box-shadow:0 0 20px rgba(192,132,252,.3);transform:translateY(-4px)}
+.tube.won{border-color:#4ade80;animation:pulse .5s ease-in-out}
+.layer{width:100%;height:33.333%;transition:all .3s}
+@keyframes pulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.btns{display:flex;justify-content:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.btn{padding:8px 18px;border-radius:20px;border:1px solid rgba(139,92,246,.3);background:rgba(139,92,246,.1);color:#a78bfa;cursor:pointer;font-size:13px;transition:.3s}
+.btn:hover{background:rgba(139,92,246,.2);border-color:#7c3aed}
+.btn.undo{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#f87171}
+.msg{font-size:18px;margin-top:12px;min-height:28px;color:#4ade80}
+.lvl{margin-top:8px;font-size:13px;color:#888}
+.lvl button{margin:0 4px;padding:4px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#888;cursor:pointer;font-size:12px;transition:.3s}
+.lvl button:hover{background:rgba(139,92,246,.1);color:#a78bfa}
+.lvl button.cur{background:rgba(139,92,246,.15);color:#c084fc;border-color:rgba(139,92,246,.4)}
+</style>
+
+<meta name="description" content="将彩色液体倒入试管分类排序。灵犀游戏大厅收录，免费H5在线游戏，即点即玩。">
+<meta name="keywords" content="水排序谜题,Water Sort Puzzle,H5游戏,免费游戏,在线游戏,益智游戏,灵犀游戏大厅">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://vip-881.github.io/hot-h5-games/watersort.html">
+<meta property="og:title" content="🎮 水排序谜题 - 灵犀游戏大厅">
+<meta property="og:description" content="将彩色液体倒入试管分类排序。免费H5在线游戏，即点即玩。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vip-881.github.io/hot-h5-games/watersort.html">
+<meta property="og:site_name" content="灵犀游戏大厅">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="🎮 水排序谜题 - 灵犀游戏大厅">
+<meta name="twitter:description" content="将彩色液体倒入试管分类排序。免费H5在线游戏。">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"水排序谜题","alternateName":"Water Sort Puzzle","description":"将彩色液体倒入试管分类排序","url":"https://vip-881.github.io/hot-h5-games/watersort.html","playMode":"SinglePlayer","applicationCategory":"GameApplication","genre":"Puzzle","inLanguage":"zh-CN","isAccessibleForFree":true,"isFamilyFriendly":true}</script>
+
+</head>
+<body>
+<nav><a href="index.html">← 返回大厅</a><span>🧪 水排序谜题</span></nav>
+<div class="arena">
+<h1>🧪 水排序谜题</h1>
+<p class="info"><span>🏆 步数: <b id="moves">0</b></span><span>⭐ 最高分: <b id="best">—</b></span></p>
+<div class="tubes" id="board"></div>
+<p class="msg" id="msg"></p>
+<div class="btns">
+<button class="btn undo" onclick="undo()">↩ 撤销</button>
+<button class="btn" onclick="newGame()">🔄 新游戏</button>
+<button class="btn" onclick="hint()">💡 提示</button>
+</div>
+<div class="lvl">
+难度：<button class="cur" onclick="setLevel(2)">简单</button>
+<button onclick="setLevel(3)">中等</button>
+<button onclick="setLevel(4)">困难</button>
+</div>
+</div>
+
+<script>
+const COLORS = ['#ef4444','#3b82f6','#22c55e','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#f97316'];
+let tubes=[], selected=null, moves=0, history=[], colors=2;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function newGame(){
+  colors=colors||2;
+  let n=colors+1; // +1 extra empty tubes
+  tubes=Array.from({length:n+1},(_,i)=>{
+    if(i<n) return Array.from({length:3},(_,k)=>Math.floor(k/3*colors/3)+(i%colors));
+    return [];
+  });
+  // Fill each color tube with 3 of same color, shuffle
+  tubes = tubes.map((t,i) => i<colors ? Array(3).fill(i) : (i<colors+1 ? [] : []));
+  // Actually: easier approach - create layers
+  let all = [];
+  for(let c=0;c<colors;c++) for(let i=0;i<3;i++) all.push(c);
+  all = shuffle(all);
+  tubes = [];
+  for(let i=0;i<colors;i++) tubes.push([all[i*3],all[i*3+1],all[i*3+2]]);
+  // Add 2 empty tubes
+  tubes.push([]); tubes.push([]);
+  selected=null; moves=0; history=[];
+  document.getElementById('moves').textContent='0';
+  document.getElementById('msg').textContent='';
+  render();
+}
+
+function render(){
+  let b=document.getElementById('board');
+  b.innerHTML=tubes.map((t,i)=>{
+    let layers='';
+    for(let j=2;j>=0;j--){
+      let c=j<t.length?COLORS[t[j]]:'transparent';
+      layers+=`<div class="layer" style="background:${c}"></div>`;
+    }
+    let cls='tube';
+    if(selected===i) cls+=' selected';
+    if(isTubeDone(t)) cls+=' won';
+    return `<div class="${cls}" onclick="tap(${i})">${layers}</div>`;
+  }).join('');
+}
+
+function isTubeDone(t){return t.length===3&&t[0]===t[1]&&t[1]===t[2]}
+
+function tap(i){
+  if(document.getElementById('msg').textContent) return;
+  if(selected===null){
+    if(tubes[i].length===0) return;
+    selected=i;
+  } else if(selected===i){
+    selected=null;
+  } else {
+    let from=tubes[selected], to=tubes[i];
+    if(to.length>=3) {selected=null; return;}
+    if(to.length===0 || from[from.length-1]===to[to.length-1]){
+      // Move top color from -> to (all same top)
+      let color=from[from.length-1], count=0;
+      while(from.length>0&&from[from.length-1]===color&&to.length+count<3) count++;
+      // Save state for undo
+      history.push({from:selected,to:i,count:count,colors:JSON.parse(JSON.stringify(tubes))});
+      for(let k=0;k<count;k++) to.push(from.pop());
+      moves++;
+      document.getElementById('moves').textContent=moves;
+    }
+    selected=null;
+  }
+  render();
+  checkWin();
+}
+
+function undo(){
+  if(history.length===0) return;
+  let h=history.pop();
+  tubes=JSON.parse(JSON.stringify(h.colors));
+  moves--;
+  document.getElementById('moves').textContent=moves;
+  selected=null;
+  render();
+}
+
+function checkWin(){
+  let won=tubes.filter(t=>t.length>0).every(t=>t.length===3&&t[0]===t[1]&&t[1]===t[2]);
+  if(won&&tubes.filter(t=>t.length>0).length===colors){
+    document.getElementById('msg').textContent='🎉 恭喜通关！';
+    let b=localStorage.getItem('watersort_best_'+colors);
+    if(!b||moves<parseInt(b)){
+      localStorage.setItem('watersort_best_'+colors,moves);
+      document.getElementById('best').textContent=moves;
+    }
+  }
+}
+
+function hint(){
+  if(!selected) {
+    // Suggest a move
+    for(let i=0;i<tubes.length;i++){
+      if(tubes[i].length===0||isTubeDone(tubes[i])) continue;
+      for(let j=0;j<tubes.length;j++){
+        if(i===j) continue;
+        if(tubes[j].length<3&&(tubes[j].length===0||tubes[i][tubes[i].length-1]===tubes[j][tubes[j].length-1])){
+          selected=i; render(); setTimeout(()=>{selected=null;render()},800);
+          return;
+        }
+      }
+    }
+  }
+}
+
+function setLevel(l){
+  colors=l;
+  document.querySelectorAll('.lvl button').forEach(b=>b.classList.remove('cur'));
+  event.target.classList.add('cur');
+  let b=localStorage.getItem('watersort_best_'+colors);
+  document.getElementById('best').textContent=b||'—';
+  newGame();
+}
+
+setLevel(2);
+</script>
+</body>
+</html>
