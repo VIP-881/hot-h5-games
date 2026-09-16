@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🔍 单词搜索 - 热门H5游戏</title>
+<meta name="description" content="经典英文单词搜索Word Search，在字母网格中找出隐藏的单词，锻炼眼力和词汇免费在线">
+<meta property="og:title" content="🔍 单词搜索 - 热门H5游戏"><meta property="og:description" content="经典字母网格单词搜索"><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"单词搜索"}</script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:#fff;font-family:monospace;user-select:none;touch-action:none}h1{font-size:1.3em;margin:4px 0}.stats{display:flex;gap:12px;font-size:0.85em;margin:4px 0}canvas{display:block;border:1px solid #334;border-radius:6px;max-width:98vw;background:#1a1a2e;cursor:pointer}#wlist{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:4px;font-size:0.8em;max-width:340px}.word-item{padding:2px 8px;border:1px solid #446;border-radius:4px;color:#8af}.word-item.done{color:#4a4;border-color:#4a4;text-decoration:line-through;opacity:0.5}.btn{margin:4px;padding:4px 14px;border:1px solid #557;border-radius:4px;background:#2a2a4e;color:#8af;cursor:pointer}</style>
+</head>
+<body>
+<h1>🔍 单词搜索</h1>
+<div class="stats"><span>🔍 <b id="ws-found">0</b>/<b id="ws-total">0</b></span></div>
+<canvas id="c" width="330" height="330"></canvas>
+<div id="wlist"></div>
+<div><button class="btn" onclick="newWS()">🔄 新题</button></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),N=10,S=33,W=330;
+const WORDS=[['PYTHON','JAVA','RUST','GOLANG','SWIFT','KOTLIN','TYPESCRIPT','SVELTE','REACT','ANGULAR'],
+  ['ALPHA','BETA','GAMMA','DELTA','EPSILON','THETA','OMEGA','SIGMA','LAMBDA','KAPPA'],
+  ['TIGER','PANDA','EAGLE','KOALA','DOLPHIN','PYTHON','OTTER','RAVEN','SALMON','WHALE'],
+  ['GREEN','BLUE','AMBER','CORAL','IVORY','JETTY','KEEN','LIME','MAUVE','NAVY'],
+  ['APPLE','BERRY','CHERRY','DATES','ELDER','FIG','GRAPE','HONEY','KIWI','LEMON'],
+  ['CLOUD','DOCKER','LINUX','NODE','GIT','HTML','CSS','REACT','API','JSON']];
+const DIRS=[[0,1],[1,0],[1,1],[0,-1],[-1,0],[-1,-1],[1,-1],[-1,1]];
+let grid=[],words=[],found=[],selected=null,highlight=[];
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function newWS(){grid=Array.from({length:N},()=>Array(N).fill(''));words=[];found=[];selected=null;highlight=[];
+  const pool=WORDS[Math.floor(Math.random()*WORDS.length)];const chosen=shuffle([...pool]).slice(0,6);
+  for(const w of chosen){let placed=false;for(let a=0;a<200;a++){const d=DIRS[Math.floor(Math.random()*DIRS.length)];
+      const r=Math.floor(Math.random()*N),c=Math.floor(Math.random()*N);let ok=true;
+      for(let i=0;i<w.length;i++){const nr=r+d[0]*i,nc=c+d[1]*i;if(nr<0||nr>=N||nc<0||nc>=N){ok=false;break}if(grid[nr][nc]!==''&&grid[nr][nc]!==w[i]){ok=false;break}}
+      if(ok){for(let i=0;i<w.length;i++){const nr=r+d[0]*i,nc=c+d[1]*i;grid[nr][nc]=w[i]}words.push({w,d,r,c,len:w.length});placed=true;break}}if(!placed){}}// Skip if can't place
+  // Fill blanks
+  const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ';for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(grid[r][c]==='')grid[r][c]=letters[Math.floor(Math.random()*letters.length)];
+  render();document.getElementById('ws-found').textContent='0';document.getElementById('ws-total').textContent=words.length;renderWords()}
+
+function renderWords(){const el=document.getElementById('wlist');el.innerHTML='';
+  words.forEach((w,i)=>{const div=document.createElement('div');div.className='word-item'+(found.includes(i)?' done':'');div.textContent=w.w;el.appendChild(div)})}
+
+function getCells(r1,c1,dir,len){const cells=[];for(let i=0;i<len;i++)cells.push({r:r1+dir[0]*i,c:c1+dir[1]*i});return cells}
+
+cv.addEventListener('mousedown',e=>{const r=cv.getBoundingClientRect(),c=Math.floor((e.clientX-r.left)/S),rr=Math.floor((e.clientY-r.top)/S);
+  if(c>=0&&c<N&&rr>=0&&rr<N)selected={r:rr,c,cells:[{r:rr,c}]},render()});
+cv.addEventListener('mousemove',e=>{if(!selected)return;const r=cv.getBoundingClientRect(),c=Math.floor((e.clientX-r.left)/S),rr=Math.floor((e.clientY-r.top)/S);
+  if(c<0||c>=N||rr<0||rr>=N)return;const dr=Math.sign(rr-selected.r),dc=c-selected.c!==0?Math.sign(c-selected.c):0;
+  if(dr===0&&dc===0){selected.cells=[{r:selected.r,c:selected.c}];render();return}
+  const len=Math.max(Math.abs(rr-selected.r),Math.abs(c-selected.c))+1;selected.cells=getCells(selected.r,selected.c,[dr,dc],len);render()});
+cv.addEventListener('mouseup',e=>{if(!selected)return;
+  const sel=selected;selected=null;
+  if(sel.cells.length<2){render();return}
+  const word=sel.cells.map(cell=>grid[cell.r][cell.c]).join('');
+  const rev=word.split('').reverse().join('');
+  for(let i=0;i<words.length;i++){if(found.includes(i))continue;if(words[i].w===word||words[i].w===rev){found.push(i);highlight=highlight.concat(sel.cells);document.getElementById('ws-found').textContent=found.length;renderWords();break}}
+  render()});
+cv.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0],r=cv.getBoundingClientRect(),c=Math.floor((t.clientX-r.left)/S),rr=Math.floor((t.clientY-r.top)/S);
+  if(c>=0&&c<N&&rr>=0&&rr<N)selected={r:rr,c,cells:[{r:rr,c}]},render()});
+cv.addEventListener('touchmove',e=>{e.preventDefault();if(!selected)return;const t=e.changedTouches[0],r=cv.getBoundingClientRect(),c=Math.floor((t.clientX-r.left)/S),rr=Math.floor((t.clientY-r.top)/S);
+  if(c<0||c>=N||rr<0||rr>=N)return;const dr=Math.sign(rr-selected.r),dc=c-selected.c!==0?Math.sign(c-selected.c):0;
+  if(dr===0&&dc===0){selected.cells=[{r:selected.r,c:selected.c}];render();return}
+  const len=Math.max(Math.abs(rr-selected.r),Math.abs(c-selected.c))+1;selected.cells=getCells(selected.r,selected.c,[dr,dc],len);render()});
+cv.addEventListener('touchend',e=>{if(!selected)return;const sel=selected;selected=null;if(sel.cells.length<2){render();return}
+  const word=sel.cells.map(cell=>grid[cell.r][cell.c]).join('');const rev=word.split('').reverse().join('');
+  for(let i=0;i<words.length;i++){if(found.includes(i))continue;if(words[i].w===word||words[i].w===rev){found.push(i);highlight=highlight.concat(sel.cells);document.getElementById('ws-found').textContent=found.length;renderWords();break}}render()});
+
+function render(){ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,W);
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){const hl=highlight.some(h=>h.r===r&&h.c===c);
+    ctx.fillStyle=hl?'rgba(68,170,68,0.2)':'transparent';ctx.fillRect(c*S,r*S,S,S);
+    ctx.strokeStyle='#334';ctx.lineWidth=0.5;ctx.strokeRect(c*S,r*S,S,S);
+    ctx.fillStyle='#8af';ctx.font='16px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(grid[r][c],c*S+S/2,r*S+S/2)}
+  // Selection
+  if(selected)for(const cell of selected.cells){ctx.fillStyle='rgba(255,255,255,0.15)';ctx.fillRect(cell.c*S,cell.r*S,S,S)}
+  if(found.length===words.length&&words.length>0){ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(0,0,W,W);ctx.fillStyle='#ff0';ctx.font='bold 20px monospace';ctx.textAlign='center';ctx.fillText('🎉 全部找到!',W/2,W/2)}}
+newWS();
+</script>
+</body>
+</html>
