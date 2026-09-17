@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🔗 连线游戏 — 灵犀游戏大厅</title>
+<meta name="description" content="连接同色点填满棋盘不交叉，考验逻辑与空间思维。经典Flow Free连线谜题。灵犀游戏大厅收录，免费H5在线游戏。">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0f0;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(15,15,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(139,92,246,.2);padding:8px 12px;display:flex;align-items:center;gap:8px}
+nav a{color:#a78bfa;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:12px;background:rgba(139,92,246,.1);transition:.3s}
+nav a:hover{background:rgba(139,92,246,.2)}
+.arena{max-width:420px;margin:15px auto;text-align:center}
+h1{font-size:22px;color:#c084fc;margin-bottom:4px}
+.info{font-size:12px;color:#888;margin-bottom:8px}
+.info span{margin:0 8px}
+.grid{display:inline-grid;gap:1px;background:rgba(255,255,255,.06);border:2px solid rgba(139,92,246,.25);border-radius:10px;padding:2px;touch-action:none}
+.cell{width:48px;height:48px;background:rgba(255,255,255,.03);border-radius:4px;cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;position:relative;user-select:none}
+.cell:hover{background:rgba(255,255,255,.06)}
+.cell.endpoint{border:3px solid;border-radius:50%;font-size:20px}
+.cell.path{opacity:.7}
+.btns{margin-top:10px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.btn{padding:8px 16px;border-radius:20px;border:1px solid rgba(139,92,246,.3);background:rgba(139,92,246,.1);color:#a78bfa;cursor:pointer;font-size:13px;transition:.3s}
+.btn:hover{background:rgba(139,92,246,.2)}
+.lvls{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-top:8px}
+.lvl{padding:3px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#888;cursor:pointer;font-size:11px;transition:.3s}
+.lvl:hover{background:rgba(139,92,246,.1);color:#a78bfa}
+.lvl.cur{background:rgba(139,92,246,.2);color:#c084fc}
+.lvl.done{color:#4ade80}
+.msg{font-size:16px;color:#4ade80;margin-top:6px;min-height:24px}
+.colors{margin:6px 0;display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+.dot{width:20px;height:20px;border-radius:50%;transition:.2s}
+.dot.active{border:3px solid #fff;transform:scale(1.3)}
+</style>
+
+<meta name="description" content="连接同色点填满棋盘不交叉，考验逻辑与空间思维。经典Flow Free连线谜题。灵犀游戏大厅收录，免费H5在线游戏，即点即玩。">
+<meta name="keywords" content="连线游戏,Flow Free,Numberlink,H5游戏,免费游戏,在线游戏,益智游戏,灵犀游戏大厅">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://vip-881.github.io/hot-h5-games/flowfree.html">
+<meta property="og:title" content="🎮 连线游戏 - 灵犀游戏大厅">
+<meta property="og:description" content="连接同色点填满棋盘不交叉。免费H5在线游戏，即点即玩。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vip-881.github.io/hot-h5-games/flowfree.html">
+<meta property="og:site_name" content="灵犀游戏大厅">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="🎮 连线游戏 - 灵犀游戏大厅">
+<meta name="twitter:description" content="经典Flow Free连线谜题。免费H5在线游戏。">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"连线游戏","alternateName":"Flow Free","description":"连接同色点填满棋盘不交叉","url":"https://vip-881.github.io/hot-h5-games/flowfree.html","playMode":"SinglePlayer","applicationCategory":"GameApplication","genre":"Puzzle","inLanguage":"zh-CN","isAccessibleForFree":true,"isFamilyFriendly":true}</script>
+
+</head>
+<body>
+<nav><a href="index.html">← 返回大厅</a><span>🔗 连线游戏</span></nav>
+<div class="arena">
+<h1>🔗 连线游戏</h1>
+<p class="info"><span>🏆 步数: <b id="moves">0</b></span><span>🧩 关卡: <b id="lvname">L1</b></span></p>
+<div class="colors" id="palette"></div>
+<div class="grid" id="grid"></div>
+<p class="msg" id="msg"></p>
+<div class="btns">
+<button class="btn" onclick="undo()">↩ 撤销</button>
+<button class="btn" onclick="resetLevel()">🔄 重置</button>
+<button class="btn" id="nextBtn" onclick="nextLevel()" disabled>▶ 下一关</button>
+</div>
+<div class="lvls" id="levels"></div>
+</div>
+
+<script>
+const COLORS = ['#ef4444','#3b82f6','#22c55e','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#f97316','#6366f1','#84cc16'];
+
+// Levels: [size, [[r1,c1,r2,c2], ...]]  pairs of endpoints
+const LEVELS = [
+  [5, [[0,0,4,0],[0,2,4,2],[1,1,3,4]]],
+  [5, [[0,0,4,4],[0,2,4,1],[2,0,2,4]]],
+  [5, [[0,1,4,1],[1,0,3,4],[0,3,4,3],[2,0,2,2]]],
+  [6, [[0,0,5,5],[0,2,5,2],[1,0,4,4],[2,1,5,3]]],
+  [6, [[0,0,5,0],[0,3,5,3],[1,1,4,5],[2,2,5,4],[0,5,3,2]]],
+  [7, [[0,0,6,6],[0,2,6,4],[0,5,5,1],[2,0,4,6],[3,1,6,2]]],
+];
+
+let size, pairs, grid, paths, activeColor, moves, lvl, history;
+
+function init(){
+  let data=LEVELS[lvl];
+  size=data[0]; pairs=data[1];
+  grid=Array.from({length:size},()=>Array(size).fill(-1));
+  paths=pairs.map(()=>[]);
+  activeColor=null; moves=0; history=[];
+  
+  // Place endpoints
+  pairs.forEach((p,i)=>{
+    grid[p[0]][p[1]]=i;
+    grid[p[2]][p[3]]=i;
+  });
+  
+  document.getElementById('moves').textContent='0';
+  document.getElementById('msg').textContent='';
+  document.getElementById('lvname').textContent=`L${lvl+1} (${size}×${size})`;
+  document.getElementById('nextBtn').disabled=true;
+  renderPalette();
+  renderGrid();
+  renderLevels();
+}
+
+function renderPalette(){
+  let p=document.getElementById('palette');
+  p.innerHTML=pairs.map((_,i)=>`<div class="dot${activeColor===i?' active':''}" style="background:${COLORS[i]}" onclick="selectColor(${i})"></div>`).join('');
+}
+
+function renderGrid(){
+  let g=document.getElementById('grid');
+  g.style.gridTemplateColumns=`repeat(${size},1fr)`;
+  g.innerHTML='';
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size;c++){
+      let isEp=pairs.some((p,i)=>grid[r][c]===i&&!paths[i].some(x=>x[0]===r&&x[1]===c));
+      let inPath=pairs.some((p,i)=>paths[i].some(x=>x[0]===r&&x[1]===c));
+      let cls='cell';
+      if(isEp) cls+=' endpoint';
+      if(inPath) cls+=' path';
+      let bg='',colorIdx=grid[r][c];
+      if(isEp||inPath){
+        bg=`background:${COLORS[colorIdx]};`;
+        if(isEp) bg+=`border-color:${COLORS[colorIdx]};`;
+      }
+      g.innerHTML+=`<div class="${cls}" style="${bg}" onclick="tap(${r},${c})">${isEp?'●':''}</div>`;
+    }
+  }
+}
+
+function selectColor(i){
+  activeColor=i;
+  renderPalette();
+}
+
+function tap(r,c){
+  if(document.getElementById('msg').textContent) return;
+  
+  // If clicking an endpoint, select that color
+  let epIdx=pairs.findIndex((p,i)=>((p[0]===r&&p[1]===c)||(p[2]===r&&p[3]===c))&&paths[i].length===0);
+  if(epIdx>=0&&paths[epIdx].length===0){
+    activeColor=epIdx;
+    renderPalette();
+    return;
+  }
+  
+  if(activeColor===null) return;
+  
+  let path=paths[activeColor];
+  
+  // Starting new path from an endpoint
+  if(path.length===0){
+    let start=pairs[activeColor];
+    if((r===start[0]&&c===start[1])||(r===start[2]&&c===start[3])){
+      // Save state
+      history.push({grid:grid.map(r=>[...r]),paths:paths.map(p=>[...p]),activeColor});
+      path.push([r,c]);
+      grid[r][c]=activeColor;
+      moves++;
+      document.getElementById('moves').textContent=moves;
+      renderGrid();
+    }
+    return;
+  }
+  
+  let last=path[path.length-1];
+  
+  // Must be adjacent
+  if(Math.abs(r-last[0])+Math.abs(c-last[1])!==1) return;
+  
+  // Can't go through other paths or endpoints
+  let targetColor=grid[r][c];
+  if(targetColor>=0&&targetColor!==activeColor){
+    // If this is the other endpoint of the same color and path covers all cells
+    let end=pairs[activeColor];
+    if((r===end[2]&&c===end[3])||(r===end[0]&&c===end[1])){
+      history.push({grid:grid.map(r=>[...r]),paths:paths.map(p=>[...p]),activeColor});
+      path.push([r,c]);
+      grid[r][c]=activeColor;
+      moves++;
+      document.getElementById('moves').textContent=moves;
+      renderGrid();
+      checkWin();
+    }
+    return;
+  }
+  
+  // Empty cell
+  if(targetColor===-1){
+    history.push({grid:grid.map(r=>[...r]),paths:paths.map(p=>[...p]),activeColor});
+    path.push([r,c]);
+    grid[r][c]=activeColor;
+    moves++;
+    document.getElementById('moves').textContent=moves;
+    renderGrid();
+  }
+}
+
+function checkWin(){
+  let allConnected=pairs.every((_,i)=>paths[i].length>=2);
+  let allFilled=grid.every(row=>row.every(c=>c>=0));
+  if(allConnected&&allFilled){
+    document.getElementById('msg').textContent='🎉 通关！';
+    document.getElementById('nextBtn').disabled=false;
+    localStorage.setItem('flowfree_done_'+lvl,'1');
+    renderLevels();
+  }
+}
+
+function undo(){
+  if(history.length===0) return;
+  let h=history.pop();
+  grid=h.grid;
+  paths=h.paths;
+  activeColor=h.activeColor;
+  moves--;
+  document.getElementById('moves').textContent=moves;
+  document.getElementById('msg').textContent='';
+  renderGrid();
+  renderPalette();
+}
+
+function resetLevel(){init()}
+function nextLevel(){if(lvl<LEVELS.length-1){lvl++;init()}}
+function setLevel(i){lvl=i;init()}
+
+function renderLevels(){
+  let l=document.getElementById('levels');
+  l.innerHTML=LEVELS.map((lv,i)=>`<button class="lvl ${i===lvl?'cur':''} ${localStorage.getItem('flowfree_done_'+i)?'done':''}" onclick="setLevel(${i})">L${i+1}</button>`).join('');
+}
+
+lvl=0; init();
+</script>
+</body>
+</html>
